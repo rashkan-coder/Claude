@@ -1,46 +1,41 @@
 # Déploiement — guide.captain-invest.com
 
-Site statique (aucun build requis) + une Cloudflare Pages Function pour la capture de leads.
+Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
+**Worker avec assets statiques**, pas comme un « projet Pages » classique.
 
-## Contenu du dossier `site/`
-- `index.html` — landing page (opt-in du guide)
-- `guide/index.html` — page affichée après inscription
-- `confidentialite/index.html` — page provisoire, **à remplacer** par le texte réel
-- `functions/api/leads.js` — endpoint `POST /api/leads` (Cloudflare Pages Function)
-- `favicon.svg`
+## Structure du dépôt
+- `wrangler.toml` — config du Worker (nom, assets, binding KV) — **à la racine**
+- `worker/index.js` — le Worker : sert `site/` tel quel, et gère lui-même
+  `POST /api/leads`
+- `site/index.html` — landing page (opt-in du guide)
+- `site/guide/index.html` — page affichée après inscription
+- `site/confidentialite/index.html` — page provisoire, **à remplacer**
+- `site/favicon.svg`
 
 ## KV déjà créée
-Une KV namespace a été créée sur ton compte Cloudflare pour stocker les inscriptions :
 - Nom : `captain-invest-guide-leads`
-- ID : `54ebcb6caa43497382df023894ea90f2`
+- ID : `54ebcb6caa43497382df023894ea90f2` (déjà référencée dans `wrangler.toml`)
 
-## Étapes de déploiement (dashboard Cloudflare)
+## Étapes de déploiement (dashboard Cloudflare → Create an app → Git)
 
-1. **Créer le projet Pages**
-   - Cloudflare dashboard → *Workers & Pages* → *Create* → *Pages* → *Connect to Git*.
-   - Sélectionner le dépôt GitHub `rashkan-coder/Claude`, branche `claude/heberger-site-domaine-50orct` (ou `main` une fois mergé).
-   - Framework preset : `None`.
-   - Build command : *(laisser vide)*.
-   - Build output directory : `site`.
-   - Déployer.
-
-2. **Lier la KV à la Function**
-   - Dans le projet Pages → *Settings* → *Functions* → *KV namespace bindings* → *Add binding*.
-   - Variable name : `LEADS_KV`
-   - KV namespace : `captain-invest-guide-leads`
-   - Sauvegarder, puis redéployer (un nouveau déploiement est nécessaire pour que le binding soit pris en compte).
-
-3. **Ajouter le domaine personnalisé**
-   - Toujours dans le projet Pages → *Custom domains* → *Set up a custom domain*.
+1. Sur l'écran **« Set up your application »** :
+   - *Project name* : `captain-invest-guide` (pour que ça corresponde au `name` du `wrangler.toml`).
+   - *Build command* : laisser vide.
+   - *Deploy command* : `npx wrangler deploy` (déjà pré-rempli, ne pas toucher).
+   - Cliquer **Deploy**.
+2. Le premier déploiement clone le repo et exécute `wrangler deploy`, qui lit `wrangler.toml` :
+   crée le Worker, sert `site/` comme assets, et lie la KV `LEADS_KV`.
+3. **Ajouter le domaine personnalisé** :
+   - Dans le Worker créé → *Settings* → *Domains & Routes* → *Add* → *Custom Domain*.
    - Entrer `guide.captain-invest.com`.
-   - Comme le DNS de `captain-invest.com` est déjà sur Cloudflare, l'enregistrement CNAME est créé automatiquement. Ne touche pas à `www.captain-invest.com` (site principal) — on utilise volontairement un sous-domaine séparé.
-
-4. **Vérifier**
+   - Le DNS de `captain-invest.com` étant déjà sur Cloudflare, l'enregistrement est créé automatiquement.
+   - ⚠️ Ne pas toucher à `www.captain-invest.com` — le site principal n'est pas concerné, on utilise un sous-domaine dédié.
+4. **Vérifier** :
    - Ouvrir `https://guide.captain-invest.com/` : la landing page doit s'afficher.
-   - Remplir le formulaire : succès → redirection vers `/guide`.
-   - Dans le dashboard Cloudflare → *KV* → `captain-invest-guide-leads` → vérifier qu'une entrée a été créée.
+   - Remplir le formulaire : succès → redirection vers `/guide/`.
+   - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
 ## À finaliser ensuite
-- **`/confidentialite`** : remplacer le contenu provisoire par le texte réel de la politique de confidentialité (donne-moi l'URL du site principal ou le texte, et je le mets à jour).
-- **Envoi automatique du guide par email** : pour l'instant, `/api/leads` enregistre juste le contact en base (KV). Aucun email n'est envoyé automatiquement — à brancher plus tard (ex. Resend, Brevo, Mailjet) si besoin.
-- **Export des leads** : consultables pour l'instant uniquement via le dashboard Cloudflare KV (ou l'API Cloudflare). Un petit outil d'export peut être ajouté si besoin.
+- **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
+- **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
+- **Export des leads** : consultable pour l'instant via le dashboard Cloudflare KV (ou l'API Cloudflare).

@@ -1,12 +1,23 @@
-// Cloudflare Pages Function — POST /api/leads
-// Stores a guide signup lead into the KV namespace bound as `LEADS_KV`.
-// Configure the binding in: Cloudflare dashboard → Pages project → Settings → Functions → KV namespace bindings.
+// Worker entry point — serves the static site (site/) as assets and
+// handles POST /api/leads itself (stores signups in the LEADS_KV KV namespace).
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
+    if (url.pathname === "/api/leads" && request.method === "POST") {
+      return handleLeads(request, env);
+    }
+
+    // Everything else (/, /guide/, /confidentialite/, favicon.svg, ...)
+    // is served straight from the site/ static assets.
+    return env.ASSETS.fetch(request);
+  },
+};
+
+async function handleLeads(request, env) {
   let body;
   try {
     body = await request.json();

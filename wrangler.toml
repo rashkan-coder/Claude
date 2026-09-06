@@ -1,0 +1,11 @@
+name = "captain-invest-guide"
+main = "worker/index.js"
+compatibility_date = "2026-09-06"
+
+[assets]
+directory = "./site"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "LEADS_KV"
+id = "54ebcb6caa43497382df023894ea90f2"
