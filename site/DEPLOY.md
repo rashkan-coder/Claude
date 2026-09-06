@@ -25,11 +25,17 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
    - Cliquer **Deploy**.
 2. Le premier déploiement clone le repo et exécute `wrangler deploy`, qui lit `wrangler.toml` :
    crée le Worker, sert `site/` comme assets, et lie la KV `LEADS_KV`.
-3. **Ajouter le domaine personnalisé** :
-   - Dans le Worker créé → *Settings* → *Domains & Routes* → *Add* → *Custom Domain*.
-   - Entrer `guide.captain-invest.com`.
-   - Le DNS de `captain-invest.com` étant déjà sur Cloudflare, l'enregistrement est créé automatiquement.
+3. **Ajouter le domaine personnalisé** — sur ce compte, le bouton *Add Domain* (Custom Domain automatique)
+   a échoué silencieusement (« No zones match »), probablement un bug de l'onboarding pour ce compte.
+   Méthode manuelle qui fonctionne (2 étapes) :
+   - **DNS** : dans la zone `captain-invest.com` (dashboard Cloudflare → Domains → captain-invest.com → DNS),
+     *Add record* → Type `A`, Name `guide`, IPv4 `192.0.2.1` (IP factice, sans conséquence — Cloudflare
+     intercepte le trafic avant), Proxy status **Proxied** (nuage orange).
+   - **Route** : dans le Worker `captain-invest-guide` → *Domains* → *Add Route* → Route
+     `guide.captain-invest.com/*`, Zone `captain-invest.com`.
    - ⚠️ Ne pas toucher à `www.captain-invest.com` — le site principal n'est pas concerné, on utilise un sous-domaine dédié.
+   - (Si le bouton *Add Domain* fonctionne un jour normalement sur ce compte, il fait les deux étapes
+     ci-dessus automatiquement en une fois — plus simple si disponible.)
 4. **Vérifier** :
    - Ouvrir `https://guide.captain-invest.com/` : la landing page doit s'afficher.
    - Remplir le formulaire : succès → redirection vers `/guide/`.
