@@ -11,6 +11,10 @@ export default {
       return handleLeads(request, env);
     }
 
+    if (url.pathname === "/api/leads-export" && request.method === "GET") {
+      return handleLeadsExport(request, env, url);
+    }
+
     // Everything else (/, /guide/, /confidentialite/, favicon.svg, ...)
     // is served straight from the site/ static assets.
     return env.ASSETS.fetch(request);
@@ -63,6 +67,89 @@ async function handleLeads(request, env) {
   await env.LEADS_KV.put(`email:${email.toLowerCase()}`, id);
 
   return jsonResponse({ ok: true });
+}
+
+// GET /api/leads-export?token=...&format=json|csv
+// Protected by a shared secret (env.EXPORT_TOKEN, set as a Worker secret —
+// never committed to the repo). Auth via `Authorization: Bearer <token>`
+// header (preferred) or `?token=` query param (handy to open in a browser).
+async function handleLeadsExport(request, env, url) {
+  if (!env.EXPORT_TOKEN) {
+    return jsonResponse(
+      { error: "Export non configuré (secret 'EXPORT_TOKEN' absent)." },
+      500
+    );
+  }
+
+  const authHeader = request.headers.get("Authorization") || "";
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const providedToken = bearerToken || url.searchParams.get("token") || "";
+
+  if (!safeEqual(providedToken, env.EXPORT_TOKEN)) {
+    return jsonResponse({ error: "Non autorisé." }, 401);
+  }
+
+  if (!env.LEADS_KV) {
+    return jsonResponse(
+      { error: "Configuration serveur manquante (binding KV 'LEADS_KV' absent)." },
+      500
+    );
+  }
+
+  const leads = [];
+  let cursor;
+  do {
+    const page = await env.LEADS_KV.list({ cursor });
+    for (const key of page.keys) {
+      if (key.name.startsWith("email:")) continue; // secondary index, not a real record
+      const value = await env.LEADS_KV.get(key.name);
+      if (!value) continue;
+      try {
+        leads.push(JSON.parse(value));
+      } catch {
+        // skip malformed entries rather than fail the whole export
+      }
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+
+  leads.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+
+  const format = (url.searchParams.get("format") || "json").toLowerCase();
+
+  if (format === "csv") {
+    const columns = ["firstName", "lastName", "email", "consent", "createdAt", "ip", "userAgent"];
+    const rows = [columns.join(",")];
+    for (const lead of leads) {
+      rows.push(columns.map((col) => csvEscape(lead[col])).join(","));
+    }
+    return new Response(rows.join("\r\n"), {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="leads.csv"',
+      },
+    });
+  }
+
+  return jsonResponse({ count: leads.length, leads });
+}
+
+function csvEscape(value) {
+  const str = value === undefined || value === null ? "" : String(value);
+  return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
+// Constant-time-ish string comparison to avoid trivial timing side-channels.
+function safeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) {
+    return false;
+  }
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
 }
 
 function jsonResponse(data, status = 200) {

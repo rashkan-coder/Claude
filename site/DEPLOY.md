@@ -41,7 +41,24 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
    - Remplir le formulaire : succès → redirection vers `/guide/`.
    - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
+## Export des leads (`GET /api/leads-export`)
+
+Endpoint protégé par un secret partagé (`EXPORT_TOKEN`), à configurer une fois :
+
+1. Dashboard Cloudflare → Worker `captain-invest-guide` → *Settings* → *Variables and Secrets* → *Add*.
+   - Type : **Secret** (pas "Text" — pour qu'il ne soit jamais affiché en clair après coup).
+   - Name : `EXPORT_TOKEN`
+   - Value : (un token long et aléatoire — généré une fois pour ce projet, à garder confidentiel comme un mot de passe).
+2. Save + redeploy si demandé.
+
+Usage ensuite :
+- JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
+- CSV (téléchargeable, ouvrable dans Excel/Sheets) : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
+- Ou via header (plus propre, évite le token dans l'URL/historique du navigateur) :
+  `curl -H "Authorization: Bearer VOTRE_TOKEN" https://guide.captain-invest.com/api/leads-export`
+
+⚠️ Ce token donne accès à toutes les coordonnées collectées (email, prénom, nom) — à traiter comme un mot de passe, ne jamais le committer dans le repo ni le partager publiquement.
+
 ## À finaliser ensuite
 - **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
 - **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
-- **Export des leads** : consultable pour l'instant via le dashboard Cloudflare KV (ou l'API Cloudflare).
