@@ -122,6 +122,27 @@ async function handleOboDiagnostic(request, env) {
 
   await env.LEADS_KV.put(`obo:${id}`, JSON.stringify(record));
 
+  // Best-effort: also attach this diagnostic to the matching lead record (by
+  // email), so a single lookup shows both the opt-in and the questionnaire
+  // answers for that person. The standalone "obo:" record above stays the
+  // source of truth (kept even if no matching lead is found, or several
+  // attempts are made) — this is purely a convenience mirror.
+  if (email) {
+    try {
+      const leadId = await env.LEADS_KV.get(`email:${email.toLowerCase()}`);
+      if (leadId) {
+        const leadRaw = await env.LEADS_KV.get(leadId);
+        if (leadRaw) {
+          const lead = JSON.parse(leadRaw);
+          lead.oboDiagnostic = { answers, eligible, reason, updatedAt: record.createdAt };
+          await env.LEADS_KV.put(leadId, JSON.stringify(lead));
+        }
+      }
+    } catch {
+      // non-fatal: the standalone "obo:" record above already has the answers
+    }
+  }
+
   return jsonResponse({ ok: true });
 }
 
@@ -188,10 +209,15 @@ async function handleLeadsExport(request, env, url) {
   const format = (url.searchParams.get("format") || "json").toLowerCase();
 
   if (format === "csv") {
-    const columns = ["firstName", "lastName", "email", "consent", "source", "createdAt", "ip", "userAgent"];
+    const columns = ["firstName", "lastName", "email", "consent", "source", "createdAt", "ip", "userAgent", "oboEligible", "oboReason"];
     const rows = [columns.join(",")];
     for (const lead of leads) {
-      rows.push(columns.map((col) => csvEscape(lead[col])).join(","));
+      const flat = {
+        ...lead,
+        oboEligible: lead.oboDiagnostic ? lead.oboDiagnostic.eligible : "",
+        oboReason: lead.oboDiagnostic ? lead.oboDiagnostic.reason : "",
+      };
+      rows.push(columns.map((col) => csvEscape(flat[col])).join(","));
     }
     return new Response(rows.join("\r\n"), {
       status: 200,
