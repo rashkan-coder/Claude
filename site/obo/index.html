@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Débloquez votre diagnostic OBO — Captain Invest</title>
+<meta name="description" content="Sortez des liquidités de votre patrimoine sans tout vendre. Découvrez l'OBO (Owner Buy-Out) — liquidités ou immobilier — et faites votre diagnostic d'éligibilité.">
+<link rel="shortcut icon" href="/favicon.svg">
+<link rel="icon" href="/favicon.svg">
+<style>
+  :root{--aubergine:#411459;--violet:#6a218d;--citron:#fbf211;--ink:#2b1636;--grey:#6b6270}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{color:var(--ink);background:#f3edf7;margin:0;font-family:Calibri,Carlito,"Segoe UI",sans-serif;overflow-x:hidden}
+  .site-shell{max-width:1100px;min-height:100vh;margin:auto;padding:26px 20px 40px}
+  .topbar{justify-content:space-between;align-items:center;margin-bottom:26px;display:flex}
+  .brand{color:var(--aubergine);align-items:center;gap:9px;font-family:Georgia,serif;font-size:23px;font-weight:700;text-decoration:none;display:flex}
+  .brand svg{width:22px;height:28px;color:var(--violet);fill:currentColor}
+  .guide-chip{background:var(--citron);color:var(--aubergine);letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800}
+  .optin-card{background:#fff;border-radius:22px;grid-template-columns:1.05fr 1fr;display:grid;overflow:hidden;box-shadow:0 24px 60px #41145924}
+  .value-panel{color:#fff;background:radial-gradient(120% 100% at 85% 0,#6a218d80,#0000 55%),linear-gradient(160deg,#4a1866,#411459 60%,#2f0d43);flex-direction:column;justify-content:center;min-height:650px;padding:38px 36px;display:flex}
+  .eyebrow{color:var(--citron);letter-spacing:.2em;text-transform:uppercase;margin:0;font-size:12px;font-weight:800}
+  h1,h2{font-family:Georgia,"Times New Roman",serif}
+  .value-panel h1{letter-spacing:-.025em;margin:14px 0 0;font-size:clamp(31px,4vw,42px);line-height:1.08}
+  .value-panel h1 span{border-bottom:4px solid var(--citron)}
+  .intro{color:#eadff2;max-width:510px;margin:19px 0 0;font-size:16px;line-height:1.62}
+  .benefits{gap:14px;margin:25px 0 0;padding:0;list-style:none;display:grid}
+  .benefits li{color:#f6eff9;align-items:flex-start;gap:12px;line-height:1.45;display:flex}
+  .benefits b{background:var(--citron);width:23px;height:23px;color:var(--aubergine);border-radius:50%;flex:none;place-items:center;font-size:13px;display:grid}
+  .form-panel{flex-direction:column;justify-content:center;min-height:650px;padding:42px 38px;display:flex}
+  .form-panel h2{color:var(--aubergine);margin:0;font-size:28px;line-height:1.15}
+  .form-subtitle{color:var(--grey);margin:9px 0 24px;font-size:14px}
+  .form-panel form{gap:16px;display:grid}
+  .form-panel label{color:var(--aubergine);letter-spacing:.02em;gap:7px;font-size:13px;font-weight:750;display:grid}
+  .form-panel input{height:48px;color:var(--ink);background:#faf7fc;border:1.5px solid #e0d5e9;border-radius:11px;padding:0 15px;font-size:15px;font-family:inherit}
+  .form-panel input:focus-visible{border-color:var(--violet);box-shadow:0 0 0 3px #6a218d1f;outline:none}
+  .name-grid{grid-template-columns:1fr 1fr;gap:12px;display:grid}
+  .consent-row{align-items:flex-start;gap:10px;margin-top:2px;display:flex}
+  .consent-row button{border:1.5px solid #bfaacf;background:#fff;width:18px;height:18px;margin-top:2px;border-radius:4px;padding:0;flex:none;cursor:pointer;display:grid;place-items:center}
+  .consent-row button[data-state="checked"]{border-color:var(--violet);background:var(--violet)}
+  .consent-row button svg{width:12px;height:12px;color:#fff}
+  .consent-row label{color:var(--grey);font-size:11.5px;font-weight:400;line-height:1.5;display:block}
+  .consent-row a{color:var(--violet)}
+  .submit-button{background:var(--citron);height:52px;color:var(--aubergine);border:none;border-radius:12px;font-size:16px;font-weight:850;box-shadow:0 10px 24px #fbf21159;cursor:pointer;font-family:inherit}
+  .submit-button:hover{background:#fff72b;transform:translateY(-1px)}
+  .submit-button:disabled{opacity:.7;cursor:default;transform:none}
+  .error{color:#d22d27;min-height:18px;margin:-7px 0 0;font-size:12.5px}
+  .reassurance{color:var(--grey);justify-content:center;align-items:center;gap:5px;margin:-7px 0 0;font-size:11.5px;display:flex}
+  .reassurance svg{width:13px}
+  footer{color:#8b8194;text-align:center;padding:22px 24px 0;font-size:10.5px;line-height:1.6}
+  footer strong{color:var(--grey)}
+  @media (width<=760px){
+    .site-shell{padding:20px 14px 30px}
+    .optin-card{grid-template-columns:1fr}
+    .value-panel,.form-panel{min-height:auto;padding:30px 24px}
+    .form-panel{padding-block:36px}
+    .name-grid{grid-template-columns:1fr}
+    .brand{font-size:20px}
+    .guide-chip{font-size:10px}
+  }
+</style>
+</head>
+<body>
+<main class="site-shell">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Captain Invest — accueil">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path></svg>
+      <span>Captain Invest</span>
+    </a>
+    <span class="guide-chip">Diagnostic offert</span>
+  </header>
+
+  <section class="optin-card" id="top">
+    <div class="value-panel">
+      <div>
+        <p class="eyebrow">Transmission — la technique de l'OBO</p>
+        <h1>Encaissez aujourd'hui.<br>Transmettez <span>sans vous démunir</span>.</h1>
+        <p class="intro">Le guide de l'OBO (Owner Buy-Out) : comment sortir des liquidités de votre patrimoine — immobilier ou financier — tout en préparant la transmission à vos enfants. Sans tout vendre à un tiers, sans tout donner d'un coup.</p>
+        <ol class="benefits">
+          <li><b>1</b><span>Les deux montages possibles : versement de liquidités ou cession d'un bien immobilier</span></li>
+          <li><b>2</b><span>Le schéma complet expliqué pas à pas, avec un exemple chiffré</span></li>
+          <li><b>3</b><span>Un diagnostic en 5 questions pour savoir si votre situation s'y prête</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="form-panel">
+      <h2>Recevez le guide</h2>
+      <p class="form-subtitle">Indiquez où l'envoyer — accès débloqué juste après.</p>
+      <form novalidate>
+        <div class="name-grid">
+          <label>Prénom<input autocomplete="given-name" placeholder="Claire" name="firstName"></label>
+          <label>Nom<input autocomplete="family-name" placeholder="Delom" name="lastName"></label>
+        </div>
+        <label>Adresse email<input type="email" autocomplete="email" placeholder="claire@email.com" name="email"></label>
+        <div class="consent-row">
+          <button type="button" role="checkbox" aria-checked="false" data-state="unchecked" id="consent"></button>
+          <label for="consent">J'accepte de recevoir ce guide et les communications de Captain Invest. Mes données sont traitées par RKG INVEST pour ces envois&nbsp;; je peux me désinscrire à tout moment. <a href="/confidentialite/">Politique de confidentialité</a>.</label>
+        </div>
+        <button type="submit" class="submit-button">Accéder au diagnostic</button>
+        <p class="error" aria-live="polite"></p>
+        <p class="reassurance"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg> Pas de spam. Désinscription en 1 clic.</p>
+      </form>
+    </div>
+  </section>
+
+  <footer><strong>RKG INVEST</strong> — SASU au capital de 1 000 € · 66 avenue des Champs-Élysées, 75008 Paris · RCS Paris 944 733 161 · Orias n°944733161 · Membre CNCEF PATRIMOINE (CIF/COA). Guide pédagogique, ne constitue pas un conseil personnalisé.</footer>
+</main>
+
+<script>
+(() => {
+  const origin = '';
+  const form = document.querySelector('form');
+  const consent = document.getElementById('consent');
+  const error = document.querySelector('.error');
+  const submit = document.querySelector('.submit-button');
+  let checked = false;
+
+  function setConsent(value) {
+    checked = value;
+    consent.setAttribute('aria-checked', String(value));
+    consent.dataset.state = value ? 'checked' : 'unchecked';
+    consent.innerHTML = value ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+  }
+
+  consent.addEventListener('click', () => setConsent(!checked));
+  document.querySelector('label[for="consent"]').addEventListener('click', event => {
+    if (event.target.tagName !== 'A') {
+      event.preventDefault();
+      setConsent(!checked);
+    }
+  });
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    error.textContent = '';
+    const data = new FormData(form);
+    const lead = {
+      firstName: String(data.get('firstName') || '').trim(),
+      lastName: String(data.get('lastName') || '').trim(),
+      email: String(data.get('email') || '').trim(),
+      consent: checked,
+      source: 'obo'
+    };
+    if (!lead.firstName || !lead.lastName) return error.textContent = 'Merci d’indiquer votre prénom et votre nom.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) return error.textContent = 'Merci d’indiquer une adresse email valide.';
+    if (!checked) return error.textContent = 'Merci d’accepter l’envoi du guide et des communications.';
+    submit.disabled = true;
+    submit.textContent = 'Enregistrement…';
+    try {
+      const response = await fetch(origin + '/api/leads', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(lead)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Impossible d’enregistrer votre demande.');
+      try {
+        sessionStorage.setItem('obo-lead', JSON.stringify({firstName: lead.firstName, lastName: lead.lastName, email: lead.email}));
+      } catch {}
+      window.location.href = origin + '/obo/decouvrir';
+    } catch (exception) {
+      error.textContent = exception instanceof Error ? exception.message : 'Une erreur est survenue. Réessayez.';
+      submit.disabled = false;
+      submit.textContent = 'Accéder au diagnostic';
+    }
+  });
+})();
+</script>
+</body>
+</html>

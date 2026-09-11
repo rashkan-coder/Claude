@@ -6,11 +6,19 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 ## Structure du dépôt
 - `wrangler.toml` — config du Worker (nom, assets, binding KV) — **à la racine**
 - `worker/index.js` — le Worker : sert `site/` tel quel, et gère lui-même
-  `POST /api/leads`
-- `site/index.html` — landing page (opt-in du guide)
-- `site/guide/index.html` — page affichée après inscription
+  `POST /api/leads` et `POST /api/obo-diagnostic`
+- `site/index.html` — landing page « Clauses Don » (opt-in du guide transmission)
+- `site/guide/index.html` — page affichée après inscription (guide clauses de donation)
+- `site/obo/index.html` — landing page « OBO » (opt-in du guide OBO — même gabarit que ci-dessus)
+- `site/obo/decouvrir/index.html` — page affichée après inscription : mécanisme de l'OBO,
+  schémas (liquidités / immobilier) et diagnostic d'éligibilité interactif
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
 - `site/favicon.svg`
+
+Les deux landing pages (`/` et `/obo/`) partagent le même Worker, la même KV de leads et
+le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV supplémentaire à créer
+pour l'OBO. Si un sous-domaine dédié est préféré à terme (ex. `obo.captain-invest.com`), suivre
+la même méthode manuelle DNS + Route décrite à l'étape 3 ci-dessous.
 
 ## KV déjà créée
 - Nom : `captain-invest-guide-leads`
@@ -39,11 +47,13 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 4. **Vérifier** :
    - Ouvrir `https://guide.captain-invest.com/` : la landing page doit s'afficher.
    - Remplir le formulaire : succès → redirection vers `/guide/`.
+   - Ouvrir `https://guide.captain-invest.com/obo/` : idem, avec redirection vers `/obo/decouvrir/`
+     et son diagnostic d'éligibilité.
    - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
-## Export des leads (`GET /api/leads-export`)
+## Export des leads (`GET /api/leads-export`) et des diagnostics OBO (`GET /api/obo-diagnostic-export`)
 
-Endpoint protégé par un secret partagé (`EXPORT_TOKEN`), à configurer une fois :
+Deux endpoints protégés par le même secret partagé (`EXPORT_TOKEN`), à configurer une fois :
 
 1. Dashboard Cloudflare → Worker `captain-invest-guide` → *Settings* → *Variables and Secrets* → *Add*.
    - Type : **Secret** (pas "Text" — pour qu'il ne soit jamais affiché en clair après coup).
@@ -52,8 +62,12 @@ Endpoint protégé par un secret partagé (`EXPORT_TOKEN`), à configurer une fo
 2. Save + redeploy si demandé.
 
 Usage ensuite :
-- JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
-- CSV (téléchargeable, ouvrable dans Excel/Sheets) : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
+- Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don` ou `obo`) :
+  - JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
+- Réponses au diagnostic d'éligibilité OBO (`site/obo/decouvrir/`) — éligible ou non, et pourquoi :
+  - JSON : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN&format=csv`
 - Ou via header (plus propre, évite le token dans l'URL/historique du navigateur) :
   `curl -H "Authorization: Bearer VOTRE_TOKEN" https://guide.captain-invest.com/api/leads-export`
 
@@ -62,3 +76,5 @@ Usage ensuite :
 ## À finaliser ensuite
 - **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
 - **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
+- **Lien Calendly OBO** : `https://calendly.com/rashan-kadioglu/transmission-obo`, câblé en dur dans
+  `site/obo/decouvrir/index.html` (constante `CALENDLY_URL`) — à mettre à jour au même endroit si l'événement change.
