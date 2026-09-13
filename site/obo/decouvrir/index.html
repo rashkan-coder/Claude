@@ -3,590 +3,116 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Se vendre son immobilier à soi-même — Captain Invest</title>
-<meta name="description" content="Récupérez des liquidités, préparez la transmission à vos enfants et continuez à investir en famille, avec une fiscalité maîtrisée. Le principe de l'OBO Immobilier, et un diagnostic pour savoir si votre situation s'y prête.">
+<meta name="description" content="Récupérer du cash tout en gardant un bien immobilier dans la famille : comprendre l’OBO, ses chiffres et ses limites. Guide Captain Invest et diagnostic indicatif.">
+<meta name="theme-color" content="#411459">
 <link rel="icon" href="/favicon.svg">
+<title>Transmettez, récupérez des liquidités et construisez en famille — Captain Invest</title>
 <style>
-  :root{
-    --aubergine:#411459;
-    --violet:#6a218d;
-    --citron:#fbf211;
-    --ink:#2b1636;
-    --grey:#6b6270;
-    --paper:#faf8fb;
-    --line:#e7e0ec;
-    --red:#c0392b;
-    --green:#1e7d4b;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:#fff;color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
-  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2;margin:0 0 .5em}
-  a{color:var(--violet)}
-  img,svg{max-width:100%}
-  .wrap{max-width:840px;margin:0 auto;padding:0 24px}
-  .narrow{max-width:720px}
-
-  header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
-  .nav{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:0 auto;padding:14px 24px}
-  .brand{font-family:Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--aubergine);text-decoration:none}
-  .navlinks{display:flex;gap:22px;list-style:none;margin:0;padding:0;overflow-x:auto;white-space:nowrap}
-  .navlinks a{color:var(--ink);text-decoration:none;font-size:.92rem}
-  .navlinks a:hover{color:var(--violet)}
-
-  .hero{background:linear-gradient(160deg,var(--aubergine),var(--violet));color:#fff;padding:72px 24px 64px;text-align:center}
-  .eyebrow{display:inline-block;background:rgba(251,242,17,.16);color:var(--citron);border:1px solid rgba(251,242,17,.4);border-radius:999px;padding:5px 14px;font-size:.8rem;letter-spacing:.03em;margin-bottom:18px}
-  .hero h1{font-size:clamp(1.7rem,4vw,2.6rem);color:#fff;max-width:760px;margin-inline:auto}
-  .hero p{max-width:580px;margin:16px auto 28px;color:#ece3f2;font-size:1.05rem}
-  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:12px 26px;font-weight:600;text-decoration:none;font-size:.95rem;border:none;cursor:pointer;font-family:inherit}
-  .btn-citron{background:var(--citron);color:var(--ink)}
-  .btn-citron:hover{background:#fff}
-  .btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5)}
-
-  section{padding:56px 0}
-  section.alt{background:var(--paper)}
-  .kicker{color:var(--violet);font-weight:600;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
-  h2{font-size:clamp(1.4rem,2.6vw,1.9rem);color:var(--aubergine)}
-  p{color:var(--ink)}
-  .lede{font-size:1.05rem;color:var(--grey)}
-
-  /* --- Mécanisme --- */
-  .mechanism-steps{margin:22px 0 0;padding:0;list-style:none;counter-reset:m}
-  .mechanism-steps li{counter-increment:m;position:relative;padding:0 0 16px 40px;color:var(--ink)}
-  .mechanism-steps li::before{content:counter(m);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:999px;background:var(--aubergine);color:var(--citron);font-size:.8rem;font-weight:700;display:grid;place-items:center}
-  .mechanism-steps b{color:var(--aubergine)}
-
-  /* --- Diagrammes --- */
-  .diagram-block{margin-top:36px}
-  .diagram-block + .diagram-block{margin-top:48px;padding-top:44px;border-top:1px solid var(--line)}
-  .diagram-tag{display:inline-block;background:var(--aubergine);color:var(--citron);font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:4px 10px;margin-bottom:10px}
-  .diagram-block h3{color:var(--aubergine);font-size:1.25rem}
-  .schema-frame{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 12px;margin:20px 0;overflow-x:auto}
-  .schema-frame svg{display:block;margin:0 auto;max-width:none;width:720px;height:auto}
-  .schema-note{font-size:.8rem;color:var(--grey);text-align:center;margin-top:6px}
-  .schema-frame.dark{background:#2a0e3c;border-color:#2a0e3c}
-  .schema-frame.dark .schema-note{color:#b8a7c2}
-
-  .example-box{background:linear-gradient(160deg,var(--aubergine),var(--violet));color:#fff;border-radius:14px;padding:20px 24px;margin-top:22px}
-  .example-box .diagram-tag{background:rgba(255,255,255,.14);color:var(--citron)}
-  .example-box p{color:#ece3f2;margin:0;font-size:.95rem}
-
-  /* --- Diagnostic / Quiz --- */
-  .quiz{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;margin-top:24px}
-  .quiz-progress{height:5px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:22px}
-  .quiz-progress-bar{height:100%;width:8%;background:var(--violet);border-radius:999px;transition:width .3s ease}
-  .quiz-step-label{font-size:.78rem;color:var(--grey);font-weight:600;letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px}
-  .quiz h3{font-size:1.15rem;color:var(--ink);margin-bottom:18px}
-  .quiz-options{display:grid;gap:10px}
-  .quiz-option{text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.95rem;color:var(--ink);cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
-  .quiz-option:hover{border-color:var(--violet);background:#fff}
-  .quiz-back{display:inline-block;margin-top:18px;font-size:.85rem;color:var(--grey);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
-  .quiz-back:hover{color:var(--violet)}
-
-  .result{border-radius:16px;padding:28px}
-  .result.blocked{background:#fdf1ef;border:1px solid #f3d3cc}
-  .result.ok{background:#eef8f1;border:1px solid #cfe9d8}
-  .result-tag{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.85rem;border-radius:999px;padding:6px 14px;margin-bottom:14px}
-  .result.blocked .result-tag{background:#f6d9d2;color:var(--red)}
-  .result.ok .result-tag{background:#d3ecdc;color:var(--green)}
-  .result h3{color:var(--ink);font-size:1.3rem}
-  .result .disclaimer{font-size:.82rem;color:var(--grey);margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
-  .alt-list{display:grid;gap:10px;margin:18px 0;padding:0;list-style:none}
-  .alt-list li{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:.92rem}
-  .alt-list b{color:var(--aubergine)}
-  .ok .mechanism-steps li::before{background:var(--green);color:#fff}
-  .quiz-recap{font-size:.85rem;color:var(--grey);margin-bottom:14px}
-
-  .accompagnement{background:var(--aubergine);color:#fff}
-  .accompagnement h2{color:#fff}
-  .accompagnement .lede{color:#d8c7e2}
-  .accompagnement p{color:#ece3f2}
-  .cta-box{margin-top:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:26px;text-align:center}
-  .cta-box h3{color:#fff;margin-bottom:8px}
-  .cta-box p{color:#d8c7e2;margin-bottom:18px}
-  .profile{margin-bottom:20px}
-  .profile img{width:64px;height:64px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,.35)}
-
-  footer{padding:40px 24px;text-align:center}
-  footer p{color:var(--grey);font-size:.8rem;max-width:640px;margin:0 auto 8px}
-  footer a{color:var(--grey)}
-
-  @media (max-width:620px){
-    .schema-frame{padding:14px 6px}
-  }
+:root{--plum:#411459;--deep:#2c103d;--purple:#6a218d;--yellow:#fbf211;--ink:#291c30;--muted:#665b6c;--line:#e4dee8;--light:#f6f3f8;--white:#fff;--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:96px}body{margin:0;color:var(--ink);background:#fff;font:17px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--purple);text-underline-offset:4px}button,input{font:inherit}button,a,input{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #9b53bf;outline-offset:5px}h1,h2,h3,p{margin:0}h1,h2,h3{line-height:1.1}h1{font-size:clamp(2.8rem,6.2vw,5.1rem);letter-spacing:-.055em;font-weight:800}h2{font-size:clamp(2rem,3.6vw,3.15rem);letter-spacing:-.045em}h3{font-size:1.25rem;letter-spacing:-.02em}p+p{margin-top:16px}strong{font-weight:750}.wrap{width:min(1080px,calc(100% - 48px));margin:auto}.narrow{max-width:760px}.skip{position:absolute;left:12px;top:-100px;background:white;padding:12px;z-index:99}.skip:focus{top:10px}.site-header{position:sticky;top:0;z-index:10;background:#fffffff5;border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font:700 1.4rem Georgia,serif;text-decoration:none;color:var(--plum);white-space:nowrap}.brand span{color:var(--purple)}nav{display:flex;gap:28px;align-items:center}nav a{font-size:.88rem;font-weight:650;color:var(--ink);text-decoration:none}.nav-cta{border-bottom:2px solid var(--purple);padding:5px 0}.eyebrow{font-size:.82rem;text-transform:uppercase;letter-spacing:.13em;font-weight:750;color:var(--purple);margin-bottom:18px}.hero{background:var(--plum);color:white;padding:64px 0 0;overflow:hidden}.hero .eyebrow{color:var(--yellow)}.hero h1{max-width:950px}.hero h1 em{font-style:normal;color:var(--yellow)}.hero .intro{max-width:670px;font-size:1.17rem;line-height:1.65;color:#eee4f3;margin-top:25px}.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin:30px 0 45px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:16px;min-height:52px;padding:14px 24px;border:0;border-radius:8px;background:var(--yellow);color:var(--deep);text-decoration:none;font-weight:750;cursor:pointer;line-height:1.35;transition:transform .15s,background .15s}.btn:hover{background:#fff948;transform:translateY(-2px)}.btn.dark{background:var(--plum);color:white}.btn.dark:hover{background:var(--purple)}.hero-actions small{font-size:.88rem;color:#e2d6e9}.hero-strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #ffffff3b}.hero-strip div{padding:20px 20px 22px 0;font-size:.93rem;color:#e8dfed}.hero-strip b{color:var(--yellow);display:block;font-size:1.05rem}.section{padding:72px 0}.section-head{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:end;margin-bottom:34px}.section-head p{color:var(--muted);font-size:1.05rem}.section-head .eyebrow{color:var(--purple);font-size:.82rem}.lead{font-size:1.13rem;color:var(--muted);margin-top:24px}.tinted{background:var(--light)}.diagram{margin:0;background:white;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}.diagram-top{padding:22px 28px;background:var(--plum);color:white;display:flex;justify-content:space-between;gap:20px;align-items:center}.diagram-top strong{font-size:1.12rem}.diagram-top span{font-size:.88rem;color:#e4d7ec}.flow-group{padding:24px 28px}.flow-group+.flow-group{border-top:1px solid var(--line)}.flow-label{font-size:.82rem;font-weight:750;text-transform:uppercase;letter-spacing:.09em;margin-bottom:20px;color:var(--purple)}.flow-row{display:grid;grid-template-columns:155px 1fr 155px;align-items:center;gap:22px;margin:16px 0}.entity{background:var(--light);border:1px solid var(--line);border-radius:10px;text-align:center;padding:12px 8px;font-size:1rem;font-weight:750;line-height:1.25}.entity.sci{background:#ede2f3;border-color:#cdb8db;color:var(--plum)}.flow{position:relative;text-align:center;line-height:1.3;padding:0 8px 12px;font-size:.94rem;border-bottom:2px solid var(--purple)}.flow:after{content:"";position:absolute;right:-1px;bottom:-6px;border-left:9px solid var(--purple);border-top:5px solid transparent;border-bottom:5px solid transparent}.flow.asset{border-color:#867040}.flow.asset:after{border-left-color:#867040}.flow-note{font-size:.88rem;color:var(--muted);margin-top:18px}.diagram-caption{background:#fffed9;padding:22px 28px;font-size:.98rem}.diagram-caption strong{color:var(--plum)}.diagram-caption p+p{margin-top:8px}.under-diagram{font-size:.9rem;color:var(--muted);margin-top:17px;max-width:900px}.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:40px}.benefit{border-top:2px solid var(--plum);padding-top:20px}.benefit .number{font-size:.82rem;color:var(--purple);font-weight:750;margin-bottom:12px}.benefit p{font-size:.97rem;color:var(--muted);margin-top:12px}.example-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px}.example-intro{max-width:740px;margin-top:20px}.panel{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:28px}.panel h3{margin-bottom:22px}.rows{margin:0}.rows div{display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:11px 0;border-bottom:1px solid var(--line)}.rows dt{font-size:.95rem}.rows dd{margin:0;white-space:nowrap;font-weight:750;font-variant-numeric:tabular-nums}.rows .total{border:0;padding-top:18px;color:var(--plum);font-weight:750}.rows .total dd{font-size:1.65rem;letter-spacing:-.04em}.panel .small{font-size:.88rem;color:var(--muted);margin-top:18px}.cash-panel{background:var(--plum);border-color:var(--plum);color:white}.cash-panel .rows div{border-color:#ffffff30}.cash-panel .rows .total{color:var(--yellow)}.cash-panel .small{color:#e7dbed}.lesson{border-left:4px solid var(--purple);padding-left:22px;margin-top:28px;max-width:900px}.lesson p{margin-top:10px;color:var(--muted);font-size:.97rem}.checks{display:grid;grid-template-columns:1fr 1fr;gap:0 46px;margin-top:28px}.check{border-bottom:1px solid var(--line);padding:25px 0}.check h3{font-size:1.12rem}.check p{font-size:.96rem;color:var(--muted);margin-top:10px}.section-note{margin-top:25px;font-size:.92rem;color:var(--muted)}.quiz-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:start}.quiz-intro p{margin-top:20px;color:var(--muted)}.quiz-intro .eyebrow{margin-top:0;color:var(--purple)}.quiz{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:30px;min-height:360px}.quiz-meta{display:flex;justify-content:space-between;gap:16px;font-size:.84rem;color:var(--muted);margin-bottom:12px}.track{height:5px;background:#ece5f0;border-radius:8px;overflow:hidden;margin-bottom:28px}.bar{height:100%;background:var(--purple);transition:width .2s}.quiz h3{font-size:1.4rem;line-height:1.25;margin-bottom:20px}.quiz-sub{font-size:.9rem;color:var(--muted);margin-bottom:18px}.options{display:grid;gap:10px}.option{text-align:left;border:1px solid var(--line);background:white;border-radius:9px;padding:15px 18px;cursor:pointer;color:var(--ink);line-height:1.4;min-height:54px}.option:hover{border-color:var(--purple);background:var(--light)}.option[aria-pressed="true"]{background:#eee2f4;border:2px solid var(--purple);padding:14px 17px}.quiz-controls{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:23px}.text-btn{border:0;background:transparent;color:var(--purple);font-size:.92rem;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:8px 0}.quiz .btn{font-size:.94rem;min-height:48px;padding:12px 18px}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.result-tag{display:inline-block;background:#eee3f3;color:var(--plum);border-radius:5px;font-size:.8rem;font-weight:750;padding:5px 9px;margin-bottom:16px}.result-list{padding-left:21px;font-size:.96rem}.result-list li+li{margin-top:10px}.quiz .disclaimer{border-top:1px solid var(--line);padding-top:16px;margin-top:22px;font-size:.84rem;color:var(--muted)}.profile{background:var(--plum);color:white;padding:60px 0}.profile-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:64px;align-items:center}.profile h2{font-size:clamp(2rem,3.5vw,3rem)}.profile h2 span{color:var(--yellow)}.profile p{color:#e7ddec}.profile p+p{margin-top:18px}.profile .btn{margin-top:25px}.footer{padding:35px 0;font-size:.83rem;color:var(--muted)}.footer p{max-width:940px}.footer-links{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px}details{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}summary{cursor:pointer;font-weight:650;color:var(--plum)}details ul{padding-left:20px}details li+li{margin-top:8px}.copyright{margin-top:22px;font-size:.82rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+@media(max-width:760px){html{scroll-padding-top:82px}.wrap{width:calc(100% - 36px)}.nav{min-height:66px;gap:12px}.brand{font-size:1.13rem}nav{gap:12px}nav a{font-size:.82rem}nav a:first-child{display:none}.hero{padding-top:43px}.hero .intro{font-size:1.07rem}.hero-actions{gap:16px;margin-bottom:30px}.hero-strip div{font-size:.82rem;padding:17px 10px 18px 0}.hero-strip b{font-size:.92rem}.section{padding:48px 0}.section-head,.quiz-layout,.profile-layout{grid-template-columns:1fr;gap:24px}.section-head{margin-bottom:25px}.example-grid{grid-template-columns:1fr}.benefits{grid-template-columns:1fr;gap:24px;margin-top:28px}.benefit{padding-top:16px}.benefit .number{margin-bottom:7px}.benefit p{margin-top:9px}.checks{grid-template-columns:1fr}.flow-group{padding:20px 16px}.flow-row{grid-template-columns:83px minmax(0,1fr) 83px;gap:10px;margin:18px 0}.entity{font-size:.9rem;padding:12px 4px}.flow{font-size:.88rem;padding:0 0 10px;overflow-wrap:break-word}.diagram-top{padding:18px;display:block}.diagram-top span{display:block;margin-top:6px}.diagram-caption{padding:19px;font-size:.94rem}.panel{padding:23px}.quiz{padding:24px}.profile{padding:46px 0}.profile-layout{gap:22px}.rows dt{font-size:.9rem}.rows dd{font-size:.96rem}.rows .total dd{font-size:1.5rem}.quiz-intro p{margin-top:15px}}
+@media(max-width:370px){.wrap{width:calc(100% - 28px)}.brand{font-size:1rem}.hero h1{font-size:2.55rem}.flow-row{grid-template-columns:70px minmax(0,1fr) 70px;gap:8px}.flow-group{padding:18px 12px}.flow{font-size:.83rem}.quiz{padding:20px}.hero-strip{grid-template-columns:1fr}.hero-strip div{padding:10px 0}.hero-strip b{display:inline;margin-right:8px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.btn:hover{transform:none}}
+@media print{.site-header,.hero-actions,.quiz-layout,.profile .btn,.footer-links{display:none}.hero,.profile,.cash-panel,.diagram-top{background:white;color:#291c30}.hero h1 em,.hero .eyebrow,.hero .intro,.hero-strip b,.hero-strip div,.profile h2 span,.profile p,.cash-panel .small,.cash-panel .rows .total,.diagram-top span{color:#411459}.section{padding:28px 0}.hero{padding:20px 0}.wrap{width:100%}.panel,.diagram,.check{break-inside:avoid}.hero h1{font-size:40px}.section-head{gap:30px}.hero-strip{border-color:#ddd}.footer{padding-bottom:0}a{color:inherit}}
+.hero-steps{max-width:760px;margin-top:32px}.hero-steps h2{font-size:1.3rem;letter-spacing:0;color:var(--yellow)}.hero-steps ol{padding-left:25px;margin:18px 0 0;color:#eee4f3}.hero-steps li{padding-left:7px;margin-bottom:12px}.hero-steps li::marker{color:var(--yellow);font-weight:750}@media print{.hero-steps h2,.hero-steps ol,.hero-steps li::marker{color:var(--plum)}}
 </style>
 </head>
 <body>
+<a class="skip" href="#contenu">Aller au guide</a>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="#contenu" aria-label="Captain Invest, début du guide">Captain <span>Invest.</span></a><nav aria-label="Navigation du guide"><a href="#exemple">L’exemple</a><a href="#diagnostic" class="nav-cta">Et pour moi ?</a></nav></div></header>
+<main id="contenu">
+<section class="hero"><div class="wrap">
+<p class="eyebrow">Le guide OBO immobilier · 5 minutes pour comprendre</p>
+<h1>Transmettez vos biens immobiliers sans impôts.<br><em>Récupérez des liquidités.</em><br>Et construisez en famille.</h1>
+<p class="intro"><strong>L’OBO immobilier</strong>, ou « Owner Buy Out », consiste à <strong>vendre votre bien immobilier à une nouvelle SCI que vous contrôlez pour récupérer des liquidités, puis organiser la donation de parts de cette SCI à vos enfants à moindre coût.</strong></p>
+<p class="intro">La SCI emprunte pour vous racheter ce bien, puis utilise les loyers pour rembourser le crédit.</p>
+<p class="intro">Vous disposez ainsi d’argent pour de nouveaux projets, tout en organisant la transmission à vos enfants grâce à la donation de parts de la SCI.</p>
+<div class="hero-steps">
+<h2>Les étapes</h2>
+<ol>
+<li><strong>Vous créez une SCI</strong>, avec des règles adaptées à votre projet familial.</li>
+<li><strong>La SCI obtient un crédit</strong>, sous réserve de l’accord de la banque.</li>
+<li><strong>Vous lui vendez votre bien</strong>, à sa valeur de marché, devant notaire.</li>
+<li><strong>Vous récupérez le prix de vente</strong>, après remboursement du prêt éventuel, frais et impôts applicables.</li>
+<li><strong>Les loyers contribuent à rembourser le crédit</strong> de la SCI.</li>
+<li><strong>Vous pouvez donner des parts à vos enfants</strong> : la dette de la SCI réduit leur valeur, ce qui peut réduire les droits de donation.</li>
+</ol>
+</div>
+<div class="hero-actions"><a href="#exemple" class="btn">Je veux comprendre <span aria-hidden="true">↓</span></a><small>Un mécanisme. Un exemple. Votre situation.</small></div>
+<div class="hero-strip"><div><b>Du cash aujourd’hui</b>pour vos nouveaux projets</div><div><b>Construire ensemble</b>un projet patrimonial familial</div><div><b>Une transmission préparée</b>avec des parts à donner</div></div>
+</div></section>
+<section class="section tinted" id="exemple"><div class="wrap">
+<p class="eyebrow">01 / Les vrais chiffres</p><h2>Un bien à 1 000 000 €.<br>Combien reste-t-il dans votre poche ?</h2>
+<p class="example-intro">Prenons un bien locatif avec <strong>200 000 € de crédit restant</strong>. La SCI le rachète 1 000 000 €. Voici un exemple pédagogique, avec un financement bancaire supposé accepté.</p>
+<div class="example-grid"><article class="panel"><h3>Ce que la SCI doit financer</h3><dl class="rows"><div><dt>Prix du bien</dt><dd>1 000 000 €</dd></div><div><dt>Frais d’achat et de montage*</dt><dd>+ 75 000 €</dd></div><div class="total"><dt>Budget total</dt><dd>1 075 000 €</dd></div><div><dt>Emprunt de la SCI</dt><dd>800 000 €</dd></div><div><dt>Apport en capital à prévoir*</dt><dd>275 000 €</dd></div></dl><p class="small">Dans cet exemple, vous financez l’apport sur votre épargne disponible avant la vente. La trésorerie nécessaire et le calendrier sont à valider avec la banque et le notaire.</p></article>
+<article class="panel cash-panel"><h3>Ce qui vous reste vraiment</h3><dl class="rows"><div><dt>Prix de vente reçu</dt><dd>1 000 000 €</dd></div><div><dt>Ancien crédit remboursé</dt><dd>− 200 000 €</dd></div><div><dt>Impôt et frais du vendeur*</dt><dd>− 30 000 €</dd></div><div><dt>Votre argent réinvesti dans la SCI</dt><dd>− 275 000 €</dd></div><div class="total"><dt>Cash net dégagé</dt><dd>495 000 €</dd></div></dl><p class="small">C’est le gain de liquidité par rapport à votre situation de départ, une fois votre apport déduit. Ce n’est ni un bénéfice ni un rendement.</p></article></div>
+<p class="section-note">* Hypothèses illustratives, sans valeur de devis ni de barème fiscal. Frais, fiscalité, contribution des autres associés, garanties, taux et capacité d’emprunt dépendent du dossier.</p>
+<div class="lesson"><strong>Pour la transmission, on regarde la valeur des parts. Pas seulement celle de l’immeuble.</strong><p>Ici, 1 000 000 € de bien moins 800 000 € de dette donnent <strong>200 000 € de valeur nette simplifiée</strong>, après consommation des frais. Ce calcul aide à comprendre ; il ne remplace pas une valorisation des parts. Les droits de donation dépendent notamment des parts données, des abattements disponibles et d’un éventuel démembrement.</p><p><strong>Le pourcentage détenu par les enfants n’augmente pas lorsque le crédit se rembourse.</strong> C’est la valeur de leurs parts qui peut augmenter. Et le cash conservé par les parents reste dans leur patrimoine : l’OBO ne transmet pas tout à lui seul.</p></div>
+</div></section>
+<section class="section" id="vigilance"><div class="wrap">
+<p class="eyebrow">02 / Avant de vous lancer</p><h2>Un bon OBO se prouve.<br>Il ne se promet pas.</h2>
+<div class="checks"><article class="check"><h3>01. Le crédit doit tenir sans scénario parfait.</h3><p>Testez les loyers après charges et impôts, une vacance locative et des travaux. L’accord bancaire, l’apport et les garanties ne sont jamais acquis.</p></article><article class="check"><h3>02. Les frais peuvent manger l’intérêt.</h3><p>Chiffrez la plus-value à la vente, les frais d’acquisition, de prêt et de structure. Comparez le cash obtenu au coût total sur la durée.</p></article><article class="check"><h3>03. La famille doit avoir un vrai projet.</h3><p>Transmission, gouvernance, diversification : documentez vos objectifs. Prix de marché, flux réels, assemblées et suivi comptable sont indispensables. Un montage artificiel expose à une contestation fiscale.</p></article><article class="check"><h3>04. La fiscalité se regarde jusqu’à la sortie.</h3><p>SCI à l’IR ou à l’IS : le choix change les loyers, la revente et les retraits d’argent. À l’IS, les amortissements peuvent alourdir le résultat taxable à la revente. L’OBO ne supprime pas automatiquement l’IFI.</p></article></div>
 
-<header>
-  <nav class="nav">
-    <a class="brand" href="/">Captain Invest</a>
-    <ul class="navlinks">
-      <li><a href="#mecanisme">Le mécanisme</a></li>
-      <li><a href="#schemas">Les 2 versions</a></li>
-      <li><a href="#diagnostic">Mon diagnostic</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main>
-  <section class="hero">
-    <span class="eyebrow">L'OBO Immobilier</span>
-    <h1>Se vendre son immobilier à soi-même et le transmettre sans limite</h1>
-    <p>Récupérez des liquidités, préparez la transmission à vos enfants et continuez à investir en famille, avec une fiscalité maîtrisée.</p>
-    <a class="btn btn-citron" href="#mecanisme">Comprendre le mécanisme</a>
-  </section>
-
-  <section id="mecanisme">
-    <div class="wrap narrow">
-      <div class="kicker">La mécanique en une phrase</div>
-      <h2>L'OBO, ou comment rester propriétaire sans rester seul</h2>
-      <p class="lede">L'OBO Immobilier (Owner Buy Out) est l'une des opérations les plus efficaces pour transmettre et continuer à faire grandir votre patrimoine.</p>
-      <p><strong>Le principe est simple&nbsp;:</strong></p>
-      <ol class="mechanism-steps">
-        <li>Vous vendez votre bien à une <b>SCI familiale</b>&nbsp;: elle emprunte pour vous payer, et les loyers contribuent à rembourser son crédit.</li>
-        <li>Vous <b>récupérez l'argent de la vente</b>, après remboursement de votre ancien prêt et paiement des frais et impôts éventuels.</li>
-        <li>Vous pouvez <b>donner des parts à vos enfants</b> pendant que la dette en réduit la valeur, avec des droits de donation réduits, voire nuls selon votre situation.</li>
-      </ol>
-      <p>Vous avez ainsi transmis votre bien immobilier à vos enfants quasiment sans frais de donation, récupéré des liquidités, et vous permettez à votre famille de continuer à construire un patrimoine solide.</p>
-    </div>
-  </section>
-
-  <section id="schemas" class="alt">
-    <div class="wrap">
-      <div class="kicker">Le schéma complet</div>
-      <h2>Les deux montages possibles</h2>
-      <p class="lede">Le principe est identique. Seul change ce que vous cédez à la société&nbsp;: des liquidités ou titres financiers, ou un bien immobilier.</p>
-
-      <div class="diagram-block">
-        <span class="diagram-tag">Version 1 — Liquidités</span>
-        <h3>Vous cédez des actifs financiers à une holding familiale</h3>
-        <div class="schema-frame">
-          <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma de l'OBO en liquidités : vous cédez vos actifs financiers à une holding, financée par une banque, dont vos enfants sont associés dès le départ.">
-            <defs>
-              <marker id="arrCash" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M0 0 L10 5 L0 10 z" fill="#6a218d"></path>
-              </marker>
-            </defs>
-            <rect x="30" y="140" width="170" height="80" rx="12" fill="#f3edf7" stroke="#411459" stroke-width="1.5"></rect>
-            <text x="115" y="175" text-anchor="middle" font-size="15" font-weight="700" fill="#411459">Vous</text>
-            <text x="115" y="196" text-anchor="middle" font-size="11" fill="#6b6270">propriétaire des actifs</text>
-
-            <rect x="325" y="130" width="190" height="100" rx="12" fill="#411459"></rect>
-            <text x="420" y="170" text-anchor="middle" font-size="15" font-weight="700" fill="#fbf211">Holding</text>
-            <text x="420" y="190" text-anchor="middle" font-size="11" fill="#eadff2">société familiale</text>
-            <text x="420" y="207" text-anchor="middle" font-size="11" fill="#eadff2">(vous + vos enfants)</text>
-
-            <rect x="640" y="140" width="150" height="80" rx="12" fill="#f3edf7" stroke="#411459" stroke-width="1.5"></rect>
-            <text x="715" y="175" text-anchor="middle" font-size="15" font-weight="700" fill="#411459">Vos enfants</text>
-            <text x="715" y="196" text-anchor="middle" font-size="11" fill="#6b6270">associés dès le départ</text>
-
-            <rect x="325" y="300" width="190" height="64" rx="12" fill="#fff" stroke="#6a218d" stroke-width="1.5" stroke-dasharray="4 3"></rect>
-            <text x="420" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#6a218d">Banque</text>
-
-            <line x1="200" y1="168" x2="323" y2="168" stroke="#6a218d" stroke-width="2.5" marker-end="url(#arrCash)"></line>
-            <text x="261" y="150" text-anchor="middle" font-size="11.5" font-weight="700" fill="#411459">① cède les actifs</text>
-
-            <line x1="323" y1="196" x2="200" y2="196" stroke="#6a218d" stroke-width="2.5" marker-end="url(#arrCash)"></line>
-            <text x="261" y="217" text-anchor="middle" font-size="11.5" font-weight="700" fill="#411459">② verse le prix</text>
-
-            <line x1="515" y1="168" x2="638" y2="168" stroke="#6a218d" stroke-width="2.5" marker-end="url(#arrCash)"></line>
-            <text x="576" y="150" text-anchor="middle" font-size="11" font-weight="700" fill="#411459">③ parts / actions</text>
-            <text x="576" y="204" text-anchor="middle" font-size="10.5" fill="#6b6270">capital réparti</text>
-
-            <path d="M400 300 L400 232" stroke="#6a218d" stroke-width="2.5" fill="none" marker-end="url(#arrCash)"></path>
-            <text x="330" y="272" text-anchor="middle" font-size="11" font-weight="700" fill="#411459">④ prête</text>
-
-            <path d="M445 232 L445 300" stroke="#6a218d" stroke-width="2.5" fill="none" marker-end="url(#arrCash)"></path>
-            <text x="560" y="272" text-anchor="middle" font-size="10.5" fill="#6b6270">⑤ remboursée par les revenus des actifs</text>
-          </svg>
-          <p class="schema-note">Schéma simplifié à but pédagogique — ne reflète pas une opération réelle.</p>
-        </div>
-        <div class="example-box">
-          <span class="diagram-tag">Exemple chiffré (illustratif)</span>
-          <p>Un portefeuille de titres et liquidités évalué 900&nbsp;000&nbsp;€. La holding l'achète, financée à 60&nbsp;% par crédit et 40&nbsp;% par apport de vos enfants. Vous encaissez 900&nbsp;000&nbsp;€. Les revenus du portefeuille remboursent le crédit sur 10 à 15 ans, pendant que vos enfants, déjà associés, montent en puissance dans le capital.</p>
-        </div>
-      </div>
-
-      <div class="diagram-block">
-        <span class="diagram-tag">Version 2 — Immobilier</span>
-        <h3>Vous cédez un bien immobilier à une SCI familiale</h3>
-        <div class="schema-frame dark">
-          <svg viewBox="0 0 1040 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma de l'OBO immobilier. Avant l'opération : vous détenez le bien immobilier. Après l'opération : vous cédez le bien à une SCI financée par un crédit bancaire ; vous encaissez le prix de vente en liquidités ; vous conservez des parts de la SCI et vos enfants en reçoivent également ; la SCI détient le bien, perçoit les loyers et rembourse le crédit à la banque.">
-            <defs>
-              <marker id="arrImmo2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M0 0 L10 5 L0 10 z" fill="#fbf211"></path>
-              </marker>
-            </defs>
-
-            <rect x="0" y="0" width="1040" height="640" fill="#2a0e3c"></rect>
-
-            <!-- Avant -->
-            <rect x="28" y="24" width="300" height="36" rx="18" fill="#fff"></rect>
-            <text x="178" y="47" text-anchor="middle" font-size="13" font-weight="800" letter-spacing="0.03em" fill="#2a0e3c">AVANT L'OBO IMMOBILIER</text>
-
-            <g transform="translate(160,128) scale(1.3)">
-              <circle cx="0" cy="-14" r="9" fill="#fff"></circle>
-              <path d="M -15 18 C -15 -2 15 -2 15 18 Z" fill="#fff"></path>
-            </g>
-            <text x="160" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Vous</text>
-
-            <g transform="translate(560,122) scale(1.3)">
-              <path d="M -24 2 L 0 -20 L 24 2 Z" fill="#fff"></path>
-              <rect x="-18" y="2" width="36" height="22" fill="#fff"></rect>
-              <rect x="-6" y="10" width="12" height="14" fill="#2a0e3c"></rect>
-            </g>
-            <text x="560" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Bien immobilier</text>
-
-            <line x1="215" y1="128" x2="498" y2="126" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="358" y="112" text-anchor="middle" font-size="14" font-weight="800" fill="#fbf211">Détient</text>
-
-            <line x1="28" y1="205" x2="1012" y2="205" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1.5"></line>
-
-            <!-- Après -->
-            <rect x="692" y="222" width="320" height="36" rx="18" fill="#fff"></rect>
-            <text x="852" y="245" text-anchor="middle" font-size="13" font-weight="800" letter-spacing="0.03em" fill="#2a0e3c">APRÈS L'OBO IMMOBILIER</text>
-
-            <g transform="translate(150,392) scale(1.15)">
-              <circle cx="0" cy="-14" r="9" fill="#fff"></circle>
-              <path d="M -15 18 C -15 -2 15 -2 15 18 Z" fill="#fff"></path>
-            </g>
-            <text x="150" y="438" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">Vous</text>
-
-            <g transform="translate(150,520)">
-              <g transform="translate(-11,4) scale(0.72)">
-                <circle cx="0" cy="-14" r="9" fill="#fff"></circle>
-                <path d="M -15 18 C -15 -2 15 -2 15 18 Z" fill="#fff"></path>
-              </g>
-              <g transform="translate(11,4) scale(0.72)">
-                <circle cx="0" cy="-14" r="9" fill="#fff"></circle>
-                <path d="M -15 18 C -15 -2 15 -2 15 18 Z" fill="#fff"></path>
-              </g>
-            </g>
-            <text x="150" y="558" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">Vos enfants</text>
-
-            <g transform="translate(355,300) scale(1.05)">
-              <ellipse cx="0" cy="0" rx="22" ry="15" fill="#fff"></ellipse>
-              <path d="M 17 -7 L 29 -11 L 24 1 Z" fill="#fff"></path>
-              <rect x="-5" y="-16" width="10" height="4" rx="1" fill="#fff"></rect>
-              <circle cx="-19" cy="-1" r="2.6" fill="#2a0e3c"></circle>
-              <rect x="-14" y="12" width="4" height="8" fill="#fff"></rect>
-              <rect x="8" y="12" width="4" height="8" fill="#fff"></rect>
-            </g>
-
-            <g transform="translate(560,430) scale(1.3)">
-              <rect x="-20" y="-26" width="40" height="52" fill="#fff"></rect>
-              <rect x="-14" y="-20" width="8" height="8" fill="#2a0e3c"></rect>
-              <rect x="-2" y="-20" width="8" height="8" fill="#2a0e3c"></rect>
-              <rect x="-14" y="-6" width="8" height="8" fill="#2a0e3c"></rect>
-              <rect x="-2" y="-6" width="8" height="8" fill="#2a0e3c"></rect>
-              <rect x="-14" y="8" width="8" height="8" fill="#2a0e3c"></rect>
-              <rect x="-2" y="8" width="8" height="8" fill="#2a0e3c"></rect>
-            </g>
-            <text x="560" y="492" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">SCI ou société</text>
-            <text x="560" y="510" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">de rachat</text>
-
-            <g transform="translate(870,330) scale(1.2)">
-              <path d="M -24 2 L 0 -20 L 24 2 Z" fill="#fff"></path>
-              <rect x="-18" y="2" width="36" height="22" fill="#fff"></rect>
-              <rect x="-6" y="10" width="12" height="14" fill="#2a0e3c"></rect>
-            </g>
-            <text x="870" y="380" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">Bien immobilier</text>
-
-            <g transform="translate(870,532) scale(1.2)">
-              <path d="M -22 -2 L 0 -18 L 22 -2 Z" fill="#fff"></path>
-              <rect x="-24" y="-2" width="48" height="3" fill="#fff"></rect>
-              <rect x="-18" y="2" width="4" height="16" fill="#fff"></rect>
-              <rect x="-6" y="2" width="4" height="16" fill="#fff"></rect>
-              <rect x="6" y="2" width="4" height="16" fill="#fff"></rect>
-              <rect x="16" y="2" width="4" height="16" fill="#fff"></rect>
-              <rect x="-26" y="20" width="52" height="4" fill="#fff"></rect>
-            </g>
-            <text x="870" y="580" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">Banque</text>
-
-            <line x1="182" y1="368" x2="322" y2="322" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="192" y="284" text-anchor="start" font-size="12.5" font-weight="600" fill="#fff">Liquidités suite</text>
-            <text x="192" y="300" text-anchor="start" font-size="12.5" font-weight="600" fill="#fff">à la vente du bien</text>
-
-            <line x1="197" y1="388" x2="478" y2="408" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="335" y="375" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fbf211">Conservent des parts</text>
-
-            <line x1="197" y1="512" x2="478" y2="456" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="335" y="508" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fbf211">Reçoivent des parts</text>
-
-            <line x1="622" y1="404" x2="815" y2="340" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="718" y="358" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fbf211">Détient</text>
-
-            <line x1="812" y1="366" x2="620" y2="430" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="718" y="412" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Loyers</text>
-
-            <line x1="612" y1="454" x2="815" y2="510" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="718" y="468" text-anchor="middle" font-size="13" font-weight="800" fill="#fbf211">Échéances de prêt</text>
-
-            <line x1="812" y1="536" x2="614" y2="480" stroke="#fbf211" stroke-width="3" marker-end="url(#arrImmo2)"></line>
-            <text x="718" y="528" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Crédit</text>
-          </svg>
-          <p class="schema-note">Schéma simplifié à but pédagogique — ne reflète pas une opération réelle.</p>
-        </div>
-        <div class="example-box">
-          <span class="diagram-tag">Exemple chiffré (illustratif)</span>
-          <p>Un bien évalué 1,2&nbsp;M€. La SCI l'achète, financée à 70&nbsp;% par crédit (840&nbsp;000&nbsp;€) et 30&nbsp;% par apport. Vous encaissez 1,2&nbsp;M€. Le bien est loué&nbsp;: les loyers remboursent le crédit sur 15 à 20 ans, pendant que vos enfants, associés dès le départ, voient leur part dans la SCI grandir à mesure que la dette diminue.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="diagnostic">
-    <div class="wrap narrow">
-      <div class="kicker">Diagnostic express</div>
-      <h2>Votre situation permet-elle un OBO&nbsp;?</h2>
-      <p class="lede">Cette opération ne convient pas à toutes les situations&nbsp;: elle suppose un patrimoine immobilier conséquent, car elle repose sur un refinancement bancaire, et un vrai projet de structuration familiale — pas seulement une envie de liquidités. Le questionnaire ci-dessous vous dit en 2 minutes, sans engagement, si la vôtre s'y prête.</p>
-
-      <div class="quiz" id="quiz">
-        <div class="quiz-progress"><div class="quiz-progress-bar" id="quiz-progress-bar"></div></div>
-        <div id="quiz-body"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="accompagnement" class="accompagnement">
-    <div class="wrap narrow">
-      <div class="kicker">L'accompagnement Captain Invest</div>
-      <div class="profile">
-        <img src="/images/rashan-kadioglu.jpg" alt="">
-      </div>
-      <h2>Un montage technique, qui se pilote de bout en bout</h2>
-      <p class="lede">Une SCI ou une holding mal montée coûte plus cher qu'elle ne rapporte. La valeur d'un OBO tient dans son montage — financement, répartition du capital, fiscalité, suivi dans la durée.</p>
-      <p>25 ans de finance, de la banque d'investissement aux directions financières, pour transformer votre patrimoine en liquidités aujourd'hui, sans compromettre sa transmission demain.</p>
-    </div>
-  </section>
+</div></section>
+<section class="section tinted" id="diagnostic"><div class="wrap quiz-layout"><div class="quiz-intro"><p class="eyebrow">03 / Et dans votre cas ?</p><h2>Votre bien mérite-t-il<br>une étude OBO ?</h2><p>Répondez à 5 questions. Vous repartirez avec les points à chiffrer en priorité pour votre situation.</p><p><strong>Pas de feu vert automatique.</strong> Un premier tri utile, avant une vraie étude.</p><p style="font-size:.88rem">Vos réponses restent dans cette page et ne sont pas envoyées. Aucun e-mail demandé.</p></div><div class="quiz"><noscript><p>Activez JavaScript pour utiliser le diagnostic, ou <a href="https://calendly.com/rashan-kadioglu/transmission-obo">réservez directement un échange</a>.</p></noscript><div id="quiz-body"></div><p id="announcement" class="sr-only" aria-live="polite"></p></div></div></section>
+<section class="profile"><div class="wrap profile-layout"><h2>Votre patrimoine mérite<br><span>mieux qu’un montage<br>copié-collé.</span></h2><div><p><strong>Je m’appelle Rashan. 25 ans de finance.</strong></p><p>Avant de choisir une structure, partons de votre vie : l’argent dont vous avez besoin, ce que vous voulez transmettre et la liberté que vous voulez garder.</p><p>Le premier échange sert à comprendre votre situation et à cadrer l’étude nécessaire.</p><a class="btn" href="https://calendly.com/rashan-kadioglu/transmission-obo" target="_blank" rel="noopener noreferrer">Parlons de mon patrimoine <span aria-hidden="true">↗</span></a></div></div></section>
 </main>
-
-<footer>
-  <p>Guide pédagogique édité par RKG INVEST (Captain Invest). Il ne constitue ni un conseil juridique, fiscal ou patrimonial personnalisé, ni une incitation à réaliser une opération. Les seuils mentionnés dans le diagnostic sont des ordres de grandeur, pas des règles absolues&nbsp;: toute stratégie doit être validée avec un notaire, un expert-comptable et vos conseils.</p>
-  <p>RKG INVEST — SASU au capital de 1&nbsp;000&nbsp;€ · 66 avenue des Champs-Élysées, 75008 Paris · RCS Paris 944 733 161 · Orias n°944733161 · Membre CNCEF PATRIMOINE (CIF/COA).</p>
-  <p><a href="/confidentialite/">Politique de confidentialité</a></p>
-</footer>
-
+<footer class="footer"><div class="wrap"><p>Guide pédagogique Captain Invest — RKG INVEST. Il ne constitue pas un conseil juridique, fiscal ou patrimonial personnalisé. Toute opération nécessite une étude complète avec vos conseils, votre notaire et, selon le montage, un expert-comptable. Aucun financement, gain fiscal ou résultat de transmission n’est garanti.</p>
+<details><summary>Sources et repères pour approfondir</summary><ul><li><a href="https://www.rapport-congresdesnotaires.fr/2025-rapport-du-121e-congres/la-reorganisation-patrimoniale-par-le-recours-un-obo-immobilier" target="_blank" rel="noopener noreferrer">Congrès des notaires de France — Le mécanisme de l’OBO immobilier</a></li><li><a href="https://www.rapport-congresdesnotaires.fr/2025-rapport-du-121e-congres/les-prerequis-lobo-immobilier" target="_blank" rel="noopener noreferrer">Congrès des notaires de France — Les prérequis et contraintes</a></li><li><a href="https://www.service-public.gouv.fr/particuliers/vosdroits/F10864" target="_blank" rel="noopener noreferrer">Service Public — L’imposition des plus-values immobilières</a></li></ul><p>Sources consultées en septembre 2026. La fiscalité dépend de votre dossier et des règles applicables à la date de l’opération ; les montants de cet exemple sont des hypothèses, pas un calcul d’impôt.</p></details>
+<div class="footer-links"><a href="https://guide.captain-invest.com/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="mailto:rashan@captain-invest.com">Contacter Rashan</a><a href="#contenu">Retour en haut</a></div><p class="copyright">© Captain Invest · RKG INVEST</p></div></footer>
 <script>
-(() => {
-  const CALENDLY_URL = 'https://calendly.com/rashan-kadioglu/transmission-obo';
-  const MAILTO = 'mailto:rashan@captain-invest.com?subject=' + encodeURIComponent("Ma situation — hors OBO");
-
-  const body = document.getElementById('quiz-body');
-  const progressBar = document.getElementById('quiz-progress-bar');
-
-  // state accumulates every answer given along the path actually taken
-  const state = { type: null, montantImmo: null, montantCash: null, residence: null, residenceChange: null, credit: null, creditPart: null, enfants: null };
-  const history = []; // stack of step ids, for the "back" link
-
-  const IMMO_BANDS = [
-    ['lt800', 'Moins de 800 000 €'],
-    ['r800-1500', '800 000 € – 1,5 M€'],
-    ['r1500-3000', '1,5 M€ – 3 M€'],
-    ['gt3000', 'Plus de 3 M€']
-  ];
-  const CASH_BANDS = [
-    ['lt300', 'Moins de 300 000 €'],
-    ['r300-800', '300 000 € – 800 000 €'],
-    ['r800-2000', '800 000 € – 2 M€'],
-    ['gt2000', 'Plus de 2 M€']
-  ];
-  const CREDIT_BANDS = [
-    ['lt10', 'Moins de 10 %'],
-    ['r10-30', '10 % à 30 %'],
-    ['r30-50', '30 % à 50 %'],
-    ['gt50', 'Plus de 50 %']
-  ];
-  const CHILDREN = [['1', '1'], ['2', '2'], ['3', '3'], ['4+', '4 et plus']];
-
-  function progressFor(stepId) {
-    const order = ['type', 'montant-immo', 'residence', 'residence-change', 'credit', 'credit-part', 'montant-cash', 'enfants'];
-    const i = order.indexOf(stepId);
-    return Math.min(95, 10 + (i >= 0 ? i : 0) * 13);
-  }
-
-  function renderQuestion(stepId, label, title, options, onPick) {
-    progressBar.style.width = progressFor(stepId) + '%';
-    body.innerHTML = '';
-    const labelEl = document.createElement('div');
-    labelEl.className = 'quiz-step-label';
-    labelEl.textContent = label;
-    const h3 = document.createElement('h3');
-    h3.textContent = title;
-    const opts = document.createElement('div');
-    opts.className = 'quiz-options';
-    options.forEach(([value, text]) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'quiz-option';
-      btn.textContent = text;
-      btn.addEventListener('click', () => { history.push(stepId); onPick(value); });
-      opts.appendChild(btn);
-    });
-    body.appendChild(labelEl);
-    body.appendChild(h3);
-    body.appendChild(opts);
-    if (history.length) {
-      const back = document.createElement('button');
-      back.type = 'button';
-      back.className = 'quiz-back';
-      back.textContent = '← Question précédente';
-      back.addEventListener('click', goBack);
-      body.appendChild(back);
-    }
-  }
-
-  const stepRenderers = {};
-
-  function goBack() {
-    const prev = history.pop();
-    if (prev && stepRenderers[prev]) stepRenderers[prev]();
-    else stepRenderers.type();
-  }
-
-  stepRenderers.type = function () {
-    renderQuestion('type', 'Question 1 / 5', 'Souhaitez-vous transmettre de l’immobilier ou des liquidités ?', [
-      ['immo', 'De l’immobilier'],
-      ['cash', 'Des liquidités / actifs financiers'],
-      ['both', 'Les deux']
-    ], v => { state.type = v; if (v === 'cash') stepRenderers['montant-cash'](); else stepRenderers['montant-immo'](); });
-  };
-
-  stepRenderers['montant-immo'] = function () {
-    renderQuestion('montant-immo', 'Question 2 / 5', 'Quelle est la valeur approximative du bien ?', IMMO_BANDS, v => {
-      state.montantImmo = v;
-      if (v === 'lt800') return showBlocked('montant');
-      stepRenderers.residence();
-    });
-  };
-
-  stepRenderers.residence = function () {
-    renderQuestion('residence', 'Question 3 / 5', 'Est-ce votre résidence principale ?', [
-      ['oui', 'Oui'],
-      ['non', 'Non']
-    ], v => { state.residence = v; if (v === 'oui') stepRenderers['residence-change'](); else stepRenderers.credit(); });
-  };
-
-  stepRenderers['residence-change'] = function () {
-    renderQuestion('residence-change', 'Question 3 / 5', 'Envisagez-vous de changer de résidence principale après l’opération ?', [
-      ['oui', 'Oui, je compte déménager'],
-      ['non', 'Non, je compte y rester']
-    ], v => { state.residenceChange = v; if (v === 'non') return showBlocked('residence'); stepRenderers.credit(); });
-  };
-
-  stepRenderers.credit = function () {
-    renderQuestion('credit', 'Question 4 / 5', 'Avez-vous encore un crédit sur ce bien ?', [
-      ['oui', 'Oui'],
-      ['non', 'Non, il est intégralement remboursé']
-    ], v => { state.credit = v; if (v === 'oui') stepRenderers['credit-part'](); else afterImmoBlock(); });
-  };
-
-  stepRenderers['credit-part'] = function () {
-    renderQuestion('credit-part', 'Question 4 / 5', 'Quelle part du bien reste financée par ce crédit ?', CREDIT_BANDS, v => {
-      state.creditPart = v;
-      if (v === 'r30-50' || v === 'gt50') return showBlocked('credit');
-      afterImmoBlock();
-    });
-  };
-
-  function afterImmoBlock() {
-    if (state.type === 'both') stepRenderers['montant-cash']();
-    else stepRenderers.enfants();
-  }
-
-  stepRenderers['montant-cash'] = function () {
-    const label = state.type === 'both' ? 'Question 5 / 5' : 'Question 2 / 5';
-    renderQuestion('montant-cash', label, 'Quel montant de liquidités / actifs financiers envisagez-vous ?', CASH_BANDS, v => {
-      state.montantCash = v;
-      stepRenderers.enfants();
-    });
-  };
-
-  stepRenderers.enfants = function () {
-    renderQuestion('enfants', 'Dernière question', 'Combien d’enfants souhaitez-vous accompagner dans cette transmission ?', CHILDREN, v => {
-      state.enfants = v;
-      showResult();
-    });
-  };
-
-  function sendDiagnostic(eligible, reason) {
-    let lead = {};
-    try { lead = JSON.parse(sessionStorage.getItem('obo-lead') || '{}'); } catch {}
-    const payload = Object.assign({}, lead, { answers: state, eligible, reason });
-    fetch('/api/obo-diagnostic', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(() => {});
-  }
-
-  function showBlocked(reasonKey) {
-    sendDiagnostic(false, reasonKey);
-    progressBar.style.width = '100%';
-    const reasons = {
-      montant: {
-        title: 'Ce n’est pas adapté à votre cas',
-        text: 'En dessous de 800 000 €, les frais fixes d’un OBO immobilier — notaire, structuration de la société, financement — pèsent proportionnellement trop lourd. L’opération perd son intérêt face à des solutions plus simples.'
-      },
-      residence: {
-        title: 'Ce n’est pas adapté à votre cas',
-        text: 'Vous comptez rester dans votre résidence principale sans en changer. C’est précisément le point sur lequel l’OBO immobilier bute&nbsp;: pour rester valable, le montage suppose une vraie bascule d’usage — un loyer réel versé à la société, ou un changement de résidence. Sans cela, l’administration peut requalifier l’opération.'
-      },
-      credit: {
-        title: 'Ce n’est pas adapté à votre cas',
-        text: 'Il reste encore plus de 30&nbsp;% de crédit sur ce bien. À ce niveau d’endettement, la marge pour financer le rachat par la société est trop réduite&nbsp;: les frais de structuration rognent l’essentiel du bénéfice de l’opération.'
-      }
-    };
-    const r = reasons[reasonKey] || reasons.montant;
-    body.innerHTML =
-      '<div class="result blocked">' +
-        '<span class="result-tag">OBO non adapté</span>' +
-        '<h3>' + r.title + '</h3>' +
-        '<p>' + r.text + '</p>' +
-        '<p>Ce n’est pas un « non » définitif à la transmission — juste à ce montage précis. D’autres dispositifs sont probablement plus adaptés à votre situation&nbsp;:</p>' +
-        '<ul class="alt-list">' +
-          '<li><b>Donation avec démembrement</b> — transmettre la nue-propriété, garder l’usufruit (l’usage ou les revenus).</li>' +
-          '<li><b>Assurance-vie</b> — transmission hors succession, cadre fiscal dédié.</li>' +
-          '<li><b>Don familial de sommes d’argent</b> (dit « don Sarkozy ») — exonération sous conditions, plafond réévalué périodiquement.</li>' +
-        '</ul>' +
-        '<a class="btn" style="background:#411459;color:#fff" href="' + MAILTO + '">M’écrire pour en discuter</a>' +
-        '<p class="disclaimer">Le seuil mentionné ci-dessus est un ordre de grandeur, pas une règle absolue&nbsp;: chaque situation mérite d’être regardée en détail.</p>' +
-      '</div>';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'quiz-back';
-    back.textContent = '← Reprendre le diagnostic';
-    back.addEventListener('click', () => { history.length = 0; stepRenderers.type(); });
-    body.appendChild(back);
-  }
-
-  function showResult() {
-    sendDiagnostic(true, null);
-    progressBar.style.width = '100%';
-    body.innerHTML =
-      '<div class="result ok">' +
-        '<span class="result-tag">Les voyants sont au vert</span>' +
-        '<h3>Un OBO pourrait être possible pour vous</h3>' +
-        '<p>Sur la base de vos réponses, rien ne bloque a priori l’opération. Reste à la construire précisément. Voici les grandes étapes&nbsp;:</p>' +
-        '<ol class="mechanism-steps">' +
-          '<li>Diagnostic approfondi de votre patrimoine et de vos objectifs de transmission</li>' +
-          '<li>Structuration de la société et répartition du capital avec vos enfants</li>' +
-          '<li>Valorisation du bien ou des actifs par un expert indépendant</li>' +
-          '<li>Montage du financement (banque, apport, garanties)</li>' +
-          '<li>Signature chez le notaire et mise en place de la société</li>' +
-          '<li>Suivi dans la durée&nbsp;: remboursement du crédit, fiscalité, ajustements</li>' +
-        '</ol>' +
-        '<div class="cta-box" style="background:#f3edf7;border-color:#e0d5e9">' +
-          '<h3 style="color:#411459">Notre équipe a l’expérience de ce type d’opérations</h3>' +
-          '<p style="color:#6b6270">On gère tout, du diagnostic à la signature. Réservons un créneau pour regarder votre situation en détail.</p>' +
-          '<a class="btn btn-citron" style="color:#411459" href="' + CALENDLY_URL + '" target="_blank" rel="noopener">Réserver mon diagnostic OBO</a>' +
-        '</div>' +
-        '<p class="disclaimer">Ce résultat est indicatif et fondé sur vos seules réponses au questionnaire&nbsp;: il ne constitue pas une validation de faisabilité, qui suppose une analyse complète de votre situation.</p>' +
-      '</div>';
-  }
-
-  stepRenderers.type();
-})();
+'use strict';
+// Fichier autonome : aucun appel à une API, aucun stockage, aucune dépendance.
+// Pour modifier le lien de rendez-vous : rechercher « calendly.com » dans le fichier.
+const questions=[
+ {title:'Quel bien envisagez-vous de vendre à la SCI ?',help:'Le guide présente le cas d’un bien locatif.',options:[['rented','Un bien déjà loué'],['future','Un bien que je compte mettre en location'],['home','Ma résidence principale, que je souhaite garder pour y vivre']]},
+ {title:'Quelle est sa valeur estimée ?',help:'Un ordre de grandeur suffit. Aucun montant ne valide ou n’exclut à lui seul un OBO.',options:[['low','Moins de 500 000 €'],['mid','De 500 000 € à 1 million €'],['high','Plus de 1 million €']]},
+ {title:'Quelle part du prix servirait à rembourser votre crédit actuel ?',help:'Capital restant dû ÷ valeur du bien. Exemple : 100 000 € sur 500 000 € = 20 %.',options:[['none','Le bien est entièrement payé'],['some','Moins de la moitié'],['much','La moitié ou plus'],['unknown','Je dois vérifier']]},
+ {title:'Que cherchez-vous en priorité ?',help:'Le montage doit répondre à votre objectif, pas l’inverse.',options:[['both','Récupérer du cash et préparer la transmission'],['cash','Récupérer du cash pour un autre projet'],['gift','Transmettre à mes enfants'],['tax','Réduire mes impôts']]},
+ {title:'Si les loyers ne suffisent pas pendant quelques mois…',help:'Pensez aussi aux frais de départ, aux travaux et aux garanties demandées.',options:[['buffer','J’ai une réserve pour faire face'],['tight','Je n’ai pas de marge disponible'],['unknown','Je n’ai pas encore fait le calcul']]}
+];
+let step=0;const answers=[];
+const quizBody=document.getElementById('quiz-body');
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
+function getOutcome(a){
+ const notes=[];let title='Votre projet mérite d’être chiffré.';
+ if(a[0]==='home'){title='Votre résidence principale demande une analyse spécifique.';notes.push('Le schéma locatif présenté ne se transpose pas tel quel à votre logement. Il faut examiner l’occupation, le financement et les conséquences fiscales avant toute vente.');}
+ else if(a[0]==='future')notes.push('Validez le loyer réaliste, les travaux et le délai de mise en location avant de dimensionner le crédit.');
+ else notes.push('Partez des loyers réellement encaissés et retranchez charges, impôts, entretien et vacance pour tester la nouvelle dette.');
+ if(a[1]==='low')notes.push('Rapportez les frais fixes au cash obtenu. Sur ce montant, une solution plus simple peut être préférable.');
+ if(a[2]==='much')notes.push('Une part importante du prix remboursera l’ancien prêt. Calculez le cash restant après ce remboursement, la fiscalité et votre nouvel apport.');
+ if(a[2]==='unknown')notes.push('Récupérez votre tableau d’amortissement : le capital restant dû est nécessaire pour calculer votre cash net.');
+ if(a[3]==='gift')notes.push('Comparez d’abord l’OBO à une donation directe ou démembrée : si vous ne cherchez pas de cash, la vente et son crédit ne sont pas forcément utiles.');
+ if(a[3]==='tax'){title='Commencez par clarifier votre projet patrimonial.';notes.push('Une économie d’impôt ne suffit pas à établir l’intérêt du montage. Formalisez les objectifs de transmission, de gestion ou de diversification et faites examiner le risque fiscal.');}
+ if(a[4]==='tight'){title='Votre marge de sécurité est le premier point à résoudre.';notes.push('Sans réserve, un impayé, des travaux ou une demande d’apport peuvent déséquilibrer le projet. N’engagez pas de montage avant d’avoir financé cette marge.');}
+ if(a[4]==='unknown')notes.push('Établissez un budget avec plusieurs mois sans loyer et une enveloppe travaux. Faites préciser l’apport et les garanties par la banque.');
+ if(a[3]==='both')notes.push('Chiffrez séparément le cash dont vous avez besoin et la valeur des parts à donner. Prévoyez aussi les pouvoirs que vous souhaitez conserver.');
+ if(a[3]==='cash')notes.push('Comparez le coût total de l’OBO aux autres financements possibles avant de vendre le bien à votre SCI.');
+ return {title,notes};
+}
+function focusHeading(){const h=quizBody.querySelector('h3');h.tabIndex=-1;h.focus({preventScroll:true});}
+function render(moveFocus=false){
+ quizBody.replaceChildren();const q=questions[step];
+ const meta=el('div','quiz-meta');meta.append(el('span','',`Question ${step+1} sur ${questions.length}`),el('span','','Diagnostic indicatif'));quizBody.append(meta);
+ const track=el('div','track');track.setAttribute('role','progressbar');track.setAttribute('aria-label','Progression du diagnostic');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','5');track.setAttribute('aria-valuenow',String(step));const bar=el('div','bar');bar.style.width=`${step/5*100}%`;track.append(bar);quizBody.append(track);
+ const h=el('h3','',q.title);h.id='question-title';quizBody.append(h,el('p','quiz-sub',q.help));
+ const opts=el('div','options');opts.setAttribute('role','group');opts.setAttribute('aria-labelledby','question-title');
+ const next=el('button','btn dark',step===4?'Voir mes points de vigilance':'Continuer');next.type='button';next.disabled=answers[step]===undefined;
+ q.options.forEach(([value,label])=>{const b=el('button','option',label);b.type='button';b.setAttribute('aria-pressed',String(answers[step]===value));b.addEventListener('click',()=>{answers[step]=value;opts.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');next.disabled=false;});opts.append(b);});quizBody.append(opts);
+ const controls=el('div','quiz-controls');const back=el('button','text-btn','Retour');back.type='button';back.hidden=step===0;back.addEventListener('click',()=>{step--;render(true);});controls.append(back,next);quizBody.append(controls);
+ next.addEventListener('click',()=>{if(answers[step]===undefined)return;if(step===4)showResult();else{step++;render(true);}});
+ if(moveFocus)focusHeading();
+}
+function showResult(){
+ const result=getOutcome(answers);quizBody.replaceChildren();quizBody.append(el('span','result-tag','Vos priorités'),el('h3','',result.title));
+ const list=el('ul','result-list');result.notes.forEach(t=>list.append(el('li','',t)));quizBody.append(list);
+ quizBody.append(el('p','quiz-sub','Pour le premier échange : estimation du bien, loyers et charges annuels, capital restant dû, date et prix d’achat, et montant de cash souhaité.'));
+ const link=el('a','btn dark','Faire le point avec Rashan');link.href='https://calendly.com/rashan-kadioglu/transmission-obo';link.target='_blank';link.rel='noopener noreferrer';quizBody.append(link);
+ const back=el('button','text-btn','Modifier mes réponses');back.type='button';back.style.display='block';back.style.marginTop='15px';back.addEventListener('click',()=>{step=0;render(true);});quizBody.append(back);
+ quizBody.append(el('p','disclaimer','Ce résultat oriente les questions à étudier. Il ne valide ni la faisabilité bancaire, ni la sécurité juridique, ni l’intérêt fiscal de l’opération.'));
+ document.getElementById('announcement').textContent='Diagnostic terminé. Vos priorités sont affichées.';focusHeading();
+}
+render();
 </script>
 </body>
 </html>
