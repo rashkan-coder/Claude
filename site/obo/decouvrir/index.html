@@ -54,7 +54,7 @@
 <div class="checks"><article class="check"><h3>01. Le crédit doit tenir sans scénario parfait.</h3><p>Testez les loyers après charges et impôts, une vacance locative et des travaux. L’accord bancaire, l’apport et les garanties ne sont jamais acquis.</p></article><article class="check"><h3>02. Les frais peuvent manger l’intérêt.</h3><p>Chiffrez la plus-value à la vente, les frais d’acquisition, de prêt et de structure. Comparez le cash obtenu au coût total sur la durée.</p></article><article class="check"><h3>03. La famille doit avoir un vrai projet.</h3><p>Transmission, gouvernance, diversification : documentez vos objectifs. Prix de marché, flux réels, assemblées et suivi comptable sont indispensables. Un montage artificiel expose à une contestation fiscale.</p></article><article class="check"><h3>04. La fiscalité se regarde jusqu’à la sortie.</h3><p>SCI à l’IR ou à l’IS : le choix change les loyers, la revente et les retraits d’argent. À l’IS, les amortissements peuvent alourdir le résultat taxable à la revente. L’OBO ne supprime pas automatiquement l’IFI.</p></article></div>
 
 </div></section>
-<section class="section tinted" id="diagnostic"><div class="wrap quiz-layout"><div class="quiz-intro"><p class="eyebrow">03 / Et dans votre cas ?</p><h2>Votre bien mérite-t-il<br>une étude OBO ?</h2><p>Répondez à 5 questions. Vous repartirez avec les points à chiffrer en priorité pour votre situation.</p><p><strong>Pas de feu vert automatique.</strong> Un premier tri utile, avant une vraie étude.</p><p style="font-size:.88rem">Vos réponses restent dans cette page et ne sont pas envoyées. Aucun e-mail demandé.</p></div><div class="quiz"><noscript><p>Activez JavaScript pour utiliser le diagnostic, ou <a href="https://calendly.com/rashan-kadioglu/transmission-obo">réservez directement un échange</a>.</p></noscript><div id="quiz-body"></div><p id="announcement" class="sr-only" aria-live="polite"></p></div></div></section>
+<section class="section tinted" id="diagnostic"><div class="wrap quiz-layout"><div class="quiz-intro"><p class="eyebrow">03 / Et dans votre cas ?</p><h2>Votre bien mérite-t-il<br>une étude OBO ?</h2><p>Répondez à 5 questions. Vous repartirez avec les points à chiffrer en priorité pour votre situation.</p><p><strong>Pas de feu vert automatique.</strong> Un premier tri utile, avant une vraie étude.</p><p style="font-size:.88rem">Vos réponses sont associées à l’adresse email indiquée à l’étape précédente, pour préparer votre échange avec Rashan.</p></div><div class="quiz"><noscript><p>Activez JavaScript pour utiliser le diagnostic, ou <a href="https://calendly.com/rashan-kadioglu/transmission-obo">réservez directement un échange</a>.</p></noscript><div id="quiz-body"></div><p id="announcement" class="sr-only" aria-live="polite"></p></div></div></section>
 <section class="profile"><div class="wrap profile-layout"><h2>Votre patrimoine mérite<br><span>mieux qu’un montage<br>copié-collé.</span></h2><div><p><strong>Je m’appelle Rashan. 25 ans de finance.</strong></p><p>Avant de choisir une structure, partons de votre vie : l’argent dont vous avez besoin, ce que vous voulez transmettre et la liberté que vous voulez garder.</p><p>Le premier échange sert à comprendre votre situation et à cadrer l’étude nécessaire.</p><a class="btn" href="https://calendly.com/rashan-kadioglu/transmission-obo" target="_blank" rel="noopener noreferrer">Parlons de mon patrimoine <span aria-hidden="true">↗</span></a></div></div></section>
 </main>
 <footer class="footer"><div class="wrap"><p>Guide pédagogique Captain Invest — RKG INVEST. Il ne constitue pas un conseil juridique, fiscal ou patrimonial personnalisé. Toute opération nécessite une étude complète avec vos conseils, votre notaire et, selon le montage, un expert-comptable. Aucun financement, gain fiscal ou résultat de transmission n’est garanti.</p>
@@ -62,8 +62,19 @@
 <div class="footer-links"><a href="https://guide.captain-invest.com/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="mailto:rashan@captain-invest.com">Contacter Rashan</a><a href="#contenu">Retour en haut</a></div><p class="copyright">© Captain Invest · RKG INVEST</p></div></footer>
 <script>
 'use strict';
-// Fichier autonome : aucun appel à une API, aucun stockage, aucune dépendance.
+// À la fin du diagnostic, les réponses sont envoyées à /api/obo-diagnostic et
+// rattachées à l'email renseigné sur la page d'opt-in (stocké dans
+// sessionStorage sous la clé "obo-lead" par site/obo/index.html). Envoi en
+// tâche de fond : un échec réseau n'empêche jamais d'afficher le résultat.
 // Pour modifier le lien de rendez-vous : rechercher « calendly.com » dans le fichier.
+const ANSWER_KEYS=['bien','valeur','credit','priorite','marge'];
+function answersToObject(a){const o={};ANSWER_KEYS.forEach((k,i)=>{if(a[i]!==undefined)o[k]=a[i];});return o;}
+function sendDiagnostic(a,outcomeTitle){
+ let lead={};
+ try{lead=JSON.parse(sessionStorage.getItem('obo-lead')||'{}');}catch{}
+ const payload=Object.assign({},lead,{answers:answersToObject(a),eligible:true,reason:outcomeTitle});
+ fetch('/api/obo-diagnostic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+}
 const questions=[
  {title:'Quel bien envisagez-vous de vendre à la SCI ?',help:'Le guide présente le cas d’un bien locatif.',options:[['rented','Un bien déjà loué'],['future','Un bien que je compte mettre en location'],['home','Ma résidence principale, que je souhaite garder pour y vivre']]},
  {title:'Quelle est sa valeur estimée ?',help:'Un ordre de grandeur suffit. Aucun montant ne valide ou n’exclut à lui seul un OBO.',options:[['low','Moins de 500 000 €'],['mid','De 500 000 € à 1 million €'],['high','Plus de 1 million €']]},
@@ -104,7 +115,7 @@ function render(moveFocus=false){
  if(moveFocus)focusHeading();
 }
 function showResult(){
- const result=getOutcome(answers);quizBody.replaceChildren();quizBody.append(el('span','result-tag','Vos priorités'),el('h3','',result.title));
+ const result=getOutcome(answers);sendDiagnostic(answers,result.title);quizBody.replaceChildren();quizBody.append(el('span','result-tag','Vos priorités'),el('h3','',result.title));
  const list=el('ul','result-list');result.notes.forEach(t=>list.append(el('li','',t)));quizBody.append(list);
  quizBody.append(el('p','quiz-sub','Pour le premier échange : estimation du bien, loyers et charges annuels, capital restant dû, date et prix d’achat, et montant de cash souhaité.'));
  const link=el('a','btn dark','Faire le point avec Rashan');link.href='https://calendly.com/rashan-kadioglu/transmission-obo';link.target='_blank';link.rel='noopener noreferrer';quizBody.append(link);
