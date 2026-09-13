@@ -76,7 +76,7 @@ Usage ensuite :
 ## À finaliser ensuite
 - **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
 - **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
-- **Lien Calendly OBO** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique-clone?back=1&month=2026-09`,
+- **Lien Calendly OBO** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique-clone?back=1`,
   câblé en dur à 3 endroits dans `site/obo/decouvrir/index.html` (lien de secours `<noscript>`, bouton du
   profil de Rashan, et `link.href` dans la fonction `showResult()` du script) — à mettre à jour aux trois
   endroits si l'événement change (rechercher « calendly.com » dans le fichier).
