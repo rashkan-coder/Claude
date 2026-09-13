@@ -15,12 +15,20 @@ export default {
       return handleOboDiagnostic(request, env);
     }
 
+    if (url.pathname === "/api/transmission-diagnostic" && request.method === "POST") {
+      return handleTransmissionDiagnostic(request, env);
+    }
+
     if (url.pathname === "/api/leads-export" && request.method === "GET") {
       return handleLeadsExport(request, env, url);
     }
 
     if (url.pathname === "/api/obo-diagnostic-export" && request.method === "GET") {
       return handleOboDiagnosticExport(request, env, url);
+    }
+
+    if (url.pathname === "/api/transmission-diagnostic-export" && request.method === "GET") {
+      return handleTransmissionDiagnosticExport(request, env, url);
     }
 
     // Everything else (/, /guide/, /confidentialite/, favicon.svg, ...)
@@ -146,6 +154,67 @@ async function handleOboDiagnostic(request, env) {
   return jsonResponse({ ok: true });
 }
 
+// POST /api/transmission-diagnostic — records an answer set from the
+// transmission simulator (site/transmission/simulateur/). Same shape and
+// spirit as handleOboDiagnostic above: best-effort, fire-and-forget from the
+// frontend, no hard requirement on identity fields. This simulator has no
+// eligible/blocked outcome (it always surfaces a set of recommendation
+// cards), so the record only carries the raw answers.
+async function handleTransmissionDiagnostic(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Requête invalide." }, 400);
+  }
+
+  const firstName = String(body?.firstName || "").trim().slice(0, 200);
+  const lastName = String(body?.lastName || "").trim().slice(0, 200);
+  const emailRaw = String(body?.email || "").trim().slice(0, 200);
+  const email = EMAIL_RE.test(emailRaw) ? emailRaw : null;
+  const answers = body?.answers && typeof body.answers === "object" ? body.answers : {};
+
+  if (!env.LEADS_KV) {
+    return jsonResponse(
+      { error: "Configuration serveur manquante (binding KV 'LEADS_KV' absent)." },
+      500
+    );
+  }
+
+  const id = `${Date.now()}-${crypto.randomUUID()}`;
+  const record = {
+    firstName,
+    lastName,
+    email,
+    answers,
+    createdAt: new Date().toISOString(),
+    ip: request.headers.get("CF-Connecting-IP") || null,
+    userAgent: request.headers.get("User-Agent") || null,
+  };
+
+  await env.LEADS_KV.put(`transmission:${id}`, JSON.stringify(record));
+
+  // Best-effort mirror onto the matching lead record (by email) — see the
+  // identical pattern in handleOboDiagnostic above.
+  if (email) {
+    try {
+      const leadId = await env.LEADS_KV.get(`email:${email.toLowerCase()}`);
+      if (leadId) {
+        const leadRaw = await env.LEADS_KV.get(leadId);
+        if (leadRaw) {
+          const lead = JSON.parse(leadRaw);
+          lead.transmissionDiagnostic = { answers, updatedAt: record.createdAt };
+          await env.LEADS_KV.put(leadId, JSON.stringify(lead));
+        }
+      }
+    } catch {
+      // non-fatal: the standalone "transmission:" record above already has the answers
+    }
+  }
+
+  return jsonResponse({ ok: true });
+}
+
 // Shared bearer/token check for both export endpoints below.
 function checkExportAuth(request, env, url) {
   if (!env.EXPORT_TOKEN) {
@@ -202,20 +271,22 @@ async function handleLeadsExport(request, env, url) {
     );
   }
 
-  // "email:" is the secondary index, "obo:" holds the diagnostic answers
-  // (see /api/obo-diagnostic-export) — neither belongs in the leads export.
-  const leads = await listRecords(env.LEADS_KV, { skipPrefixes: ["email:", "obo:"] });
+  // "email:" is the secondary index; "obo:" and "transmission:" hold the
+  // diagnostic/simulator answers (see their dedicated export endpoints) —
+  // none of these belong in the leads export.
+  const leads = await listRecords(env.LEADS_KV, { skipPrefixes: ["email:", "obo:", "transmission:"] });
 
   const format = (url.searchParams.get("format") || "json").toLowerCase();
 
   if (format === "csv") {
-    const columns = ["firstName", "lastName", "email", "consent", "source", "createdAt", "ip", "userAgent", "oboEligible", "oboReason"];
+    const columns = ["firstName", "lastName", "email", "consent", "source", "createdAt", "ip", "userAgent", "oboEligible", "oboReason", "transmissionSimule"];
     const rows = [columns.join(",")];
     for (const lead of leads) {
       const flat = {
         ...lead,
         oboEligible: lead.oboDiagnostic ? lead.oboDiagnostic.eligible : "",
         oboReason: lead.oboDiagnostic ? lead.oboDiagnostic.reason : "",
+        transmissionSimule: lead.transmissionDiagnostic ? "oui" : "",
       };
       rows.push(columns.map((col) => csvEscape(flat[col])).join(","));
     }
@@ -264,6 +335,47 @@ async function handleOboDiagnosticExport(request, env, url) {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": 'attachment; filename="obo-diagnostics.csv"',
+      },
+    });
+  }
+
+  return jsonResponse({ count: diagnostics.length, diagnostics });
+}
+
+// GET /api/transmission-diagnostic-export?token=...&format=json|csv
+// Same auth as /api/leads-export. Lists the answers collected by the
+// transmission simulator (site/transmission/simulateur/), stored under the
+// "transmission:" prefix.
+async function handleTransmissionDiagnosticExport(request, env, url) {
+  const authError = checkExportAuth(request, env, url);
+  if (authError) return authError;
+
+  if (!env.LEADS_KV) {
+    return jsonResponse(
+      { error: "Configuration serveur manquante (binding KV 'LEADS_KV' absent)." },
+      500
+    );
+  }
+
+  const diagnostics = await listRecords(env.LEADS_KV, { prefix: "transmission:" });
+
+  const format = (url.searchParams.get("format") || "json").toLowerCase();
+
+  if (format === "csv") {
+    const columns = ["firstName", "lastName", "email", "answers", "createdAt", "ip", "userAgent"];
+    const rows = [columns.join(",")];
+    for (const d of diagnostics) {
+      rows.push(
+        columns
+          .map((col) => csvEscape(col === "answers" ? JSON.stringify(d.answers || {}) : d[col]))
+          .join(",")
+      );
+    }
+    return new Response(rows.join("\r\n"), {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="transmission-diagnostics.csv"',
       },
     });
   }

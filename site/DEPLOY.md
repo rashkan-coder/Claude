@@ -12,13 +12,19 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 - `site/obo/index.html` — landing page « OBO » (opt-in du guide OBO — même gabarit que ci-dessus)
 - `site/obo/decouvrir/index.html` — page affichée après inscription : mécanisme de l'OBO,
   schémas (liquidités / immobilier) et diagnostic d'éligibilité interactif
+- `site/transmission/index.html` — landing page « Simulateur de transmission » (opt-in — même
+  gabarit que ci-dessus)
+- `site/transmission/simulateur/index.html` — page affichée après inscription : simulateur en
+  6 questions, leviers de transmission, section « Pour aller plus loin » (profil de Rashan) et
+  diagnostic enregistré en fin de parcours
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
 - `site/favicon.svg`
 
-Les deux landing pages (`/` et `/obo/`) partagent le même Worker, la même KV de leads et
-le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV supplémentaire à créer
-pour l'OBO. Si un sous-domaine dédié est préféré à terme (ex. `obo.captain-invest.com`), suivre
-la même méthode manuelle DNS + Route décrite à l'étape 3 ci-dessous.
+Les trois landing pages (`/`, `/obo/` et `/transmission/`) partagent le même Worker, la même KV
+de leads et le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV
+supplémentaire à créer pour chaque nouveau site. Si un sous-domaine dédié est préféré à terme
+(ex. `obo.captain-invest.com`), suivre la même méthode manuelle DNS + Route décrite à l'étape 3
+ci-dessous.
 
 ## KV déjà créée
 - Nom : `captain-invest-guide-leads`
@@ -49,11 +55,15 @@ la même méthode manuelle DNS + Route décrite à l'étape 3 ci-dessous.
    - Remplir le formulaire : succès → redirection vers `/guide/`.
    - Ouvrir `https://guide.captain-invest.com/obo/` : idem, avec redirection vers `/obo/decouvrir/`
      et son diagnostic d'éligibilité.
+   - Ouvrir `https://guide.captain-invest.com/transmission/` : idem, avec redirection vers
+     `/transmission/simulateur/`.
    - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
-## Export des leads (`GET /api/leads-export`) et des diagnostics OBO (`GET /api/obo-diagnostic-export`)
+## Export des leads et des réponses aux diagnostics
 
-Deux endpoints protégés par le même secret partagé (`EXPORT_TOKEN`), à configurer une fois :
+Trois endpoints (`GET /api/leads-export`, `GET /api/obo-diagnostic-export`,
+`GET /api/transmission-diagnostic-export`), tous protégés par le même secret partagé
+(`EXPORT_TOKEN`), à configurer une fois :
 
 1. Dashboard Cloudflare → Worker `captain-invest-guide` → *Settings* → *Variables and Secrets* → *Add*.
    - Type : **Secret** (pas "Text" — pour qu'il ne soit jamais affiché en clair après coup).
@@ -62,12 +72,16 @@ Deux endpoints protégés par le même secret partagé (`EXPORT_TOKEN`), à conf
 2. Save + redeploy si demandé.
 
 Usage ensuite :
-- Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don` ou `obo`) :
+- Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don`,
+  `obo` ou `transmission`) :
   - JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
   - CSV : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
 - Réponses au diagnostic d'éligibilité OBO (`site/obo/decouvrir/`) — éligible ou non, et pourquoi :
   - JSON : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN`
   - CSV : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN&format=csv`
+- Réponses au simulateur de transmission (`site/transmission/simulateur/`) :
+  - JSON : `https://guide.captain-invest.com/api/transmission-diagnostic-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/transmission-diagnostic-export?token=VOTRE_TOKEN&format=csv`
 - Ou via header (plus propre, évite le token dans l'URL/historique du navigateur) :
   `curl -H "Authorization: Bearer VOTRE_TOKEN" https://guide.captain-invest.com/api/leads-export`
 
@@ -80,3 +94,5 @@ Usage ensuite :
   câblé en dur à 3 endroits dans `site/obo/decouvrir/index.html` (lien de secours `<noscript>`, bouton du
   profil de Rashan, et `link.href` dans la fonction `showResult()` du script) — à mettre à jour aux trois
   endroits si l'événement change (rechercher « calendly.com » dans le fichier).
+- **Lien Calendly Transmission** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`,
+  câblé en dur dans `site/transmission/simulateur/index.html` (section « Pour aller plus loin »).
