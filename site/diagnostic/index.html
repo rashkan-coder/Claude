@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Un diagnostic patrimonial interactif en six piliers : sécurité, capacité à investir, crédit, diversification, capitalisation, protection et transmission. Sans compte, sans email obligatoire, calculs faits dans votre navigateur.">
+<meta name="theme-color" content="#411459">
+<link rel="icon" href="/favicon.svg">
+<title>Votre patrimoine, les leviers à activer · Captain Invest</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Captain Invest, accueil">Captain Invest</a>
+  <span class="edition">DIAGNOSTIC · ORGANISATION PATRIMONIALE</span>
+</header>
+
+<main id="top">
+
+  <!-- 1. Accueil ------------------------------------------------------ -->
+  <section class="hero" id="accueil">
+    <div class="resume-banner" id="resume-banner" hidden>
+      <p>Des réponses précédentes ont été retrouvées sur cet appareil.</p>
+      <div class="resume-actions">
+        <button class="button" id="btn-resume" type="button">Reprendre</button>
+        <button class="button secondary" id="btn-resume-clear" type="button">Effacer et recommencer</button>
+      </div>
+    </div>
+    <p class="eyebrow" id="reel-intro"></p>
+    <h1>Votre patrimoine&nbsp;: les leviers que vous n’utilisez pas encore</h1>
+    <p class="lead">Découvrez vos points forts, vos angles morts et les prochaines étapes pour mieux organiser votre patrimoine.</p>
+    <div class="hero-actions">
+      <button class="button" id="cta-start" type="button">Faire mon diagnostic</button>
+      <button class="button secondary" id="cta-pillars" type="button">Découvrir les 6 piliers</button>
+    </div>
+    <p class="promise" id="promise-text"></p>
+  </section>
+
+  <!-- 2. Les 6 piliers -------------------------------------------------- -->
+  <section class="pillars" id="piliers">
+    <div class="section-title">
+      <p class="eyebrow" id="pillars-eyebrow"></p>
+      <h2 id="pillars-title"></h2>
+      <p id="pillars-text"></p>
+    </div>
+    <div class="pillars-grid" id="pillars-grid"></div>
+    <button class="button" id="cta-start-2" type="button">Faire mon diagnostic</button>
+  </section>
+
+  <!-- 3. Questionnaire (contexte puis indicateurs) ----------------------- -->
+  <section class="workspace" id="app" hidden aria-label="Diagnostic patrimonial">
+    <aside class="rail">
+      <p class="eyebrow" id="rail-phase">CONTEXTE</p>
+      <h2 id="rail-title">Votre situation.</h2>
+      <div class="progress"><span id="progress-bar" style="width:0%"></span></div>
+      <p class="rail-count" id="rail-count"></p>
+      <p class="rail-note">Vos réponses restent dans votre navigateur. Vous pouvez revenir en arrière à tout moment.</p>
+      <label class="save-toggle"><input type="checkbox" id="save-locally-toggle"> Sauvegarder mes réponses sur cet appareil</label>
+      <button class="link-button" id="btn-clear" type="button">Effacer mes réponses</button>
+    </aside>
+    <div class="panel">
+      <div id="step-container"></div>
+    </div>
+  </section>
+
+  <!-- 4. Résultats -------------------------------------------------------- -->
+  <section class="results" id="results" hidden aria-label="Résultats du diagnostic"></section>
+
+</main>
+
+<section class="legal" id="legal-mention"></section>
+<p class="legal-mentions">RKG INVEST — SASU au capital de 1&nbsp;000&nbsp;€ · 66 avenue des Champs-Élysées, 75008 Paris · RCS Paris 944 733 161 · Orias n°944733161 · Membre CNCEF PATRIMOINE (CIF/COA).</p>
+<footer>
+  <span>Captain Invest</span>
+  <span>Organiser, avant d’investir plus.</span>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
