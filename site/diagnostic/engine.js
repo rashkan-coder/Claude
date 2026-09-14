@@ -8,22 +8,17 @@ import { RULE_VERSION, AXES, LEVELS } from './content.js';
 import { INDICATORS, indicatorsForBranch } from './indicators.js';
 import {
   isEntrepreneur,
-  hasInvestments,
-  hasDebtOrCreditProject,
-  reserveComputation,
-  reserveScoreFromMonths,
   fieldValue,
   residenceNonFrancaise,
   computeNetWorth,
   computeGrossAllocation,
   computeConcentrationFlags,
-  computeMonthlyCapacity,
   computeIlliquidShare,
 } from './facts.js';
 import { computePriorities, computeLevers } from './rules.js';
 
 export { RULE_VERSION, AXES, LEVELS };
-export { computeNetWorth, computeGrossAllocation, computeConcentrationFlags, computeMonthlyCapacity, computeIlliquidShare, reserveComputation };
+export { computeNetWorth, computeGrossAllocation, computeConcentrationFlags, computeIlliquidShare };
 
 export function deriveBranch(context) {
   return isEntrepreneur(context) ? 'entrepreneur' : 'particulier';
@@ -61,10 +56,6 @@ export function applicabilityMap(context, answers) {
   const branch = deriveBranch(context);
   const map = {};
   for (const ind of indicatorsForBranch(branch === 'entrepreneur')) {
-    if (ind.special === 'reserve') {
-      map[ind.id] = { status: 'applicable' };
-      continue;
-    }
     map[ind.id] = ind.getApplicability(context, answers);
   }
   return map;
@@ -72,23 +63,8 @@ export function applicabilityMap(context, answers) {
 
 // --- Score d'un indicateur ------------------------------------------------
 // Renvoie {kind:'value', value} | {kind:'unknown'} | {kind:'refuse'} | null (non répondu)
-function indicatorAnswer(id, answers) {
-  return answers[id] || null;
-}
-
-function a1Score(context, answers) {
-  const a = answers.a1;
-  if (!a) return null;
-  if (a.kind === 'unknown' || a.kind === 'refuse') return a;
-  if (a.kind === 'computed' || a.kind === 'direct-value') {
-    return { kind: 'value', value: reserveScoreFromMonths(a.months) };
-  }
-  return null;
-}
-
 export function resolvedAnswer(id, context, answers) {
-  if (id === 'a1') return a1Score(context, answers);
-  return indicatorAnswer(id, answers);
+  return answers[id] || null;
 }
 
 // --- Score et couverture par axe -------------------------------------------
@@ -155,40 +131,19 @@ export function overallCoverage(context, answers) {
 
 // --- Cohérence (section 7) --------------------------------------------------
 // Une incohérence non résolue rend indisponible le seul calcul concerné —
-// jamais tout le diagnostic.
+// jamais tout le diagnostic. Réduit aux deux contrôles calculables avec le
+// contexte simplifié (voir GRILLE.md).
 export function detectContradictions(context, answers) {
   const issues = [];
-  const debt = hasDebtOrCreditProject(context, answers);
-  const mensualites = fieldValue(context.mensualitesCredit);
-  if (debt === false && mensualites !== null && mensualites > 0) {
-    issues.push({ id: 'aucune-dette-mais-mensualites', message: 'Vous indiquez n’avoir aucune dette, mais des mensualités de crédit positives sont renseignées.', affects: ['a1'] });
-  }
   const anyAssetPositive = context.patrimoine && Object.values(context.patrimoine).some((f) => f && f.status === 'value' && f.value > 0);
-  const placementsPositifs = context.patrimoine && ((fieldValue(context.patrimoine.placementsFinanciers) || 0) > 0 || (fieldValue(context.patrimoine.crypto) || 0) > 0);
-  if (placementsPositifs && anyAssetPositive === false) {
-    issues.push({ id: 'patrimoine-nul-mais-placements', message: 'Un patrimoine nul est déclaré, alors que des placements positifs sont renseignés.', affects: ['div1', 'div2'] });
-  }
-  const reserve = reserveComputation(context);
-  if (reserve.mode === 'computed' && reserve.months >= 12) {
-    const liquidites = fieldValue(context.patrimoine && context.patrimoine.liquidites);
-    if (liquidites !== null && liquidites <= 0) {
-      issues.push({ id: 'reserve-12-mois-mais-liquidites-nulles', message: 'Une réserve de douze mois est calculée, mais les liquidités déclarées sont nulles ou négatives.', affects: ['a1'] });
-    }
+  const epargnePositive = context.patrimoine && (fieldValue(context.patrimoine.epargnePlacements) || 0) > 0;
+  if (epargnePositive && anyAssetPositive === false) {
+    issues.push({ id: 'patrimoine-nul-mais-placements', message: 'Un patrimoine nul est déclaré, alors qu’une épargne ou des placements positifs sont renseignés.', affects: ['div1'] });
   }
   const parts = context.patrimoine && context.patrimoine.partsEntreprise;
   const entreprise = context.entreprise || {};
   if (deriveBranch(context) === 'entrepreneur' && parts && parts.mode === 'value' && parts.value === 0 && entreprise.activiteStabilite === 'stable') {
     issues.push({ id: 'entreprise-sans-valeur-mais-active', message: 'Votre activité est déclarée stable, mais la valeur de vos parts d’entreprise est renseignée à zéro.', affects: ['p3'] });
-  }
-  const versements = fieldValue(context.versementsInvestissement);
-  const revenus = fieldValue(context.revenusNets);
-  const depenses = fieldValue(context.depensesEssentielles);
-  const mensualitesCredit2 = fieldValue(context.mensualitesCredit);
-  if (versements !== null && revenus !== null && depenses !== null && mensualitesCredit2 !== null) {
-    const surplusAvantVersements = revenus - depenses - mensualitesCredit2;
-    if (versements > surplusAvantVersements) {
-      issues.push({ id: 'versements-superieurs-au-surplus', message: 'Les versements d’investissement habituels déclarés dépassent le surplus mensuel avant investissement, sans financement par une réserve volontaire déclaré.', affects: ['b1', 'b2'] });
-    }
   }
   return issues;
 }
@@ -242,8 +197,6 @@ export function computeResults(context, answers) {
     levers,
     contradictions,
     factuals: {
-      reserve: reserveComputation(context),
-      monthlyCapacity: computeMonthlyCapacity(context),
       netWorth: computeNetWorth(context),
       grossAllocation: computeGrossAllocation(context),
       illiquidShare: computeIlliquidShare(context),

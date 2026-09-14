@@ -109,17 +109,12 @@ export async function buildBilanDoc(context, answers, results) {
   const p = context.patrimoine || {};
   const rows = [
     ['Revenus nets mensuels du foyer', fieldSummary(context.revenusNets)],
-    ['Dépenses essentielles mensuelles', fieldSummary(context.depensesEssentielles)],
-    ['Mensualités de crédits personnels', fieldSummary(context.mensualitesCredit)],
     ['Versements d’investissement habituels', fieldSummary(context.versementsInvestissement)],
     ['Résidence principale', fieldSummary(p.residencePrincipale)],
     ['Immobilier locatif', fieldSummary(p.immobilierLocatif)],
-    ['Liquidités disponibles', fieldSummary(p.liquidites)],
-    ['Placements financiers', fieldSummary(p.placementsFinanciers)],
-    ['Cryptoactifs', fieldSummary(p.crypto)],
+    ['Épargne et placements financiers', fieldSummary(p.epargnePlacements)],
     ['Parts d’entreprise', p.partsEntreprise ? (p.partsEntreprise.mode === 'value' ? fmtEuros(p.partsEntreprise.value) : 'valeur inconnue') : 'non renseigné'],
-    ['Dettes personnelles', fieldSummary(p.dettesPersonnelles)],
-    ['Dettes de véhicules patrimoniaux', fieldSummary(p.dettesVehicules)],
+    ['Dettes personnelles (total)', fieldSummary(p.dettesTotal)],
   ];
   for (const [label, value] of rows) {
     c.paragraph(`${label} : ${value}`, { size: 10, gapAfter: 1.5 });

@@ -1,13 +1,14 @@
 // rules.js — moteur de priorisation explicable (section 8) et carte des
 // leviers (section 9). Pas de génération à la volée : chaque règle est une
 // condition explicite, stockée avec son identifiant, son niveau et son texte.
+// Adapté au référentiel réduit (un indicateur par pilier, deux pour la
+// branche dirigeant/indépendant) — voir GRILLE.md.
 'use strict';
 
 import {
   hasInvestments,
   hasDebtOrCreditProject,
   hasDurableSurplus,
-  hasProFinancingToTest,
   residenceNonFrancaise,
   computeConcentrationFlags,
 } from './facts.js';
@@ -35,18 +36,6 @@ function echeanceOf(context, id) {
 export const PRIORITY_RULES = [
   // Palier 1 — fragilité immédiate déclarée
   {
-    id: 'p1-impayes',
-    tier: 1,
-    topic: 'impayes',
-    axis: 'C',
-    test: ({ answers, context }) => {
-      const debt = hasDebtOrCreditProject(context, answers);
-      return debt === true && scoreOf(answers, 'cred2') === 0;
-    },
-    text: 'Vous déclarez des difficultés actuelles pour tenir vos échéances de crédit.',
-    action: 'Contactez votre créancier et un professionnel pour sécuriser vos échéances avant toute autre décision.',
-  },
-  {
     id: 'p1-depenses-non-couvertes',
     tier: 1,
     topic: 'depenses-non-couvertes',
@@ -60,7 +49,7 @@ export const PRIORITY_RULES = [
     tier: 1,
     topic: 'argent-expose',
     axis: 'E',
-    test: ({ answers }) => scoreOf(answers, 'cap1') === 0 || scoreOf(answers, 'b2') === 0,
+    test: ({ answers }) => scoreOf(answers, 'cap1') === 0,
     text: 'De l’argent nécessaire à des dépenses proches semble exposé à un risque incompatible.',
     action: 'Vérifiez la disponibilité de cet argent avant votre prochaine échéance importante.',
   },
@@ -72,7 +61,7 @@ export const PRIORITY_RULES = [
     topic: 'reserve-faible',
     axis: 'A',
     test: ({ answers }) => scoreOf(answers, 'a1') === 0,
-    text: 'Votre réserve de sécurité couvre moins d’un mois de dépenses essentielles.',
+    text: 'Votre réserve de sécurité couvre moins d’un mois de dépenses.',
     action: 'Priorisez la reconstitution d’une réserve avant tout nouvel investissement.',
   },
   {
@@ -88,15 +77,6 @@ export const PRIORITY_RULES = [
     text: 'Vous avez des dettes ou un projet de crédit, mais une vue incomplète de leur coût réel.',
     action: 'Listez taux, assurances, échéances et capital restant dû de chaque crédit.',
   },
-  {
-    id: 'p2-tresorerie-melangee',
-    tier: 2,
-    topic: 'tresorerie-melangee',
-    axis: 'A',
-    test: ({ answers, context }) => context.branch === 'entrepreneur' && scoreOf(answers, 'p2') !== null && scoreOf(answers, 'p2') <= 1,
-    text: 'La trésorerie de votre activité et votre argent personnel semblent encore mélangés.',
-    action: 'Séparez ce qui revient à l’activité de ce qui vous est réellement disponible.',
-  },
 
   // Palier 3 — cohérence
   {
@@ -108,20 +88,19 @@ export const PRIORITY_RULES = [
       const proche = (context.objectifs || []).some((o) => o.echeance === 'moins-3');
       return proche && scoreOf(answers, 'cap1') !== null && scoreOf(answers, 'cap1') <= 1;
     },
-    text: 'Un objectif à moins de 3 ans ne semble pas encore protégé du risque pris sur vos actifs.',
+    text: 'Votre objectif à moins de 3 ans ne semble pas encore protégé du risque pris sur vos actifs.',
     action: 'Sécurisez la part nécessaire à ce projet avant son échéance.',
   },
   {
-    id: 'p3-concentration-sans-strategie',
+    id: 'p3-concentration',
     tier: 3,
-    topic: 'concentration-sans-strategie',
+    topic: 'concentration',
     axis: 'D',
-    test: ({ answers, context }) => {
-      const s = scoreOf(answers, 'div2');
+    test: ({ context }) => {
       const flags = computeConcentrationFlags(context);
-      return s !== null && s <= 2 && flags.available && flags.flags.length > 0;
+      return flags.available && flags.flags.length > 0;
     },
-    text: 'Une concentration importante de vos actifs n’est pas encore accompagnée d’une stratégie.',
+    text: 'Une concentration importante de vos actifs a été identifiée.',
     action: 'Étudiez si cette concentration reste compatible avec vos objectifs et vos échéances.',
   },
   {
@@ -141,15 +120,6 @@ export const PRIORITY_RULES = [
   },
 
   // Palier 4 — organisation
-  {
-    id: 'p4-fiscalite-non-comparee',
-    tier: 4,
-    topic: 'fiscalite-non-comparee',
-    axis: 'E',
-    test: ({ answers, applicability }) => applicable(applicability, 'cap2') && scoreOf(answers, 'cap2') !== null && scoreOf(answers, 'cap2') <= 1,
-    text: 'Les frais et la fiscalité de vos principaux choix ne semblent pas encore comparés.',
-    action: 'Faites comparer vos options avant votre prochaine décision importante.',
-  },
   {
     id: 'p4-remuneration-non-arbitree',
     tier: 4,
@@ -173,11 +143,7 @@ export const PRIORITY_RULES = [
     tier: 4,
     topic: 'transmission-a-examiner',
     axis: 'F',
-    test: ({ answers }) => {
-      const s1 = scoreOf(answers, 'prot1');
-      const s2 = scoreOf(answers, 'prot2');
-      return (s1 !== null && s1 <= 1) || (s2 !== null && s2 <= 1);
-    },
+    test: ({ answers }) => scoreOf(answers, 'prot1') !== null && scoreOf(answers, 'prot1') <= 1,
     text: 'Le sujet de la protection de vos proches et de la transmission reste peu avancé.',
     action: 'Clarifiez qui recevrait votre patrimoine et qui pourrait agir pour vous en cas d’incapacité.',
   },
@@ -193,7 +159,7 @@ export const PRIORITY_RULES = [
       const viseInvestissement = hasObjectif(context, 'placements') || hasObjectif(context, 'immobilier');
       return inv === false && viseInvestissement;
     },
-    text: 'Vous ne détenez pas encore d’actifs investis, alors que c’est l’un de vos objectifs.',
+    text: 'Vous ne détenez pas encore d’actifs investis, alors que c’est votre objectif déclaré.',
     action: 'Construisez une première capacité d’investissement suivie et régulière.',
   },
 ];
@@ -244,43 +210,43 @@ export function computePriorities({ context, answers, applicability, axesResults
 // {deja_mobilise, a_examiner, a_differer, non_prioritaire, informations_insuffisantes}.
 // Ce sont des conditions de découverte, jamais une conclusion d'éligibilité.
 
-function immobilierCredit({ context, answers, applicability }) {
+function immobilierCredit({ context, answers }) {
   const p = context.patrimoine || {};
   const dejaLocatif = p.immobilierLocatif && p.immobilierLocatif.status === 'value' && p.immobilierLocatif.value > 0;
   const debt = hasDebtOrCreditProject(context, answers);
   const credInconnu = debt === 'unknown';
   const b1 = scoreOf(answers, 'b1');
-  const difficulteActuelle = scoreOf(answers, 'cred2') === 0 || scoreOf(answers, 'cred1') === 0;
+  const cred1 = scoreOf(answers, 'cred1');
 
   if (dejaLocatif) {
-    const aRevoir = (applicable(applicability, 'cred2') && scoreOf(answers, 'cred2') !== null && scoreOf(answers, 'cred2') <= 1) || (scoreOf(answers, 'cred1') !== null && scoreOf(answers, 'cred1') <= 1);
+    const aRevoir = cred1 !== null && cred1 <= 1;
     return {
       status: 'deja_mobilise',
       motif: aRevoir ? 'Immobilier locatif déjà détenu, dont les engagements gagneraient à être revus.' : 'Immobilier locatif déjà détenu.',
-      action: aRevoir ? 'Reprenez le détail des coûts et de la résistance de ce crédit.' : 'Continuez à suivre ce crédit et sa cohérence avec vos autres objectifs.',
+      action: aRevoir ? 'Reprenez le détail des coûts de ce crédit.' : 'Continuez à suivre ce crédit et sa cohérence avec vos autres objectifs.',
     };
-  }
-  if (difficulteActuelle) {
-    return { status: 'a_differer', motif: 'Une fragilité de paiement est déclarée sur vos engagements actuels.', action: 'Stabilisez vos crédits en cours avant d’en envisager un nouveau.' };
   }
   const objectifOk = hasObjectif(context, 'immobilier') || hasObjectif(context, 'residence-principale');
   if (!objectifOk) {
-    return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de vos objectifs déclarés actuellement.', action: 'À reconsidérer si votre projet évolue.' };
+    return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de votre objectif déclaré actuellement.', action: 'À reconsidérer si votre projet évolue.' };
   }
   if (b1 === null || b1 === undefined || credInconnu) {
     return { status: 'informations_insuffisantes', motif: 'Capacité d’investissement ou engagements de crédit non précisés.', action: 'Précisez votre capacité mensuelle et vos engagements actuels.' };
+  }
+  if (b1 === 0) {
+    return { status: 'a_differer', motif: 'Une fragilité budgétaire est déclarée par ailleurs.', action: 'Stabilisez votre budget avant d’envisager un nouveau crédit.' };
   }
   return { status: 'a_examiner', motif: 'Objectif immobilier déclaré, sans fragilité immédiate identifiée.', action: 'Étudiez le budget complet, la trésorerie, les risques et le financement.' };
 }
 
 function investissementFinancier({ context, answers }) {
   const p = context.patrimoine || {};
-  const deja = (p.placementsFinanciers && p.placementsFinanciers.status === 'value' && p.placementsFinanciers.value > 0) || (p.crypto && p.crypto.status === 'value' && p.crypto.value > 0);
+  const deja = p.epargnePlacements && p.epargnePlacements.status === 'value' && p.epargnePlacements.value > 0;
   if (deja) {
-    return { status: 'deja_mobilise', motif: 'Placements financiers déjà détenus.', action: 'Vérifiez que leur rôle reste cohérent avec vos objectifs et échéances.' };
+    return { status: 'deja_mobilise', motif: 'Épargne et placements déjà détenus.', action: 'Vérifiez que leur rôle reste cohérent avec vos objectifs et échéances.' };
   }
   const objectifOk = hasObjectif(context, 'placements') || hasObjectif(context, 'retraite');
-  if (!objectifOk) return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de vos objectifs déclarés actuellement.', action: 'À reconsidérer si votre projet évolue.' };
+  if (!objectifOk) return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de votre objectif déclaré actuellement.', action: 'À reconsidérer si votre projet évolue.' };
   const echeanceProche = echeanceOf(context, 'placements') === 'moins-3';
   if (echeanceProche) {
     return { status: 'a_examiner', motif: 'Objectif financier à échéance proche.', action: 'Étudiez d’abord la disponibilité et la sécurité de cet argent, avant toute allocation chiffrée.' };
@@ -314,46 +280,40 @@ function capitalisationHolding({ context, answers }) {
   return { status: 'a_examiner', motif: 'Excédents durables et projet explicite, sans comparaison des coûts et contraintes.', action: 'Comparez réinvestissement, détention professionnelle et sortie personnelle — sans présumer d’un seuil, d’un taux ou d’une économie.' };
 }
 
-function levierBancairePro({ context, answers }) {
+function levierBancairePro({ context }) {
   if (context.branch !== 'entrepreneur') return null;
-  const need = hasProFinancingToTest(context, answers);
-  if (need === 'unknown') return { status: 'informations_insuffisantes', motif: 'Dette professionnelle, caution ou projet de financement non précisé.', action: 'Précisez vos engagements professionnels actuels ou envisagés.' };
-  if (need === false) return { status: 'non_prioritaire', motif: 'Aucune dette professionnelle ni projet de financement déclaré.', action: 'À reconsidérer si un projet de financement se présente.' };
-  const s = scoreOf(answers, 'p4');
-  if (s !== null && s >= 3) {
-    return { status: 'deja_mobilise', motif: 'Financement déjà testé sur les flux de l’activité.', action: 'Revoyez ce test si l’activité ou les engagements évoluent.' };
-  }
-  return { status: 'a_examiner', motif: 'Dette, caution ou projet de financement déclaré, sans test complet.', action: 'Évaluez les flux prévisionnels et les garanties — ceci n’est pas un accord bancaire.' };
+  const projet = context.entreprise && context.entreprise.projetFinancementEnvisage;
+  if (!projet || projet === 'inconnu') return { status: 'informations_insuffisantes', motif: 'Projet de financement professionnel non précisé.', action: 'Précisez si un financement professionnel est envisagé.' };
+  if (projet === 'non') return { status: 'non_prioritaire', motif: 'Aucun projet de financement professionnel déclaré.', action: 'À reconsidérer si un projet de financement se présente.' };
+  return { status: 'a_examiner', motif: 'Projet de financement professionnel envisagé.', action: 'Évaluez les flux prévisionnels, les garanties et l’effet sur vos engagements personnels — ceci n’est pas un accord bancaire.' };
 }
 
 function fiscaliteFrais({ context, answers, applicability }) {
   if (residenceNonFrancaise(context)) {
     return { status: 'informations_insuffisantes', motif: 'Résidence fiscale hors de France ou incertaine.', action: 'Une analyse transfrontalière dédiée est nécessaire ; les pistes fiscales françaises ne sont pas présentées ici comme applicables.' };
   }
-  if (!applicable(applicability, 'cap2')) {
-    return { status: 'non_prioritaire', motif: 'Aucun investissement ni décision engagée à comparer pour l’instant.', action: 'À reconsidérer dès votre première décision d’investissement.' };
+  const inv = hasInvestments(context);
+  if (inv === false) {
+    return { status: 'non_prioritaire', motif: 'Aucun investissement à comparer pour l’instant.', action: 'À reconsidérer dès votre première décision d’investissement.' };
   }
-  const s = scoreOf(answers, 'cap2');
-  if (s === null) return { status: 'informations_insuffisantes', motif: 'Comparaison des frais et de la fiscalité non précisée.', action: 'Précisez si vos derniers choix ont été comparés.' };
-  if (s >= 3) return { status: 'deja_mobilise', motif: 'Comparaison des frais et de la fiscalité déjà réalisée.', action: 'Actualisez cette comparaison à chaque changement notable.' };
-  return { status: 'a_examiner', motif: 'Frais et fiscalité de vos choix pas encore comparés.', action: 'Faites comparer vos options avant votre prochaine décision importante.' };
+  if (inv === 'unknown') {
+    return { status: 'informations_insuffisantes', motif: 'Composition de votre patrimoine partiellement connue.', action: 'Précisez vos actifs pour affiner ce repère.' };
+  }
+  return { status: 'a_examiner', motif: 'Des actifs sont investis : leurs frais et leur fiscalité méritent d’être comparés.', action: 'Faites comparer vos options avant votre prochaine décision importante.' };
 }
 
 function transmission({ context, answers }) {
   const s1 = scoreOf(answers, 'prot1');
-  const s2 = scoreOf(answers, 'prot2');
-  if (s1 === null && s2 === null) {
+  if (s1 === null) {
     return { status: 'informations_insuffisantes', motif: 'Sujet non encore précisé.', action: 'Indiquez si vous savez qui recevrait votre patrimoine et qui pourrait agir pour vous.' };
   }
-  const trigger = context.dependents === true || hasObjectif(context, 'transmission') || (context.branch === 'entrepreneur' && hasObjectif(context, 'entreprise'));
-  const bas = (s1 !== null && s1 <= 1) || (s2 !== null && s2 <= 1);
-  const haut = (s1 === null || s1 >= 3) && (s2 === null || s2 >= 3) && (s1 !== null || s2 !== null);
+  const trigger = hasObjectif(context, 'transmission') || (context.branch === 'entrepreneur' && hasObjectif(context, 'entreprise'));
   const nonFr = residenceNonFrancaise(context);
   const outilsFr = nonFr ? '' : ' Donation, démembrement ou organisation sociétaire sont des outils à examiner selon votre situation.';
-  if (trigger && bas) {
+  if (trigger && s1 <= 1) {
     return { status: 'a_examiner', motif: 'Vos souhaits ne semblent pas encore traduits en mesures concrètes.', action: `Clarifiez qui doit recevoir quoi, et dans quelles conditions.${outilsFr}` };
   }
-  if (haut) {
+  if (s1 >= 3) {
     return { status: 'deja_mobilise', motif: 'Organisation de la protection et de la transmission déjà avancée.', action: 'Revoyez cette organisation après chaque évolution familiale ou professionnelle importante.' };
   }
   return { status: 'non_prioritaire', motif: 'Aucune urgence identifiée à ce stade.', action: `Une cartographie de vos souhaits reste possible, sans urgence établie.${outilsFr}` };

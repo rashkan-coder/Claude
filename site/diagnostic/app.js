@@ -87,15 +87,6 @@ function radioGroup(name, options, selected) {
     .join('')}</div>`;
 }
 
-function checkboxGroup(name, options, selectedValues) {
-  return `<div class="choices">${options
-    .map(
-      (o) =>
-        `<label class="choice"><input type="checkbox" name="${name}" value="${o.value}" ${selectedValues.includes(o.value) ? 'checked' : ''}><span>${o.label}</span></label>`
-    )
-    .join('')}</div>`;
-}
-
 function selectHTML(id, options, selected, placeholder) {
   return `<select id="${id}">${placeholder ? `<option value="" ${!selected ? 'selected' : ''}>${placeholder}</option>` : ''}${options
     .map((o) => `<option value="${o.value}" ${selected === o.value ? 'selected' : ''}>${o.label}</option>`)
@@ -179,32 +170,16 @@ function renderContextStep(id, container) {
     container.innerHTML = `
       <div class="step-top"><span>VOTRE FOYER</span><span></span></div>
       <h2 tabindex="-1">Votre foyer</h2>
-      <p class="helper">Ces informations servent à contextualiser vos résultats, jamais à calculer des droits de succession.</p>
       <div class="linked-field"><p class="q">Votre tranche d'âge</p>${radioGroup('ageBracket', C.AGE_BRACKETS, ctx.ageBracket)}</div>
       <div class="linked-field"><p class="q">Votre situation familiale</p>${radioGroup('foyerSituation', C.FOYER_OPTIONS, ctx.foyerSituation)}</div>
-      <div class="linked-field"><p class="q">Avez-vous des personnes financièrement dépendantes de vous&nbsp;?</p>${radioGroup('dependents', C.OUI_NON_INCONNU.filter((o) => o.value !== 'inconnu'), ctx.dependents === true ? 'oui' : ctx.dependents === false ? 'non' : null)}</div>
-      <div class="linked-field" id="regime-field" ${ctx.foyerSituation === 'mariage' ? '' : 'hidden'}><p class="q">Votre régime matrimonial légal</p>${radioGroup('regime', C.REGIME_OPTIONS, ctx.regime)}</div>
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
-    container.querySelectorAll('input[name="foyerSituation"]').forEach((r) =>
-      r.addEventListener('change', () => {
-        container.querySelector('#regime-field').hidden = radioValue('foyerSituation') !== 'mariage';
-      })
-    );
     return () => {
       const age = radioValue('ageBracket');
       const foyer = radioValue('foyerSituation');
-      const dep = radioValue('dependents');
-      if (!age || !foyer || !dep) return { error: 'Merci de répondre à chaque question.' };
-      let regime = null;
-      if (foyer === 'mariage') {
-        regime = radioValue('regime');
-        if (!regime) return { error: 'Merci d’indiquer votre régime matrimonial (ou « je ne sais pas »).' };
-      }
+      if (!age || !foyer) return { error: 'Merci de répondre à chaque question.' };
       ctx.ageBracket = age;
       ctx.foyerSituation = foyer;
-      ctx.dependents = dep === 'oui';
-      ctx.regime = regime;
       return { error: null };
     };
   }
@@ -226,58 +201,30 @@ function renderContextStep(id, container) {
   }
 
   if (id === 'objectifs') {
-    const selected = (ctx.objectifs || []).map((o) => o.id);
+    const selected = (ctx.objectifs || []).map((o) => o.id)[0] || null;
     container.innerHTML = `
-      <div class="step-top"><span>VOS OBJECTIFS</span><span></span></div>
-      <h2 tabindex="-1">Quels sont vos objectifs&nbsp;? <span style="font-size:15px;color:var(--muted);font-weight:400">(2 maximum)</span></h2>
-      <p class="helper">Choisissez jusqu'à deux priorités. Pour chacune, indiquez l'échéance.</p>
-      ${checkboxGroup('objectif', C.OBJECTIF_OPTIONS, selected)}
-      <div id="echeances"></div>
-      <div id="priorite-field"></div>
+      <div class="step-top"><span>VOTRE OBJECTIF</span><span></span></div>
+      <h2 tabindex="-1">Quel est votre objectif principal en ce moment&nbsp;?</h2>
+      ${radioGroup('objectif', C.OBJECTIF_OPTIONS, selected)}
+      <div id="echeance-field"></div>
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
-    function renderEcheances() {
-      const picked = [...container.querySelectorAll('input[name="objectif"]:checked')].map((i) => i.value);
-      const echWrap = container.querySelector('#echeances');
-      echWrap.innerHTML = picked
-        .map((id2) => {
-          const label = C.OBJECTIF_OPTIONS.find((o) => o.value === id2).label;
-          const current = (ctx.objectifs || []).find((o) => o.id === id2);
-          return `<div class="linked-field"><p class="q">Échéance pour « ${label} »</p>${selectHTML(`echeance-${id2}`, C.ECHEANCE_OPTIONS, current ? current.echeance : null, 'Choisir…')}</div>`;
-        })
-        .join('');
-      const prioWrap = container.querySelector('#priorite-field');
-      if (picked.length === 2) {
-        prioWrap.innerHTML = `<div class="linked-field"><p class="q">Laquelle est prioritaire entre les deux&nbsp;?</p>${radioGroup(
-          'objectifPriorite',
-          picked.map((id2) => ({ value: id2, label: C.OBJECTIF_OPTIONS.find((o) => o.value === id2).label })),
-          ctx.objectifPrioritaireId
-        )}</div>`;
-      } else {
-        prioWrap.innerHTML = '';
-      }
+    function renderEcheance() {
+      const picked = radioValue('objectif');
+      const wrap = container.querySelector('#echeance-field');
+      if (!picked) { wrap.innerHTML = ''; return; }
+      const current = (ctx.objectifs || []).find((o) => o.id === picked);
+      wrap.innerHTML = `<div class="linked-field"><p class="q">À quelle échéance&nbsp;?</p>${selectHTML('echeance-objectif', C.ECHEANCE_OPTIONS, current ? current.echeance : null, 'Choisir…')}</div>`;
     }
-    renderEcheances();
-    container.querySelectorAll('input[name="objectif"]').forEach((cb) =>
-      cb.addEventListener('change', () => {
-        const checked = container.querySelectorAll('input[name="objectif"]:checked');
-        if (checked.length > 2) cb.checked = false;
-        renderEcheances();
-      })
-    );
+    renderEcheance();
+    container.querySelectorAll('input[name="objectif"]').forEach((r) => r.addEventListener('change', renderEcheance));
     return () => {
-      const picked = [...container.querySelectorAll('input[name="objectif"]:checked')].map((i) => i.value);
-      if (picked.length === 0) return { error: 'Choisissez au moins un objectif.' };
-      const objectifs = [];
-      for (const id2 of picked) {
-        const ech = document.getElementById(`echeance-${id2}`).value;
-        if (!ech) return { error: 'Merci d’indiquer une échéance pour chaque objectif choisi.' };
-        objectifs.push({ id: id2, echeance: ech });
-      }
-      let prioritaire = picked.length === 1 ? picked[0] : radioValue('objectifPriorite');
-      if (picked.length === 2 && !prioritaire) return { error: 'Merci d’indiquer laquelle des deux priorités passe avant l’autre.' };
-      ctx.objectifs = objectifs;
-      ctx.objectifPrioritaireId = prioritaire;
+      const picked = radioValue('objectif');
+      if (!picked) return { error: 'Choisissez un objectif.' };
+      const ech = document.getElementById('echeance-objectif').value;
+      if (!ech) return { error: 'Merci d’indiquer une échéance.' };
+      ctx.objectifs = [{ id: picked, echeance: ech }];
+      ctx.objectifPrioritaireId = picked;
       return { error: null };
     };
   }
@@ -286,27 +233,21 @@ function renderContextStep(id, container) {
     container.innerHTML = `
       <div class="step-top"><span>VOTRE CAPACITÉ FINANCIÈRE</span><span></span></div>
       <h2 tabindex="-1">Votre capacité financière</h2>
-      <p class="helper">Montants approximatifs acceptés, y compris zéro. Les dépenses essentielles excluent l'épargne et les mensualités de crédit, comptées séparément, pour éviter de les compter deux fois.</p>
+      <p class="helper">Montants approximatifs acceptés, y compris zéro.</p>
       ${amountFieldHTML('revenusNets', 'Revenus nets mensuels du foyer, après impôt', ctx.revenusNets)}
-      ${amountFieldHTML('depensesEssentielles', 'Dépenses essentielles mensuelles (hors épargne et crédits)', ctx.depensesEssentielles)}
-      ${amountFieldHTML('mensualitesCredit', 'Mensualités de crédits personnels', ctx.mensualitesCredit)}
-      ${amountFieldHTML('versementsInvestissement', 'Versements d’investissement habituels', ctx.versementsInvestissement)}
-      <div class="linked-field"><p class="q">Vos revenus sont-ils…</p>${radioGroup('stabiliteRevenus', [...C.STABILITE_REVENUS_OPTIONS, { value: 'inconnu', label: C.DONT_KNOW_LABEL }], ctx.stabiliteRevenus)}</div>
+      ${amountFieldHTML('versementsInvestissement', 'Versements d’investissement habituels par mois', ctx.versementsInvestissement)}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
     return () => {
-      const fields = ['revenusNets', 'depensesEssentielles', 'mensualitesCredit', 'versementsInvestissement'];
+      const fields = ['revenusNets', 'versementsInvestissement'];
       const results = {};
       for (const f of fields) {
         const r = readAmountField(f);
         if (r.error) return { error: r.error };
         results[f] = r.field;
       }
-      const stabilite = radioValue('stabiliteRevenus');
-      if (!stabilite) return { error: 'Choisissez une réponse.' };
       Object.assign(ctx, results);
-      ctx.stabiliteRevenus = stabilite;
       return { error: null };
     };
   }
@@ -317,32 +258,21 @@ function renderContextStep(id, container) {
     container.innerHTML = `
       <div class="step-top"><span>VOTRE PATRIMOINE</span><span></span></div>
       <h2 tabindex="-1">Votre patrimoine</h2>
-      <p class="helper">Valeurs brutes approximatives, par catégorie. Un patrimoine nul est accepté.</p>
+      <p class="helper">Valeurs brutes approximatives. Un patrimoine nul est accepté.</p>
       ${amountFieldHTML('residencePrincipale', 'Résidence principale')}
       ${amountFieldHTML('immobilierLocatif', 'Immobilier locatif')}
-      ${amountFieldHTML('liquidites', 'Liquidités disponibles')}
-      ${amountFieldHTML('placementsFinanciers', 'Placements financiers (hors cryptoactifs)')}
-      ${amountFieldHTML('crypto', 'Cryptoactifs')}
+      ${amountFieldHTML('epargnePlacements', 'Épargne et placements financiers (comptes, livrets, assurance-vie, bourse, crypto…)')}
       <div class="field-group" data-field="partsEntreprise" data-meta="${parts.mode === 'unknown' ? 'unknown' : ''}">
-        <label style="display:block;font-weight:700;color:var(--p);font-size:14px;margin-bottom:6px">Parts d’entreprise (valeur estimée des titres, déjà nette de la dette de l’entreprise)</label>
+        <label style="display:block;font-weight:700;color:var(--p);font-size:14px;margin-bottom:6px">Parts d’entreprise (valeur estimée des titres)</label>
         <div class="field"><input type="number" min="0" id="partsEntreprise" placeholder="Ex. 150000" value="${parts.mode === 'value' ? parts.value : ''}" ${parts.mode === 'unknown' ? 'disabled' : ''}><span>€</span></div>
         <div class="meta-row"><button type="button" class="meta-btn ${parts.mode === 'unknown' ? 'active' : ''}" data-role="unknown" data-target="partsEntreprise">Valeur inconnue</button></div>
       </div>
-      ${amountFieldHTML('autresActifs', 'Autres actifs')}
-      ${amountFieldHTML('dettesPersonnelles', 'Dettes personnelles')}
-      ${amountFieldHTML('dettesVehicules', 'Dettes de véhicules patrimoniaux (non déjà intégrées ci-dessus)')}
-      <div class="linked-field"><p class="q">Une partie de votre patrimoine est-elle détenue via une société patrimoniale (SCI, holding…)&nbsp;?</p>${radioGroup('viaSociete', C.OUI_NON_INCONNU, p.viaSociete)}</div>
-      <div class="linked-field" id="via-mode-field" ${p.viaSociete === 'oui' ? '' : 'hidden'}><p class="q">Pour cette part, préférez-vous renseigner…</p>${radioGroup('viaSocieteMode', [{ value: 'titres', label: 'La valeur des titres de la société' }, { value: 'quote-part', label: 'Le détail des actifs et dettes sous-jacents' }], p.viaSocieteMode)}</div>
+      ${amountFieldHTML('dettesTotal', 'Dettes personnelles (total)')}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
-    container.querySelectorAll('input[name="viaSociete"]').forEach((r) =>
-      r.addEventListener('change', () => {
-        container.querySelector('#via-mode-field').hidden = radioValue('viaSociete') !== 'oui';
-      })
-    );
     return () => {
-      const fields = ['residencePrincipale', 'immobilierLocatif', 'liquidites', 'placementsFinanciers', 'crypto', 'autresActifs', 'dettesPersonnelles', 'dettesVehicules'];
+      const fields = ['residencePrincipale', 'immobilierLocatif', 'epargnePlacements', 'dettesTotal'];
       const results = {};
       for (const f of fields) {
         const r = readAmountField(f);
@@ -359,14 +289,7 @@ function renderContextStep(id, container) {
         if (!v.valid) return { error: v.error };
         partsResult = { mode: 'value', value: v.value };
       }
-      const viaSociete = radioValue('viaSociete');
-      if (!viaSociete) return { error: 'Choisissez une réponse.' };
-      let viaSocieteMode = null;
-      if (viaSociete === 'oui') {
-        viaSocieteMode = radioValue('viaSocieteMode');
-        if (!viaSocieteMode) return { error: 'Merci de préciser comment vous souhaitez renseigner cette part.' };
-      }
-      ctx.patrimoine = { ...results, partsEntreprise: partsResult, viaSociete, viaSocieteMode };
+      ctx.patrimoine = { ...results, partsEntreprise: partsResult };
       state.answers = E.pruneAnswers(ctx, state.answers);
       return { error: null };
     };
@@ -377,21 +300,19 @@ function renderContextStep(id, container) {
     container.innerHTML = `
       <div class="step-top"><span>VOTRE ACTIVITÉ</span><span></span></div>
       <h2 tabindex="-1">Votre activité professionnelle</h2>
-      <div class="linked-field"><p class="q">Statut juridique</p>${radioGroup('statutJuridique', C.STATUT_JURIDIQUE_OPTIONS, ent.statutJuridique)}</div>
       <div class="linked-field"><p class="q">L’activité est…</p>${radioGroup('activiteStabilite', C.ACTIVITE_STABILITE_OPTIONS, ent.activiteStabilite)}</div>
       <div class="linked-field"><p class="q">Part des revenus du foyer dépendant de cette activité</p>${radioGroup('partRevenusDependante', C.PART_REVENUS_OPTIONS, ent.partRevenusDependante)}</div>
       <div class="linked-field"><p class="q">Avez-vous un projet professionnel avec financement envisagé&nbsp;?</p>${radioGroup('projetFinancementEnvisage', C.OUI_NON_INCONNU, ent.projetFinancementEnvisage)}</div>
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     return () => {
-      const statutJuridique = radioValue('statutJuridique');
       const activiteStabilite = radioValue('activiteStabilite');
       const partRevenusDependante = radioValue('partRevenusDependante');
       const projetFinancementEnvisage = radioValue('projetFinancementEnvisage');
-      if (!statutJuridique || !activiteStabilite || !partRevenusDependante || !projetFinancementEnvisage) {
+      if (!activiteStabilite || !partRevenusDependante || !projetFinancementEnvisage) {
         return { error: 'Merci de répondre à chaque question.' };
       }
-      ctx.entreprise = { statutJuridique, activiteStabilite, partRevenusDependante, projetFinancementEnvisage };
+      ctx.entreprise = { activiteStabilite, partRevenusDependante, projetFinancementEnvisage };
       return { error: null };
     };
   }
@@ -410,9 +331,7 @@ function renderIndicatorStep(id, container) {
   const answers = state.answers;
   const ind = getIndicator(id);
 
-  if (id === 'a1') return renderA1(container);
-
-  // Indicateurs avec une "porte" liée (creditGate, p3Gate, p4Gate)
+  // Indicateurs avec une "porte" liée (creditGate, p3Gate)
   if (ind.gate) return renderGatedIndicator(ind, container);
 
   const app = ind.getApplicability(ctx, answers);
@@ -459,62 +378,6 @@ function axisLabel(axisId) {
 function INDICATOR_HELPER(id) {
   const t = C.INDICATOR_TEXTS[id];
   return t && t.helper ? t.helper : null;
-}
-
-function renderA1(container) {
-  const ctx = state.context;
-  const answers = state.answers;
-  const reserve = E.reserveComputation(ctx);
-  const current = answers.a1;
-  if (reserve.mode === 'computed') {
-    const months = Math.round(reserve.months * 10) / 10;
-    container.innerHTML = `
-      <div class="step-top"><span>SÉCURITÉ FINANCIÈRE</span><span></span></div>
-      <h2 tabindex="-1">${C.INDICATOR_TEXTS.a1.question}</h2>
-      <p class="helper">${C.INDICATOR_TEXTS.a1.helper}</p>
-      <div class="info-note">D’après vos réponses précédentes, votre réserve couvrirait environ <strong>${months} mois</strong> de dépenses essentielles et de crédits. (Liquidités disponibles ÷ (dépenses essentielles + mensualités personnelles).)</div>
-      ${radioGroup('a1mode', [{ value: 'confirm', label: 'Cela correspond à ma situation' }, { value: 'adjust', label: 'Je préfère ajuster cette estimation' }], current && current.kind !== 'unknown' && current.kind !== 'refuse' ? 'confirm' : null)}
-      <div id="a1-adjust" hidden>${amountFieldHTML('a1-months', 'Votre estimation, en mois de dépenses couvertes', current && current.kind === 'direct-value' ? { status: 'value', value: current.months } : null, { placeholder: 'Ex. 4' })}</div>
-      <p class="error" id="error" role="alert"></p>
-      ${navHTML(true)}`;
-    wireMetaButtons(container);
-    container.querySelectorAll('input[name="a1mode"]').forEach((r) =>
-      r.addEventListener('change', () => {
-        container.querySelector('#a1-adjust').hidden = radioValue('a1mode') !== 'adjust';
-      })
-    );
-    return () => {
-      const mode = radioValue('a1mode');
-      if (!mode) return { error: 'Choisissez une réponse.' };
-      if (mode === 'confirm') {
-        answers.a1 = { kind: 'computed', months: reserve.months };
-        return { error: null };
-      }
-      const r = readAmountField('a1-months', { allowZero: true });
-      if (r.error) return { error: r.error };
-      if (r.field.status === 'unknown') { answers.a1 = { kind: 'unknown' }; return { error: null }; }
-      if (r.field.status === 'refuse') { answers.a1 = { kind: 'refuse' }; return { error: null }; }
-      answers.a1 = { kind: 'direct-value', months: r.field.value };
-      return { error: null };
-    };
-  }
-  // Mode direct : pas assez de données de contexte pour calculer automatiquement.
-  container.innerHTML = `
-    <div class="step-top"><span>SÉCURITÉ FINANCIÈRE</span><span></span></div>
-    <h2 tabindex="-1">${C.INDICATOR_TEXTS.a1.directQuestion}</h2>
-    <p class="helper">${C.INDICATOR_TEXTS.a1.helper} Exprimez votre réserve directement en mois, si vous la connaissez.</p>
-    ${amountFieldHTML('a1-months', 'Nombre de mois couverts', current && current.kind === 'direct-value' ? { status: 'value', value: current.months } : current && (current.kind === 'unknown' || current.kind === 'refuse') ? { status: current.kind } : null, { placeholder: 'Ex. 4' })}
-    <p class="error" id="error" role="alert"></p>
-    ${navHTML(true)}`;
-  wireMetaButtons(container);
-  return () => {
-    const r = readAmountField('a1-months', { allowZero: true });
-    if (r.error) return { error: r.error };
-    if (r.field.status === 'unknown') { answers.a1 = { kind: 'unknown' }; return { error: null }; }
-    if (r.field.status === 'refuse') { answers.a1 = { kind: 'refuse' }; return { error: null }; }
-    answers.a1 = { kind: 'direct-value', months: r.field.value };
-    return { error: null };
-  };
 }
 
 function renderGatedIndicator(ind, container) {
@@ -654,7 +517,7 @@ function axisExplain(axisId, axisResult, context, answers) {
   for (const ind of inds) {
     const ans = E.resolvedAnswer(ind.id, context, answers);
     if (ans && ans.kind === 'value') {
-      const opts = ind.id === 'a1' ? null : ind.getOptions ? ind.getOptions(context, answers) : null;
+      const opts = ind.getOptions ? ind.getOptions(context, answers) : null;
       const label = opts ? (opts.find((o) => o.value === ans.value) || {}).label : null;
       if (label) lines.push(label);
     }
@@ -807,6 +670,7 @@ function showResults() {
 // Amorçage
 // ---------------------------------------------------------------------
 function fillStaticText() {
+  document.getElementById('short-disclaimer').textContent = C.SHORT_DISCLAIMER;
   document.getElementById('promise-text').textContent = C.HERO.promise;
   document.getElementById('reel-intro').textContent = C.REEL_INTROS[new URLSearchParams(location.search).get('theme')] || '';
   document.getElementById('pillars-eyebrow').textContent = C.PILLARS_INTRO.eyebrow;

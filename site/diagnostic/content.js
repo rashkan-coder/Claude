@@ -2,7 +2,7 @@
 // jamais un calcul ; seuls indicators.js et rules.js portent la logique de score.
 'use strict';
 
-export const RULE_VERSION = 'diagnostic-patrimoine-v1.0.0';
+export const RULE_VERSION = 'diagnostic-patrimoine-v1.1.0';
 export const RULE_DATE = '2026-09-14';
 
 export const AXES = [
@@ -35,12 +35,17 @@ export const REEL_INTROS = {
 };
 
 export const HERO = {
-  title: 'Votre patrimoine : les leviers que vous n’utilisez pas encore',
+  title: 'Votre patrimoine : les leviers que vous n’utilisez pas encore',
   subtitle: 'Découvrez vos points forts, vos angles morts et les prochaines étapes pour mieux organiser votre patrimoine.',
   ctaPrimary: 'Faire mon diagnostic',
   ctaSecondary: 'Découvrir les 6 piliers',
   promise: 'Cet outil vous aide à repérer les sujets à étudier et leur ordre de priorité. Il ne promet ni enrichissement, ni rendement, ni économie d’impôt chiffrée, ni validation d’un montage.',
 };
+
+// Disclaimer court, affiché bien en évidence (accueil + questionnaire), en
+// plus de la mention légale complète (LEGAL_MENTION) affichée sous les
+// résultats.
+export const SHORT_DISCLAIMER = 'Ce diagnostic est une estimation pédagogique à partir de vos réponses — quelques minutes suffisent. Aucun engagement de votre part, aucun résultat garanti.';
 
 export const PILLARS_INTRO = {
   eyebrow: 'LES 6 PILIERS DE VOTRE ORGANISATION PATRIMONIALE',
@@ -49,15 +54,15 @@ export const PILLARS_INTRO = {
 };
 
 export const PILLARS = [
-  { axis: 'A', title: 'Sécurité financière', text: 'Une réserve disponible en cas de coup dur, et une protection du foyer si un revenu s’arrête.' },
-  { axis: 'B', title: 'Capacité à investir', text: 'Savoir ce que vous pouvez réellement investir, et selon quelle règle vous décidez de le faire.' },
-  { axis: 'C', title: 'Maîtrise du crédit', text: 'Une vue complète du coût de vos engagements, et leur résistance à un imprévu.' },
-  { axis: 'D', title: 'Diversification', text: 'Savoir à quoi vous êtes réellement exposé, et ce que vous faites de vos concentrations.' },
-  { axis: 'E', title: 'Capitalisation et efficacité', text: 'Donner un rôle à chaque actif, et comparer frais et fiscalité avant de décider.' },
-  { axis: 'F', title: 'Protection et transmission', text: 'Savoir qui recevrait quoi, qui pourrait agir pour vous, et si les mesures nécessaires ont été prises.' },
+  { axis: 'A', title: 'Sécurité financière', text: 'Une réserve disponible en cas de coup dur.' },
+  { axis: 'B', title: 'Capacité à investir', text: 'Savoir ce que vous pouvez réellement investir.' },
+  { axis: 'C', title: 'Maîtrise du crédit', text: 'Une vue claire du coût de vos engagements.' },
+  { axis: 'D', title: 'Diversification', text: 'Savoir à quoi vous êtes réellement exposé.' },
+  { axis: 'E', title: 'Capitalisation et efficacité', text: 'Donner un rôle à chaque actif.' },
+  { axis: 'F', title: 'Protection et transmission', text: 'Savoir qui recevrait quoi, et qui pourrait agir pour vous.' },
 ];
 
-// --- Écrans de contexte (non notés) ---------------------------------------
+// --- Écrans de contexte (non notés) — volontairement réduits au minimum ---
 
 export const SITUATION_OPTIONS = [
   { value: 'salarie', label: 'Salarié(e)' },
@@ -82,14 +87,6 @@ export const FOYER_OPTIONS = [
   { value: 'mariage', label: 'Marié(e)' },
 ];
 
-export const REGIME_OPTIONS = [
-  { value: 'communaute-acquets', label: 'Communauté réduite aux acquêts' },
-  { value: 'separation-biens', label: 'Séparation de biens' },
-  { value: 'communaute-universelle', label: 'Communauté universelle' },
-  { value: 'autre', label: 'Autre régime' },
-  { value: 'inconnu', label: 'Je ne sais pas' },
-];
-
 export const RESIDENCE_FISCALE_OPTIONS = [
   { value: 'france', label: 'France' },
   { value: 'autre', label: 'Un autre pays' },
@@ -112,18 +109,6 @@ export const ECHEANCE_OPTIONS = [
   { value: '3-8', label: '3 à 8 ans' },
   { value: 'plus-8', label: 'Plus de 8 ans' },
   { value: 'inconnue', label: 'Échéance inconnue' },
-];
-
-export const STABILITE_REVENUS_OPTIONS = [
-  { value: 'stable', label: 'Stables' },
-  { value: 'irregulier', label: 'Irréguliers' },
-];
-
-export const STATUT_JURIDIQUE_OPTIONS = [
-  { value: 'ei-micro', label: 'Entreprise individuelle / micro-entreprise' },
-  { value: 'societe-ir', label: 'Société à l’impôt sur le revenu' },
-  { value: 'societe-is', label: 'Société à l’impôt sur les sociétés' },
-  { value: 'inconnu', label: 'Je ne sais pas' },
 ];
 
 export const ACTIVITE_STABILITE_OPTIONS = [
@@ -151,33 +136,30 @@ export const CONTEXT_LABELS = {
   situation: 'Votre situation',
   foyer: 'Votre foyer',
   residenceFiscale: 'Votre résidence fiscale',
-  objectifs: 'Vos objectifs',
+  objectifs: 'Votre objectif',
   capacite: 'Votre capacité financière',
   patrimoine: 'Votre patrimoine',
   entreprise: 'Votre activité',
 };
 
 // --- Textes des indicateurs notés (voir indicators.js pour la logique) ---
+// Réduits à un indicateur par pilier (deux pour la branche dirigeant/
+// indépendant) pour raccourcir le parcours.
 
 export const INDICATOR_TEXTS = {
   a1: {
-    question: 'Si vos revenus s’arrêtaient, combien de temps votre argent immédiatement disponible couvrirait-il vos dépenses essentielles et vos crédits ?',
-    helper: 'On exclut la trésorerie nécessaire à l’entreprise, les fonds bloqués et l’argent déjà réservé aux impôts ou à des projets engagés.',
-    directQuestion: 'Combien de mois de dépenses essentielles votre réserve disponible couvrirait-elle ?',
-  },
-  a2: {
-    question: 'En cas d’arrêt de travail, de décès ou de perte durable d’un revenu, savez-vous comment le foyer serait protégé ?',
-    helper: 'Comptent les couvertures publiques ou employeur, les ressources du foyer, et une décision motivée de ne pas s’assurer.',
+    question: 'Si vos revenus s’arrêtaient, combien de temps votre épargne immédiatement disponible couvrirait-elle vos dépenses et vos crédits ?',
+    helper: 'Une estimation suffit — on exclut la trésorerie nécessaire à l’entreprise et l’argent déjà réservé à un projet.',
     options: [
-      { value: 0, label: 'Je n’ai jamais vérifié' },
-      { value: 1, label: 'Je connais mes couvertures, mais je n’ai pas évalué mes besoins' },
-      { value: 2, label: 'J’ai évalué mes besoins, avec des lacunes identifiées' },
-      { value: 3, label: 'J’ai comparé besoins et couvertures, un plan est en cours' },
-      { value: 4, label: 'Mon organisation est revue et cohérente avec ma situation' },
+      { value: 0, label: 'Moins d’un mois' },
+      { value: 1, label: '1 à 3 mois' },
+      { value: 2, label: '3 à 6 mois' },
+      { value: 3, label: '6 à 12 mois' },
+      { value: 4, label: 'Au moins 12 mois' },
     ],
   },
   b1: {
-    question: 'Savez-vous ce que vous pouvez investir après vos dépenses, crédits, impôts et projets proches ?',
+    question: 'Savez-vous ce que vous pouvez investir après vos dépenses, crédits, impôts et projets proches ?',
     helper: null,
     options: [
       { value: 0, label: 'Non, et mes engagements sont financés à découvert' },
@@ -187,22 +169,11 @@ export const INDICATOR_TEXTS = {
       { value: 4, label: 'Je connais ma capacité et je la suis, même si elle est temporairement nulle' },
     ],
   },
-  b2: {
-    question: 'Comment décidez-vous des sommes à investir ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Mes investissements compromettent mes dépenses indispensables' },
-      { value: 1, label: 'Sans règle ni vérification' },
-      { value: 2, label: 'Par versements occasionnels qui respectent mon budget' },
-      { value: 3, label: 'Selon une règle adaptée, appliquée la plupart du temps' },
-      { value: 4, label: 'Selon une règle suivie et ajustée à mes projets — ou une pause volontaire documentée' },
-    ],
-  },
   creditGate: {
-    question: 'Avez-vous des dettes personnelles en cours, une caution, ou un projet de crédit à l’étude ?',
+    question: 'Avez-vous des dettes personnelles en cours, une caution, ou un projet de crédit à l’étude ?',
   },
   cred1WithDebt: {
-    question: 'Avez-vous une vue complète du coût et des engagements de vos crédits ?',
+    question: 'Avez-vous une vue complète du coût et des engagements de vos crédits ?',
     options: [
       { value: 0, label: 'Aucune vue' },
       { value: 1, label: 'Je connais les mensualités seules' },
@@ -212,25 +183,14 @@ export const INDICATOR_TEXTS = {
     ],
   },
   cred1NoDebt: {
-    question: 'Disposez-vous d’une vérification de vos engagements et cautions éventuelles ?',
+    question: 'Disposez-vous d’une vérification de vos engagements et cautions éventuelles ?',
     options: [
       { value: 4, label: 'Oui, absence d’engagement confirmée' },
       { value: null, label: 'Incertain' },
     ],
   },
-  cred2: {
-    question: 'Avez-vous testé votre capacité à tenir en cas de baisse de revenus ou de dépenses imprévues ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'J’ai des difficultés actuelles de paiement' },
-      { value: 1, label: 'Aucun test' },
-      { value: 2, label: 'Une intuition, sans calcul' },
-      { value: 3, label: 'Un scénario chiffré' },
-      { value: 4, label: 'Un scénario chiffré, avec une réponse prévue' },
-    ],
-  },
   div1: {
-    question: 'Savez-vous à quels actifs, secteurs et zones vos placements sont réellement exposés ?',
+    question: 'Savez-vous à quels actifs, secteurs et zones vos placements sont réellement exposés ?',
     helper: null,
     options: [
       { value: 0, label: 'Aucune vue d’ensemble' },
@@ -240,19 +200,8 @@ export const INDICATOR_TEXTS = {
       { value: 4, label: 'Vue consolidée, incluant entreprise et actifs détenus via des structures' },
     ],
   },
-  div2: {
-    question: 'Que faites-vous de vos principales concentrations ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Un risque est identifié, incompatible avec un besoin proche, sans solution' },
-      { value: 1, label: 'Aucune analyse' },
-      { value: 2, label: 'La concentration est connue, sans stratégie' },
-      { value: 3, label: 'Stratégie de diversification — ou maintien motivé compatible avec mes contraintes' },
-      { value: 4, label: 'Stratégie suivie et réévaluée' },
-    ],
-  },
   cap1: {
-    question: 'Vos actifs et les revenus qu’ils produisent ont-ils un rôle défini dans vos objectifs ?',
+    question: 'Vos actifs et les revenus qu’ils produisent ont-ils un rôle défini dans vos objectifs ?',
     helper: null,
     options: [
       { value: 0, label: 'De l’argent nécessaire à court terme est exposé à un risque incompatible' },
@@ -267,19 +216,8 @@ export const INDICATOR_TEXTS = {
       { value: 4, label: 'J’ai un plan que je suis et j’ajuste' },
     ],
   },
-  cap2: {
-    question: 'Connaissez-vous les frais et les conséquences fiscales de vos principaux choix ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Aucune vérification' },
-      { value: 1, label: 'Fiscalité ou frais partiellement connus' },
-      { value: 2, label: 'Les deux sont identifiés approximativement' },
-      { value: 3, label: 'Une comparaison a été faite avant les décisions importantes' },
-      { value: 4, label: 'Comparaison actualisée, intégrant disponibilité, risques et objectifs' },
-    ],
-  },
   prot1: {
-    question: 'Savez-vous qui recevrait votre patrimoine et qui pourrait agir en cas d’incapacité ?',
+    question: 'Savez-vous qui recevrait votre patrimoine et qui pourrait agir en cas d’incapacité ?',
     helper: null,
     options: [
       { value: 0, label: 'Ce sujet n’a jamais été examiné' },
@@ -289,20 +227,8 @@ export const INDICATOR_TEXTS = {
       { value: 4, label: 'Organisation et documents vérifiés depuis ma dernière évolution importante' },
     ],
   },
-  prot2: {
-    question: 'Les mesures correspondant à vos souhaits ont-elles été prises ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Une incompatibilité connue n’a pas été traitée' },
-      { value: 1, label: 'Aucune démarche, malgré un besoin identifié' },
-      { value: 2, label: 'Des mesures partielles ont été prises' },
-      { value: 3, label: 'Les mesures essentielles ont été réalisées' },
-      { value: 4, label: 'Organisation cohérente et suivie — ou décision motivée de différer' },
-    ],
-    dontKnowIfNeeded: 'Je ne sais pas si des mesures sont nécessaires',
-  },
   p1: {
-    question: 'Votre mode de rémunération a-t-il été comparé en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise ?',
+    question: 'Votre mode de rémunération a-t-il été comparé en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise ?',
     helper: null,
     options: [
       { value: 0, label: 'Jamais' },
@@ -312,22 +238,11 @@ export const INDICATOR_TEXTS = {
       { value: 4, label: 'Un arbitrage suivi et revu lors des changements importants' },
     ],
   },
-  p2: {
-    question: 'Distinguez-vous la trésorerie nécessaire à l’activité de l’argent durablement disponible ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Non' },
-      { value: 1, label: 'Le solde bancaire est assimilé à de l’argent libre' },
-      { value: 2, label: 'Les charges immédiates sont provisionnées' },
-      { value: 3, label: 'Impôts, échéances et besoin d’exploitation sont intégrés' },
-      { value: 4, label: 'Une prévision inclut une marge de sécurité adaptée et actualisée' },
-    ],
-  },
   p3Gate: {
-    question: 'Votre activité dégage-t-elle des excédents de trésorerie durables, au-delà des besoins d’exploitation, des impôts et des projets déjà engagés ?',
+    question: 'Votre activité dégage-t-elle des excédents de trésorerie durables, au-delà des besoins d’exploitation, des impôts et des projets déjà engagés ?',
   },
   p3: {
-    question: 'L’utilisation de ces excédents professionnels est-elle organisée ?',
+    question: 'L’utilisation de ces excédents professionnels est-elle organisée ?',
     helper: null,
     options: [
       { value: 0, label: 'Aucune réflexion' },
@@ -335,20 +250,6 @@ export const INDICATOR_TEXTS = {
       { value: 2, label: 'Des objectifs définis, sans comparaison' },
       { value: 3, label: 'Comparaison entre réinvestissement, détention professionnelle et sortie personnelle' },
       { value: 4, label: 'Arbitrage suivi, coûts et contraintes intégrés' },
-    ],
-  },
-  p4Gate: {
-    question: 'Avez-vous une dette professionnelle, une caution en cours, ou un projet professionnel avec financement envisagé ?',
-  },
-  p4: {
-    question: 'Le financement a-t-il été testé sur les flux de l’activité et vos engagements personnels ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Des difficultés actuelles existent' },
-      { value: 1, label: 'Aucun examen' },
-      { value: 2, label: 'La mensualité seule a été regardée' },
-      { value: 3, label: 'Un plan de financement et des flux prévisionnels existent' },
-      { value: 4, label: 'Scénarios défavorables, garanties et effets sur le foyer examinés' },
     ],
   },
 };
@@ -378,18 +279,18 @@ export const LEVER_STATUS_LABELS = {
 
 // --- Mentions légales et limites ----------------------------------------
 
-export const LEGAL_MENTION = 'Cet outil propose une lecture pédagogique de votre organisation patrimoniale à partir de vos déclarations. Les scores reposent sur une grille indicative ; ils ne constituent ni une expertise, ni un conseil personnalisé en investissement, fiscalité, droit ou assurance. L’outil ne vérifie pas l’éligibilité à un dispositif, la conformité d’un montage ou l’adéquation d’un produit. Les résultats dépendent de l’exactitude et de la complétude des réponses et ne garantissent aucun rendement ni économie. Toute décision importante nécessite une analyse de votre situation avec les professionnels compétents.';
+export const LEGAL_MENTION = 'Cet outil propose une lecture pédagogique de votre organisation patrimoniale à partir de vos déclarations. Les scores reposent sur une grille indicative ; ils ne constituent ni une expertise, ni un conseil personnalisé en investissement, fiscalité, droit ou assurance. L’outil ne vérifie pas l’éligibilité à un dispositif, la conformité d’un montage ou l’adéquation d’un produit. Les résultats dépendent de l’exactitude et de la complétude des réponses et ne garantissent aucun rendement ni économie — c’est une estimation, sans engagement de votre part. Toute décision importante nécessite une analyse de votre situation avec les professionnels compétents.';
 
 export const NON_RESIDENT_NOTICE = 'Votre résidence fiscale n’est pas la France, ou reste incertaine. Ce diagnostic reste utilisable pour une lecture générale de votre organisation patrimoniale, mais les pistes fiscales françaises ne sont pas présentées ici comme applicables à votre situation. Une analyse transfrontalière dédiée est nécessaire avant toute décision liée à la fiscalité ou à la transmission.';
 
-export const PRIVACY_NOTE = 'Vos réponses restent dans votre navigateur : aucun calcul n’est envoyé à un serveur, à un outil publicitaire ou à un service de mesure d’audience. Rien n’est enregistré automatiquement sur cet appareil — vous pouvez choisir de sauvegarder localement, et effacer cette sauvegarde à tout moment.';
+export const PRIVACY_NOTE = 'Vos réponses restent dans votre navigateur : aucun calcul n’est envoyé à un serveur, à un outil publicitaire ou à un service de mesure d’audience. Rien n’est enregistré automatiquement sur cet appareil — vous pouvez choisir de sauvegarder localement, et effacer cette sauvegarde à tout moment.';
 
 // --- Guide pédagogique (3 pages) -----------------------------------------
 
 export const GUIDE = {
   page1: {
     title: 'Gagner de l’argent ne suffit pas. Il faut l’organiser.',
-    intro: 'Un patrimoine solide ne repose pas sur un placement miracle. Il repose sur des décisions qui se complètent : garder une marge de sécurité, investir avec un objectif, utiliser le crédit avec discernement et préparer la suite. Avant de chercher le prochain investissement, regardez comment fonctionne l’ensemble.',
+    intro: 'Un patrimoine solide ne repose pas sur un placement miracle. Il repose sur des décisions qui se complètent : garder une marge de sécurité, investir avec un objectif, utiliser le crédit avec discernement et préparer la suite. Avant de chercher le prochain investissement, regardez comment fonctionne l’ensemble.',
     blocks: [
       {
         n: 1,
@@ -418,13 +319,13 @@ export const GUIDE = {
       {
         n: 4,
         title: 'Investir dans le temps',
-        text: 'Affecter l’argent à des horizons distincts. Le réinvestissement des revenus peut soutenir la croissance du capital ; les pertes et les frais pèsent aussi. En immobilier, le remboursement du capital réduit la dette, sans garantir la rentabilité globale.',
+        text: 'Affecter l’argent à des horizons distincts. Le réinvestissement des revenus peut soutenir la croissance du capital ; les pertes et les frais pèsent aussi. En immobilier, le remboursement du capital réduit la dette, sans garantir la rentabilité globale.',
         action: 'Attribuez un objectif et une échéance à chaque poche d’argent.',
       },
       {
         n: 5,
         title: 'Maîtriser fiscalité et frais',
-        text: 'Comparer ce qu’il reste après coûts, impôts et contraintes. Une réduction d’impôt ne suffit pas à rendre une opération intéressante. Pour le dirigeant : rémunération, capitalisation personnelle ou professionnelle, financement et, si utile, holding.',
+        text: 'Comparer ce qu’il reste après coûts, impôts et contraintes. Une réduction d’impôt ne suffit pas à rendre une opération intéressante. Pour le dirigeant : rémunération, capitalisation personnelle ou professionnelle, financement et, si utile, holding.',
         action: 'Faites comparer les options à situation et objectif identiques.',
       },
       {
@@ -441,7 +342,7 @@ export const GUIDE = {
     sections: [
       {
         title: 'Diversification',
-        text: 'Compter les sources de risque, pas les contrats. Plusieurs biens dans une même zone, ou plusieurs enveloppes investies dans les mêmes actifs, peuvent rester concentrés. La diversification réduit certaines dépendances ; elle n’empêche pas toutes les pertes.',
+        text: 'Compter les sources de risque, pas les contrats. Plusieurs biens dans une même zone, ou plusieurs enveloppes investies dans les mêmes actifs, peuvent rester concentrés. La diversification réduit certaines dépendances ; elle n’empêche pas toutes les pertes.',
       },
       {
         title: 'Temps et capitalisation',
@@ -451,9 +352,9 @@ export const GUIDE = {
     plan: {
       title: 'Plan d’action',
       items: [
-        'Cette semaine : recenser actifs, dettes et réserves.',
-        'Ce mois-ci : traiter le premier angle mort de votre diagnostic.',
-        'Avant votre prochaine décision importante : vérifier son effet sur la trésorerie, la concentration et les objectifs familiaux.',
+        'Cette semaine : recenser actifs, dettes et réserves.',
+        'Ce mois-ci : traiter le premier angle mort de votre diagnostic.',
+        'Avant votre prochaine décision importante : vérifier son effet sur la trésorerie, la concentration et les objectifs familiaux.',
       ],
     },
     conclusion: 'Ne cherchez pas à activer tous les leviers. Choisissez ceux qui servent votre situation, dans le bon ordre.',

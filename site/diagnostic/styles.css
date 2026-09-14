@@ -22,7 +22,8 @@ header.topbar{min-height:64px;padding:16px max(20px,calc((100vw - 1160px)/2));di
 .hero h1{color:#fff;font-size:clamp(30px,4.4vw,46px);line-height:1.12;max-width:820px;margin:0 auto}
 .hero .lead{max-width:620px;margin:20px auto 0;font-size:17px;color:#f1e6f4;line-height:1.6}
 .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-.promise{max-width:620px;margin:22px auto 0;font-size:13px;color:#d7c5dc;line-height:1.6}
+.short-disclaimer{max-width:520px;margin:22px auto 0;padding:11px 16px;background:#ffffff14;border:1px solid #ffffff35;border-radius:2px;font-size:12.5px;font-weight:600;color:#f1e6f4;line-height:1.5}
+.promise{max-width:620px;margin:14px auto 0;font-size:13px;color:#d7c5dc;line-height:1.6}
 
 .button{border:1px solid var(--y);background:var(--y);color:var(--p);padding:14px 24px;font:800 16px Arial,Helvetica,sans-serif;cursor:pointer;min-height:50px;border-radius:2px}
 .button:hover{background:#f1c500;border-color:#f1c500}
