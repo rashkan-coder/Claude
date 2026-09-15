@@ -87,7 +87,13 @@ input[type=checkbox],input[type=radio]{accent-color:var(--p);width:17px;height:1
 .field input:disabled{background:#f3edf7;color:#9a8aa3}
 
 .linked-field{border:1px solid var(--line);padding:16px;margin-bottom:16px;background:#faf7fb}
-.linked-field p.q{font-weight:700;color:var(--p);margin:0 0 10px;font-size:14.5px}
+p.q{font-weight:700;color:var(--p);margin:0 0 10px;font-size:14.5px}
+
+/* Sépare visuellement les champs montant quand plusieurs se suivent sur un
+   même écran (capacité financière, patrimoine) — sans quoi ils se
+   confondent en un bloc continu. */
+.field-group{padding-top:18px;margin-top:2px;border-top:1px solid var(--line)}
+.field-group:first-of-type{padding-top:0;border-top:none}
 
 .echeance-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
 .echeance-row select{border:1px solid #d9cedc;padding:8px 10px;font-size:13px;color:var(--p);background:#fff}

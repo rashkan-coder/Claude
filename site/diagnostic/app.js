@@ -234,8 +234,8 @@ function renderContextStep(id, container) {
       <div class="step-top"><span>VOTRE CAPACITÉ FINANCIÈRE</span><span></span></div>
       <h2 tabindex="-1">Votre capacité financière</h2>
       <p class="helper">Montants approximatifs acceptés, y compris zéro.</p>
-      ${amountFieldHTML('revenusNets', 'Revenus nets mensuels du foyer, après impôt', ctx.revenusNets)}
-      ${amountFieldHTML('versementsInvestissement', 'Versements d’investissement habituels par mois', ctx.versementsInvestissement)}
+      ${amountFieldHTML('revenusNets', 'Revenus nets mensuels du foyer, après impôt', ctx.revenusNets, { placeholder: 'Ex. 3500' })}
+      ${amountFieldHTML('versementsInvestissement', 'Versements d’investissement habituels par mois', ctx.versementsInvestissement, { placeholder: 'Ex. 300' })}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
@@ -259,15 +259,15 @@ function renderContextStep(id, container) {
       <div class="step-top"><span>VOTRE PATRIMOINE</span><span></span></div>
       <h2 tabindex="-1">Votre patrimoine</h2>
       <p class="helper">Valeurs brutes approximatives. Un patrimoine nul est accepté.</p>
-      ${amountFieldHTML('residencePrincipale', 'Résidence principale')}
-      ${amountFieldHTML('immobilierLocatif', 'Immobilier locatif')}
-      ${amountFieldHTML('epargnePlacements', 'Épargne et placements financiers (comptes, livrets, assurance-vie, bourse, crypto…)')}
+      ${amountFieldHTML('residencePrincipale', 'Résidence principale', ctx.patrimoine && ctx.patrimoine.residencePrincipale, { placeholder: 'Ex. 300000' })}
+      ${amountFieldHTML('immobilierLocatif', 'Immobilier locatif', ctx.patrimoine && ctx.patrimoine.immobilierLocatif, { placeholder: 'Ex. 150000' })}
+      ${amountFieldHTML('epargnePlacements', 'Épargne et placements financiers (comptes, livrets, assurance-vie, bourse, crypto…)', ctx.patrimoine && ctx.patrimoine.epargnePlacements, { placeholder: 'Ex. 50000' })}
       <div class="field-group" data-field="partsEntreprise" data-meta="${parts.mode === 'unknown' ? 'unknown' : ''}">
         <label style="display:block;font-weight:700;color:var(--p);font-size:14px;margin-bottom:6px">Parts d’entreprise (valeur estimée des titres)</label>
         <div class="field"><input type="number" min="0" id="partsEntreprise" placeholder="Ex. 150000" value="${parts.mode === 'value' ? parts.value : ''}" ${parts.mode === 'unknown' ? 'disabled' : ''}><span>€</span></div>
         <div class="meta-row"><button type="button" class="meta-btn ${parts.mode === 'unknown' ? 'active' : ''}" data-role="unknown" data-target="partsEntreprise">Valeur inconnue</button></div>
       </div>
-      ${amountFieldHTML('dettesTotal', 'Dettes personnelles (total)')}
+      ${amountFieldHTML('dettesTotal', 'Dettes personnelles (total)', ctx.patrimoine && ctx.patrimoine.dettesTotal, { placeholder: 'Ex. 20000' })}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
@@ -459,7 +459,9 @@ function renderStep() {
   document.getElementById('progress-bar').style.width = `${Math.round((state.stepIndex / total) * 100)}%`;
   document.getElementById('rail-count').textContent = isContext ? `Étape ${state.stepIndex + 1} sur ${activeContextStepIds().length} (contexte)` : `Question ${state.stepIndex - activeContextStepIds().length + 1} sur ${activeIndicatorIds().length}`;
   document.getElementById('rail-phase').textContent = isContext ? 'CONTEXTE' : 'DIAGNOSTIC';
-  document.getElementById('rail-title').textContent = isContext ? 'Votre situation.' : 'Vos six piliers.';
+  // Le titre de la barre latérale suit l'étape réellement affichée, plutôt
+  // que de rester figé sur le libellé de la toute première étape de la phase.
+  document.getElementById('rail-title').textContent = isContext ? C.CONTEXT_LABELS[id] : C.AXES.find((a) => a.id === getIndicator(id).axis).name;
 
   const h2 = container.querySelector('h2');
   if (h2) h2.focus({ preventScroll: true });
