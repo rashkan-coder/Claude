@@ -2,7 +2,7 @@
 // jamais un calcul ; seuls indicators.js et rules.js portent la logique de score.
 'use strict';
 
-export const RULE_VERSION = 'diagnostic-patrimoine-v1.1.0';
+export const RULE_VERSION = 'diagnostic-patrimoine-v1.1.1';
 export const RULE_DATE = '2026-09-14';
 
 export const AXES = [
@@ -285,80 +285,3 @@ export const NON_RESIDENT_NOTICE = 'Votre résidence fiscale n’est pas la Fran
 
 export const PRIVACY_NOTE = 'Vos réponses restent dans votre navigateur : aucun calcul n’est envoyé à un serveur, à un outil publicitaire ou à un service de mesure d’audience. Rien n’est enregistré automatiquement sur cet appareil — vous pouvez choisir de sauvegarder localement, et effacer cette sauvegarde à tout moment.';
 
-// --- Guide pédagogique (3 pages) -----------------------------------------
-
-export const GUIDE = {
-  page1: {
-    title: 'Gagner de l’argent ne suffit pas. Il faut l’organiser.',
-    intro: 'Un patrimoine solide ne repose pas sur un placement miracle. Il repose sur des décisions qui se complètent : garder une marge de sécurité, investir avec un objectif, utiliser le crédit avec discernement et préparer la suite. Avant de chercher le prochain investissement, regardez comment fonctionne l’ensemble.',
-    blocks: [
-      {
-        n: 1,
-        title: 'Sécuriser',
-        text: 'Argent disponible pour les imprévus, protection des revenus et du foyer.',
-        action: 'Comptez les mois de dépenses essentielles couverts sans revenus.',
-      },
-      {
-        n: 2,
-        title: 'Transformer ses revenus en actifs',
-        text: 'Connaître ce qui reste réellement après dépenses, crédits, impôts et projets proches. Pour un dirigeant, distinguer revenu personnel et argent nécessaire à l’activité.',
-        action: 'Établissez une capacité d’investissement réaliste.',
-      },
-      {
-        n: 3,
-        title: 'Utiliser le crédit',
-        text: 'Il permet de financer un actif sans disposer immédiatement de tout son prix, mais crée des engagements. Le projet doit tenir après charges et imprévus.',
-        action: 'Testez un scénario défavorable avant d’emprunter.',
-      },
-    ],
-    callout: 'La première bonne décision n’est pas toujours d’investir plus. Elle peut être de retrouver une marge de manœuvre.',
-  },
-  page2: {
-    title: 'Faire grandir ce que vous avez construit',
-    blocks: [
-      {
-        n: 4,
-        title: 'Investir dans le temps',
-        text: 'Affecter l’argent à des horizons distincts. Le réinvestissement des revenus peut soutenir la croissance du capital ; les pertes et les frais pèsent aussi. En immobilier, le remboursement du capital réduit la dette, sans garantir la rentabilité globale.',
-        action: 'Attribuez un objectif et une échéance à chaque poche d’argent.',
-      },
-      {
-        n: 5,
-        title: 'Maîtriser fiscalité et frais',
-        text: 'Comparer ce qu’il reste après coûts, impôts et contraintes. Une réduction d’impôt ne suffit pas à rendre une opération intéressante. Pour le dirigeant : rémunération, capitalisation personnelle ou professionnelle, financement et, si utile, holding.',
-        action: 'Faites comparer les options à situation et objectif identiques.',
-      },
-      {
-        n: 6,
-        title: 'Préparer la transmission',
-        text: 'Clarifier ses souhaits et vérifier la protection du conjoint, des proches et la continuité de l’entreprise. Donation, démembrement et organisation sociétaire sont des outils à examiner selon la situation.',
-        action: 'Écrivez qui doit recevoir quoi, et dans quelles conditions.',
-      },
-    ],
-    callout: 'Votre entreprise peut être votre premier actif et votre première source de revenus. Construire un patrimoine hors de l’entreprise permet d’étudier une moindre dépendance au même risque.',
-  },
-  page3: {
-    title: 'Deux règles pour relier toutes vos décisions',
-    sections: [
-      {
-        title: 'Diversification',
-        text: 'Compter les sources de risque, pas les contrats. Plusieurs biens dans une même zone, ou plusieurs enveloppes investies dans les mêmes actifs, peuvent rester concentrés. La diversification réduit certaines dépendances ; elle n’empêche pas toutes les pertes.',
-      },
-      {
-        title: 'Temps et capitalisation',
-        text: 'Investir avec régularité, et laisser une part des revenus produire à son tour des revenus, peut soutenir la construction du patrimoine. L’horizon, les retraits, les frais, la fiscalité et les résultats réels changent la trajectoire. Le temps ne transforme pas automatiquement un mauvais investissement en bon investissement.',
-      },
-    ],
-    plan: {
-      title: 'Plan d’action',
-      items: [
-        'Cette semaine : recenser actifs, dettes et réserves.',
-        'Ce mois-ci : traiter le premier angle mort de votre diagnostic.',
-        'Avant votre prochaine décision importante : vérifier son effet sur la trésorerie, la concentration et les objectifs familiaux.',
-      ],
-    },
-    conclusion: 'Ne cherchez pas à activer tous les leviers. Choisissez ceux qui servent votre situation, dans le bon ordre.',
-    signature: 'Je m’appelle Rashan. 25 ans de finance. Je vous aide à relier vos revenus, vos investissements et vos décisions patrimoniales.',
-    finalMention: 'Ce guide et ce diagnostic sont pédagogiques. Ils ne remplacent pas une analyse personnalisée de votre situation.',
-  },
-};

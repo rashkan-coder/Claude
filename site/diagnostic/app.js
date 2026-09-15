@@ -623,9 +623,7 @@ function renderResults() {
       <p class="helper">Des conditions de découverte à partir de vos réponses — jamais une conclusion d’éligibilité ni une recommandation de souscription.</p>
       <div class="levers-grid">${leversHTML}</div>
 
-      <div class="downloads">
-        <button class="button" id="btn-download-guide" type="button">Télécharger le guide (3 pages)</button>
-        <button class="button" id="btn-download-bilan" type="button">Télécharger mon bilan</button>
+      <div class="quiet-actions">
         <button class="button secondary" id="btn-edit" type="button" style="color:var(--p);border-color:#d9cedc">Modifier mes réponses</button>
       </div>
 
@@ -639,19 +637,11 @@ function renderResults() {
         <p class="disclosure">Ce bouton ouvre Calendly (planification de rendez-vous) dans un nouvel onglet. Vos réponses à ce diagnostic ne sont transmises automatiquement à personne&nbsp;; vous seul(e) choisissez ce que vous partagez lors de l’échange.</p>
       </div>
 
-      <section class="legal" style="padding-left:0;padding-right:0;max-width:none">${C.LEGAL_MENTION}</section>
+      <section class="legal" style="padding:0">${C.LEGAL_MENTION}</section>
     </div>`;
 
   drawRadar(document.getElementById('radar'), results);
 
-  document.getElementById('btn-download-guide').addEventListener('click', async () => {
-    const mod = await import('./pdf-guide.js');
-    mod.downloadGuidePdf();
-  });
-  document.getElementById('btn-download-bilan').addEventListener('click', async () => {
-    const mod = await import('./pdf-bilan.js');
-    mod.downloadBilanPdf(state.context, state.answers, results);
-  });
   document.getElementById('btn-edit').addEventListener('click', () => {
     state.stepIndex = 0;
     root.hidden = true;
@@ -679,7 +669,7 @@ function fillStaticText() {
   document.getElementById('pillars-grid').innerHTML = C.PILLARS.map(
     (p) => `<div class="pillar-card"><span class="axis-tag">${p.axis}</span><h3>${p.title}</h3><p>${p.text}</p></div>`
   ).join('');
-  document.getElementById('legal-mention').innerHTML = `<p>${C.LEGAL_MENTION}</p><p class="privacy-note" style="padding:0;max-width:none">${C.PRIVACY_NOTE}</p>`;
+  document.getElementById('legal-mention').innerHTML = `<p>${C.LEGAL_MENTION}</p><p class="privacy-note" style="padding:0">${C.PRIVACY_NOTE}</p>`;
 }
 
 function backToAccueil() {

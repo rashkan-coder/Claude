@@ -1,7 +1,7 @@
 # Grille du diagnostic patrimonial — documentation et limites
 
 Version de la grille : voir `RULE_VERSION` dans `content.js` (actuellement
-`diagnostic-patrimoine-v1.1.0`, datée du 14/09/2026). Toute modification des
+`diagnostic-patrimoine-v1.1.1`, datée du 15/09/2026). Toute modification des
 seuils, des textes de règles ou du calcul doit incrémenter cette version.
 
 **v1.1.0** a volontairement raccourci le parcours (retour utilisateur : trop
@@ -10,6 +10,11 @@ que cela change par rapport à un référentiel plus détaillé (v1.0.0, conserv
 dans l'historique git). Un disclaimer court (« estimation pédagogique, sans
 engagement ») est désormais affiché dès l'accueil et pendant le
 questionnaire, en plus de la mention légale complète en fin de résultats.
+
+**v1.1.1** retire le guide PDF de 3 pages et le bilan PDF exportable (à la
+demande de l'utilisatrice) et corrige une mise en page cassée de la mention
+légale (une combinaison de marge calculée et de `max-width` la rendait très
+étroite sur grand écran).
 
 ## 1. Principe
 
@@ -146,12 +151,13 @@ bandeau dédié apparaît en tête des résultats.
 
 ## 8. Ce que cette version ne fait pas
 
-- Aucun barème fiscal ni simulation de droits n'est codé. Les seuils cités
-  dans le guide pédagogique (100 000 €, 152 500 €, 31 865 €, etc.) sont des
-  repères informatifs datés au 14/09/2026, pas un calcul appliqué à la
-  situation de la personne.
+- Aucun barème fiscal ni simulation de droits n'est codé.
 - Aucun calcul ne vérifie l'éligibilité réelle à un dispositif, la
   conformité d'un montage ou l'adéquation d'un produit.
+- Le guide pédagogique de 3 pages et le bilan exportable en PDF ont été
+  retirés (v1.1.1) à la demande de l'utilisatrice — seul le résultat
+  affiché à l'écran (radar, détail par pilier, priorités, carte des
+  leviers) reste accessible ; rien n'est téléchargeable.
 - Le statut juridique de l'entreprise (EI/micro, IR, IS) n'est plus demandé
   (retiré en v1.1.0 pour raccourcir le parcours) — aucun indicateur ne s'y
   réfère.
@@ -222,7 +228,5 @@ Node uniquement).
 - `engine.js` — calcul (scores, couverture, cohérence, résultats consolidés).
   Aucune fonction de ce fichier ne touche au DOM ni au réseau.
 - `app.js` — interface (questionnaire, navigation, rendu des résultats).
-- `radar.js` — dessin du radar (canvas), partagé entre la page et le bilan PDF.
-- `pdf-layout.js`, `pdf-guide.js`, `pdf-bilan.js`, `load-jspdf.js` — export PDF
-  (jsPDF est vendu localement dans `vendor/jspdf.umd.min.js`, aucun CDN externe).
+- `radar.js` — dessin du radar (canvas) affiché sur la page de résultats.
 - `styles.css` — mise en forme (palette Captain Invest).

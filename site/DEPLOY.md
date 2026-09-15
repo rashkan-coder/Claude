@@ -20,12 +20,13 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
 - `site/diagnostic/index.html` — application « Votre patrimoine : les leviers que
   vous n'utilisez pas encore » : diagnostic interactif en six piliers (radar +
-  carte des leviers), guide PDF de 3 pages et bilan PDF exportables, sans email
-  ni compte obligatoire. Calculs 100&nbsp;% côté navigateur — **aucune réponse
-  n'est envoyée au Worker ni à la KV** (pas d'endpoint `/api/*` pour cet outil).
-  Voir `site/diagnostic/GRILLE.md` pour la documentation complète de la grille
-  de score et ses limites, et `site/diagnostic/tests/engine.test.mjs` pour les
-  tests du moteur (`node site/diagnostic/tests/engine.test.mjs`).
+  carte des leviers), affiché à l'écran uniquement (pas de téléchargement),
+  sans email ni compte obligatoire. Calculs 100&nbsp;% côté navigateur —
+  **aucune réponse n'est envoyée au Worker ni à la KV** (pas d'endpoint
+  `/api/*` pour cet outil). Voir `site/diagnostic/GRILLE.md` pour la
+  documentation complète de la grille de score et ses limites, et
+  `site/diagnostic/tests/engine.test.mjs` pour les tests du moteur
+  (`node site/diagnostic/tests/engine.test.mjs`).
 - `site/favicon.svg`
 
 Les trois landing pages (`/`, `/obo/` et `/transmission/`) partagent le même Worker, la même KV
@@ -66,8 +67,8 @@ ci-dessous.
    - Ouvrir `https://guide.captain-invest.com/transmission/` : idem, avec redirection vers
      `/transmission/simulateur/`.
    - Ouvrir `https://guide.captain-invest.com/diagnostic/` : le diagnostic patrimonial
-     doit s'afficher directement (pas d'opt-in), le questionnaire, les résultats et les
-     deux téléchargements PDF (guide et bilan) doivent fonctionner sans erreur réseau.
+     doit s'afficher directement (pas d'opt-in), le questionnaire et la page de résultats
+     doivent fonctionner sans erreur réseau (aucun téléchargement à tester : retiré).
    - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
 ## Export des leads et des réponses aux diagnostics
@@ -111,6 +112,3 @@ Usage ensuite :
   (`https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`), câblé en dur dans
   `site/diagnostic/app.js` (bloc de contact en fin de résultats) — à mettre à jour au même
   endroit si l'événement change.
-- **Librairie PDF (jsPDF)** : vendue localement dans `site/diagnostic/vendor/jspdf.umd.min.js`
-  (v2.5.1, aucune dépendance CDN externe), chargée par `site/diagnostic/load-jspdf.js` à la
-  demande (au premier clic sur un téléchargement PDF). Aucune réponse au diagnostic n'y transite.
