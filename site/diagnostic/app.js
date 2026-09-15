@@ -57,7 +57,7 @@ function tryRestore() {
 const CONTEXT_STEP_IDS = ['situation', 'foyer', 'residenceFiscale', 'objectifs', 'capacite', 'patrimoine', 'entreprise'];
 
 function activeContextStepIds() {
-  const isEntrepreneur = state.context.situation === 'independant' || state.context.situation === 'dirigeant';
+  const isEntrepreneur = state.context.situation === 'entrepreneur';
   return CONTEXT_STEP_IDS.filter((id) => id !== 'entreprise' || isEntrepreneur);
 }
 
@@ -347,16 +347,15 @@ function renderIndicatorStep(id, container) {
   const question = ind.getQuestion(ctx, answers);
   const options = ind.getOptions(ctx, answers);
   const helper = INDICATOR_HELPER(id);
-  const extraUnknownLabel = ind.extraDontKnowLabel ? ind.extraDontKnowLabel() : C.DONT_KNOW_LABEL;
   const current = answers[id];
-  const selectedValue = current && current.kind === 'value' ? String(current.value) : current && current.kind === 'unknown' ? '__unknown__' : current && current.kind === 'refuse' ? '__refuse__' : null;
+  const selectedValue = current && current.kind === 'value' ? String(current.value) : current && (current.kind === 'unknown' || current.kind === 'refuse') ? '__unknown__' : null;
 
   container.innerHTML = `
     <div class="step-top"><span>${axisLabel(ind.axis)}</span><span></span></div>
     <h2 tabindex="-1">${question}</h2>
     ${helper ? `<p class="helper">${helper}</p>` : ''}
     ${app.status === 'unknown' ? `<div class="info-note unknown">${app.note}</div>` : ''}
-    ${radioGroup('indicator', [...options.map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: extraUnknownLabel }, { value: '__refuse__', label: C.PREFER_NOT_TO_SAY_LABEL }], selectedValue)}
+    ${radioGroup('indicator', [...options.map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: C.UNKNOWN_OR_PREFER_LABEL }], selectedValue)}
     <p class="error" id="error" role="alert"></p>
     ${navHTML(true)}`;
 
@@ -364,7 +363,6 @@ function renderIndicatorStep(id, container) {
     const v = radioValue('indicator');
     if (!v) return { error: 'Choisissez une réponse.' };
     if (v === '__unknown__') answers[id] = { kind: 'unknown' };
-    else if (v === '__refuse__') answers[id] = { kind: 'refuse' };
     else answers[id] = { kind: 'value', value: Number(v) };
     return { error: null };
   };
@@ -403,11 +401,11 @@ function renderGatedIndicator(ind, container) {
     const question = ind.getQuestion(ctx, draftAnswers);
     const options = ind.getOptions(ctx, draftAnswers);
     const current = answers[ind.id];
-    const selectedValue = current && current.kind === 'value' ? String(current.value) : current && current.kind === 'unknown' ? '__unknown__' : current && current.kind === 'refuse' ? '__refuse__' : null;
+    const selectedValue = current && current.kind === 'value' ? String(current.value) : current && (current.kind === 'unknown' || current.kind === 'refuse') ? '__unknown__' : null;
     bodyWrap.innerHTML = `
       <p class="q" style="margin-top:18px">${question}</p>
       ${app.status === 'unknown' ? `<div class="info-note unknown">${app.note}</div>` : ''}
-      ${radioGroup('scored', [...options.filter((o) => o.value !== null).map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: C.DONT_KNOW_LABEL }, { value: '__refuse__', label: C.PREFER_NOT_TO_SAY_LABEL }], selectedValue)}`;
+      ${radioGroup('scored', [...options.filter((o) => o.value !== null).map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: C.UNKNOWN_OR_PREFER_LABEL }], selectedValue)}`;
   }
 
   container.innerHTML = `
@@ -436,7 +434,6 @@ function renderGatedIndicator(ind, container) {
     const v = radioValue('scored');
     if (!v) return { error: 'Choisissez une réponse.' };
     if (v === '__unknown__') answers[ind.id] = { kind: 'unknown' };
-    else if (v === '__refuse__') answers[ind.id] = { kind: 'refuse' };
     else answers[ind.id] = { kind: 'value', value: Number(v) };
     return { error: null };
   };

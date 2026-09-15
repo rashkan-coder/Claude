@@ -1,7 +1,7 @@
 # Grille du diagnostic patrimonial — documentation et limites
 
 Version de la grille : voir `RULE_VERSION` dans `content.js` (actuellement
-`diagnostic-patrimoine-v1.1.1`, datée du 15/09/2026). Toute modification des
+`diagnostic-patrimoine-v1.2.0`, datée du 15/09/2026). Toute modification des
 seuils, des textes de règles ou du calcul doit incrémenter cette version.
 
 **v1.1.0** a volontairement raccourci le parcours (retour utilisateur : trop
@@ -15,6 +15,16 @@ questionnaire, en plus de la mention légale complète en fin de résultats.
 demande de l'utilisatrice) et corrige une mise en page cassée de la mention
 légale (une combinaison de marge calculée et de `max-width` la rendait très
 étroite sur grand écran).
+
+**v1.2.0** plafonne chaque question à 4 choix maximum (retour utilisateur :
+trop de réponses possibles) — voir section 2 pour le détail. L'échelle de
+notation passe de 5 niveaux (0 à 4) à 3 niveaux (0 à 2 : non / partiellement
+/ oui), avec un seul choix « je ne sais pas / je préfère ne pas répondre »
+au lieu de deux. Le calcul reste 0-100 : le multiplicateur passe de ×25 à
+×50. Les listes d'options des écrans de contexte sont aussi réduites à 4
+maximum : la situation (indépendant et dirigeant fusionnés), l'objectif (8
+choix ramenés à 4), la part des revenus dépendant de l'activité (5 ramenés
+à 4).
 
 ## 1. Principe
 
@@ -48,9 +58,12 @@ dans la version initiale plus exhaustive.
 | E | Capitalisation et efficacité | cap1 (rôle des actifs) | p3 (excédents pro organisés) |
 | F | Protection et transmission | prot1 (bénéficiaires/mandataires connus) | — |
 
-Chaque indicateur note de 0 à 4, décrit exactement dans `indicators.js`
-(logique d'applicabilité) et `content.js` (textes des questions et options).
-Un indicateur ne pondère qu'un seul axe.
+Chaque indicateur note de 0 à 2 (3 niveaux : non / partiellement / oui),
+décrit exactement dans `indicators.js` (logique d'applicabilité) et
+`content.js` (textes des questions et options). Un indicateur ne pondère
+qu'un seul axe. Chaque question notée propose au plus 4 choix : les 3
+niveaux, plus un choix unique « je ne sais pas / je préfère ne pas
+répondre » (`UNKNOWN_OR_PREFER_LABEL` dans `content.js`).
 
 ### Indicateurs à applicabilité conditionnelle
 
@@ -78,8 +91,11 @@ méthode de collecte change.
 ## 3. Calcul du score d'axe
 
 ```
-score_axe = round( (somme des notes connues / nombre de notes connues) × 25 / 5 ) × 5
+score_axe = round( (somme des notes connues / nombre de notes connues) × 50 / 5 ) × 5
 ```
+
+(le multiplicateur ×50 ramène l'échelle 0-2 sur 100 ; c'était ×25 pour
+l'ancienne échelle 0-4 des versions antérieures à v1.2.0.)
 
 - Les indicateurs non applicables sont exclus du calcul et de la couverture.
 - Les réponses « je ne sais pas » et « je préfère ne pas répondre » comptent
@@ -113,7 +129,7 @@ prioritaire du foyer (C4) départageant les règles de même palier :
 
 1. Fragilité immédiate déclarée (dépenses non couvertes, argent exposé
    nécessaire à des dépenses proches).
-2. Socle à clarifier ou sécuriser (réserve < 1 mois, engagements de crédit
+2. Socle à clarifier ou sécuriser (réserve < 3 mois, engagements de crédit
    mal connus).
 3. Cohérence (objectif proche et argent exposé, concentration identifiée,
    dépendance forte du foyer à l'activité).
@@ -203,6 +219,47 @@ cartes notées (8 pour un dirigeant). Ce que cela retire, concrètement :
   au principe fondamental : aucun point pour la détention d'un outil,
   couverture jamais convertie en zéro, incohérences neutralisées
   indicateur par indicateur.
+
+### Simplifications de la v1.2.0 (4 choix maximum par question)
+
+À la demande explicite d'un retour utilisateur (« trop de réponses
+possibles, il faut 3 ou 4 choix max »), toutes les listes d'options ont été
+revues :
+
+- **Échelle des indicateurs notés** : 5 niveaux (0-4) → 3 niveaux (0-2 :
+  non / partiellement / oui), en fusionnant les niveaux intermédiaires
+  proches (ex. cred1 : « mensualités seules » et « mensualités +
+  échéances » deviennent une seule réponse « les grandes lignes »). Les
+  deux choix « je ne sais pas » et « je préfère ne pas répondre » sont
+  fusionnés en un seul (`UNKNOWN_OR_PREFER_LABEL`), toujours stocké comme
+  `kind:'unknown'` en interne — la distinction fine entre « ne sait pas »
+  et « refuse de répondre » n'est plus faite pour ces questions. Chaque
+  question notée propose donc 4 choix maximum (3 niveaux + 1). Attention
+  au réglage des seuils dans `rules.js` en cas de nouvelle modification de
+  l'échelle : plusieurs comparaisons (`<=1`, `>=2`) sont calées sur cette
+  échelle 0-2 et ne doivent pas rester à `<=2` / `>=3` (résidu de
+  l'ancienne échelle 0-4).
+- **Situation (C1)** : « Indépendant(e) » et « Dirigeant(e) de société »
+  fusionnés en une seule option « Indépendant(e) ou dirigeant(e) »
+  (valeur `entrepreneur`), 5 choix → 4.
+- **Objectif (C4)** : 8 choix → 4 (immobilier, placements, entreprise,
+  transmission). « Sécuriser le foyer », « Acheter sa résidence
+  principale », « Préparer la retraite » et « Organiser les revenus
+  professionnels » ont été retirés en tant qu'objectifs distincts — leur
+  intention est absorbée par les 4 restants ou par les indicateurs
+  eux-mêmes (ex. la rémunération du dirigeant est couverte par p1, qu'un
+  objectif dédié soit choisi ou non).
+- **Part des revenus dépendant de l'activité (C7)** : 5 choix → 4 (les
+  tranches « 25-50 % » et « 50-75 % » ont été fusionnées ; le seuil de
+  « forte dépendance » utilisé par la règle `p3-dependance-activite`
+  passe de « 50 % ou plus » à « plus de 50 % »).
+- **Garde-fou ajouté** : la règle `p1-argent-expose` (axe E, palier 1) ne
+  se déclenche plus quand `hasInvestments(context) === false` — sans
+  cela, un score cap1 à 0 pour un profil sans aucun actif investi (qui
+  choisit légitimement « pas encore de projet formalisé ») aurait déclenché
+  à tort le message « de l'argent... est exposé à un risque », alors
+  qu'il n'y a rien à exposer. Voir le test « 2b » dans
+  `tests/engine.test.mjs`.
 
 ## 9. Tests
 

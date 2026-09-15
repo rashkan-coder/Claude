@@ -2,7 +2,7 @@
 // jamais un calcul ; seuls indicators.js et rules.js portent la logique de score.
 'use strict';
 
-export const RULE_VERSION = 'diagnostic-patrimoine-v1.1.1';
+export const RULE_VERSION = 'diagnostic-patrimoine-v1.2.0';
 export const RULE_DATE = '2026-09-14';
 
 export const AXES = [
@@ -66,17 +66,15 @@ export const PILLARS = [
 
 export const SITUATION_OPTIONS = [
   { value: 'salarie', label: 'Salarié(e)' },
-  { value: 'independant', label: 'Indépendant(e)' },
-  { value: 'dirigeant', label: 'Dirigeant(e) de société' },
+  { value: 'entrepreneur', label: 'Indépendant(e) ou dirigeant(e)' },
   { value: 'retraite', label: 'Retraité(e)' },
   { value: 'autre', label: 'Autre situation' },
 ];
 
 export const AGE_BRACKETS = [
-  { value: 'moins-30', label: 'Moins de 30 ans' },
-  { value: '30-44', label: '30 à 44 ans' },
-  { value: '45-59', label: '45 à 59 ans' },
-  { value: '60-74', label: '60 à 74 ans' },
+  { value: 'moins-35', label: 'Moins de 35 ans' },
+  { value: '35-54', label: '35 à 54 ans' },
+  { value: '55-74', label: '55 à 74 ans' },
   { value: '75-plus', label: '75 ans et plus' },
 ];
 
@@ -94,14 +92,10 @@ export const RESIDENCE_FISCALE_OPTIONS = [
 ];
 
 export const OBJECTIF_OPTIONS = [
-  { value: 'securiser', label: 'Sécuriser le foyer' },
-  { value: 'residence-principale', label: 'Acheter sa résidence principale' },
   { value: 'immobilier', label: 'Investir dans l’immobilier' },
-  { value: 'placements', label: 'Développer des placements financiers' },
-  { value: 'retraite', label: 'Préparer la retraite' },
-  { value: 'remuneration', label: 'Organiser les revenus professionnels' },
-  { value: 'entreprise', label: 'Développer ou céder l’entreprise' },
-  { value: 'transmission', label: 'Transmettre' },
+  { value: 'placements', label: 'Développer mon épargne et mes placements' },
+  { value: 'entreprise', label: 'Développer mon entreprise' },
+  { value: 'transmission', label: 'Protéger mes proches et transmettre' },
 ];
 
 export const ECHEANCE_OPTIONS = [
@@ -121,8 +115,7 @@ export const ACTIVITE_STABILITE_OPTIONS = [
 export const PART_REVENUS_OPTIONS = [
   { value: 'moins-25', label: 'Moins de 25 %' },
   { value: '25-50', label: '25 à 50 %' },
-  { value: '50-75', label: '50 à 75 %' },
-  { value: 'plus-75', label: 'Plus de 75 %' },
+  { value: 'plus-50', label: 'Plus de 50 %' },
   { value: 'inconnue', label: 'Je ne sais pas' },
 ];
 
@@ -144,29 +137,28 @@ export const CONTEXT_LABELS = {
 
 // --- Textes des indicateurs notés (voir indicators.js pour la logique) ---
 // Réduits à un indicateur par pilier (deux pour la branche dirigeant/
-// indépendant) pour raccourcir le parcours.
+// indépendant) pour raccourcir le parcours, et à une échelle à 3 niveaux
+// (0/1/2 : non / partiellement / oui) au lieu de 5, pour ne jamais proposer
+// plus de 4 choix par question (3 niveaux + « je ne sais pas / je préfère
+// ne pas répondre »).
 
 export const INDICATOR_TEXTS = {
   a1: {
     question: 'Si vos revenus s’arrêtaient, combien de temps votre épargne immédiatement disponible couvrirait-elle vos dépenses et vos crédits ?',
     helper: 'Une estimation suffit — on exclut la trésorerie nécessaire à l’entreprise et l’argent déjà réservé à un projet.',
     options: [
-      { value: 0, label: 'Moins d’un mois' },
-      { value: 1, label: '1 à 3 mois' },
-      { value: 2, label: '3 à 6 mois' },
-      { value: 3, label: '6 à 12 mois' },
-      { value: 4, label: 'Au moins 12 mois' },
+      { value: 0, label: 'Moins de 3 mois' },
+      { value: 1, label: '3 à 12 mois' },
+      { value: 2, label: 'Plus de 12 mois' },
     ],
   },
   b1: {
     question: 'Savez-vous ce que vous pouvez investir après vos dépenses, crédits, impôts et projets proches ?',
     helper: null,
     options: [
-      { value: 0, label: 'Non, et mes engagements sont financés à découvert' },
-      { value: 1, label: 'Non, je n’ai pas d’estimation' },
-      { value: 2, label: 'J’ai une estimation partielle' },
-      { value: 3, label: 'Je connais ma capacité, mais je ne l’actualise pas régulièrement' },
-      { value: 4, label: 'Je connais ma capacité et je la suis, même si elle est temporairement nulle' },
+      { value: 0, label: 'Non, mes dépenses dépassent mes revenus disponibles' },
+      { value: 1, label: 'J’ai une estimation approximative' },
+      { value: 2, label: 'Je la connais précisément et je la suis' },
     ],
   },
   creditGate: {
@@ -175,17 +167,15 @@ export const INDICATOR_TEXTS = {
   cred1WithDebt: {
     question: 'Avez-vous une vue complète du coût et des engagements de vos crédits ?',
     options: [
-      { value: 0, label: 'Aucune vue' },
-      { value: 1, label: 'Je connais les mensualités seules' },
-      { value: 2, label: 'Je connais les mensualités et les échéances' },
-      { value: 3, label: 'Je connais le taux, les assurances, les échéances et le capital restant dû' },
-      { value: 4, label: 'Vue complète, incluant garanties, cautions et risques de taux éventuels' },
+      { value: 0, label: 'Aucune vue d’ensemble' },
+      { value: 1, label: 'Je connais les grandes lignes (mensualités, échéances)' },
+      { value: 2, label: 'Vue complète (taux, assurances, garanties)' },
     ],
   },
   cred1NoDebt: {
     question: 'Disposez-vous d’une vérification de vos engagements et cautions éventuelles ?',
     options: [
-      { value: 4, label: 'Oui, absence d’engagement confirmée' },
+      { value: 2, label: 'Oui, absence d’engagement confirmée' },
       { value: null, label: 'Incertain' },
     ],
   },
@@ -194,37 +184,31 @@ export const INDICATOR_TEXTS = {
     helper: null,
     options: [
       { value: 0, label: 'Aucune vue d’ensemble' },
-      { value: 1, label: 'Je connais seulement les noms des produits' },
-      { value: 2, label: 'Les principales familles d’actifs sont identifiées' },
-      { value: 3, label: 'Expositions et concentrations sont repérées' },
-      { value: 4, label: 'Vue consolidée, incluant entreprise et actifs détenus via des structures' },
+      { value: 1, label: 'Je connais les grandes catégories' },
+      { value: 2, label: 'Vue précise, y compris via mon entreprise ou mes structures' },
     ],
   },
   cap1: {
     question: 'Vos actifs et les revenus qu’ils produisent ont-ils un rôle défini dans vos objectifs ?',
     helper: null,
     options: [
-      { value: 0, label: 'De l’argent nécessaire à court terme est exposé à un risque incompatible' },
-      { value: 1, label: 'Aucun lien entre mes actifs et mes projets' },
-      { value: 2, label: 'Les horizons sont partiellement distingués' },
-      { value: 3, label: 'Horizons et règle d’utilisation ou de réinvestissement sont définis' },
-      { value: 4, label: 'Un plan est suivi et ajusté' },
+      { value: 0, label: 'Non, de l’argent nécessaire à court terme est mal protégé' },
+      { value: 1, label: 'Partiellement — certains horizons sont distingués' },
+      { value: 2, label: 'Oui, chaque actif a un rôle et une règle suivie' },
     ],
     noInvestmentOptions: [
-      { value: 1, label: 'Je n’ai pas encore formalisé de projet' },
-      { value: 3, label: 'J’ai défini des horizons et une règle pour mes futurs investissements' },
-      { value: 4, label: 'J’ai un plan que je suis et j’ajuste' },
+      { value: 0, label: 'Pas encore de projet formalisé' },
+      { value: 1, label: 'J’ai défini des horizons et une règle' },
+      { value: 2, label: 'J’ai un plan que je suis et j’ajuste' },
     ],
   },
   prot1: {
     question: 'Savez-vous qui recevrait votre patrimoine et qui pourrait agir en cas d’incapacité ?',
     helper: null,
     options: [
-      { value: 0, label: 'Ce sujet n’a jamais été examiné' },
-      { value: 1, label: 'J’ai formulé des intentions, sans plus' },
-      { value: 2, label: 'Règles et bénéficiaires sont partiellement vérifiés' },
-      { value: 3, label: 'Ma situation familiale et professionnelle a été examinée' },
-      { value: 4, label: 'Organisation et documents vérifiés depuis ma dernière évolution importante' },
+      { value: 0, label: 'Jamais examiné' },
+      { value: 1, label: 'Partiellement (intentions ou vérifications partielles)' },
+      { value: 2, label: 'Oui, organisation vérifiée et à jour' },
     ],
   },
   p1: {
@@ -232,10 +216,8 @@ export const INDICATOR_TEXTS = {
     helper: 'En tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.',
     options: [
       { value: 0, label: 'Jamais' },
-      { value: 1, label: 'Une réflexion partielle' },
-      { value: 2, label: 'Une comparaison ancienne, devenue inadaptée' },
-      { value: 3, label: 'Une comparaison cohérente avec ma situation actuelle' },
-      { value: 4, label: 'Un arbitrage suivi et revu lors des changements importants' },
+      { value: 1, label: 'Une réflexion partielle ou ancienne' },
+      { value: 2, label: 'Oui, une comparaison à jour' },
     ],
   },
   p3Gate: {
@@ -246,16 +228,17 @@ export const INDICATOR_TEXTS = {
     helper: null,
     options: [
       { value: 0, label: 'Aucune réflexion' },
-      { value: 1, label: 'Des choix ponctuels' },
-      { value: 2, label: 'Des objectifs définis, sans comparaison' },
-      { value: 3, label: 'Comparaison entre réinvestissement, détention professionnelle et sortie personnelle' },
-      { value: 4, label: 'Arbitrage suivi, coûts et contraintes intégrés' },
+      { value: 1, label: 'Des choix ponctuels, sans comparaison' },
+      { value: 2, label: 'Oui, un arbitrage comparé et suivi' },
     ],
   },
 };
 
 export const DONT_KNOW_LABEL = 'Je ne sais pas';
 export const PREFER_NOT_TO_SAY_LABEL = 'Je préfère ne pas répondre';
+// Option unique utilisée sur les cartes de questions notées, pour ne
+// jamais dépasser 4 choix par question (3 niveaux + celui-ci).
+export const UNKNOWN_OR_PREFER_LABEL = 'Je ne sais pas / je préfère ne pas répondre';
 
 // --- Leviers -----------------------------------------------------------
 

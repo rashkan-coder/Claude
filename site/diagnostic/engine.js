@@ -95,7 +95,10 @@ export function computeAxisResult(axisId, context, answers, contradictions = [])
   if (coverage < 2 / 3) {
     return { axis: axisId, status: 'not_evaluated', score: null, coverage, answeredCount, applicableCount };
   }
-  const raw = (sum / answeredCount) * 25;
+  // Chaque indicateur note de 0 à 2 (échelle à 3 niveaux) : ×50 ramène la
+  // moyenne sur 100 (2 × 50 = 100), comme ×25 le faisait pour l'ancienne
+  // échelle 0-4.
+  const raw = (sum / answeredCount) * 50;
   const score = Math.round(raw / 5) * 5;
   return { axis: axisId, status: 'ok', score, level: levelFor(score), coverage, answeredCount, applicableCount };
 }

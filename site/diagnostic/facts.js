@@ -16,7 +16,7 @@ export function fieldKnown(field) {
 }
 
 export function isEntrepreneur(context) {
-  return context.situation === 'independant' || context.situation === 'dirigeant';
+  return context.situation === 'entrepreneur';
 }
 
 // --- Patrimoine : présence d'actifs "investis" (hors résidence principale) ---

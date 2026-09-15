@@ -49,7 +49,7 @@ export const PRIORITY_RULES = [
     tier: 1,
     topic: 'argent-expose',
     axis: 'E',
-    test: ({ answers }) => scoreOf(answers, 'cap1') === 0,
+    test: ({ context, answers }) => hasInvestments(context) !== false && scoreOf(answers, 'cap1') === 0,
     text: 'De l’argent nécessaire à des dépenses proches semble exposé à un risque incompatible.',
     action: 'Vérifiez la disponibilité de cet argent avant votre prochaine échéance importante.',
   },
@@ -61,7 +61,7 @@ export const PRIORITY_RULES = [
     topic: 'reserve-faible',
     axis: 'A',
     test: ({ answers }) => scoreOf(answers, 'a1') === 0,
-    text: 'Votre réserve de sécurité couvre moins d’un mois de dépenses.',
+    text: 'Votre réserve de sécurité couvre moins de 3 mois de dépenses.',
     action: 'Priorisez la reconstitution d’une réserve avant tout nouvel investissement.',
   },
   {
@@ -111,7 +111,7 @@ export const PRIORITY_RULES = [
     test: ({ context }) => {
       if (context.branch !== 'entrepreneur') return false;
       const part = context.entreprise && context.entreprise.partRevenusDependante;
-      const forte = part === '50-75' || part === 'plus-75';
+      const forte = part === 'plus-50';
       const inv = hasInvestments(context);
       return forte && inv !== true;
     },
@@ -125,7 +125,7 @@ export const PRIORITY_RULES = [
     tier: 4,
     topic: 'remuneration-non-arbitree',
     axis: 'B',
-    test: ({ context, answers }) => context.branch === 'entrepreneur' && scoreOf(answers, 'p1') !== null && scoreOf(answers, 'p1') <= 2,
+    test: ({ context, answers }) => context.branch === 'entrepreneur' && scoreOf(answers, 'p1') !== null && scoreOf(answers, 'p1') <= 1,
     text: 'Votre mode de rémunération n’a pas été comparé récemment.',
     action: 'Faites arbitrer votre rémunération selon votre revenu, votre protection sociale et les besoins de l’entreprise.',
   },
@@ -134,7 +134,7 @@ export const PRIORITY_RULES = [
     tier: 4,
     topic: 'capitalisation-a-organiser',
     axis: 'E',
-    test: ({ applicability, answers }) => applicable(applicability, 'p3') && scoreOf(answers, 'p3') !== null && scoreOf(answers, 'p3') <= 2,
+    test: ({ applicability, answers }) => applicable(applicability, 'p3') && scoreOf(answers, 'p3') !== null && scoreOf(answers, 'p3') <= 1,
     text: 'L’utilisation de vos excédents professionnels n’est pas encore organisée.',
     action: 'Comparez réinvestissement dans l’activité, détention professionnelle et sortie personnelle.',
   },
@@ -175,12 +175,8 @@ export function computePriorities({ context, answers, applicability, axesResults
   });
   const objectifPrioritaireId = context.objectifPrioritaireId || null;
   const axisOfObjectif = {
-    securiser: 'A',
-    'residence-principale': 'C',
     immobilier: 'D',
     placements: 'D',
-    retraite: 'E',
-    remuneration: 'B',
     entreprise: 'E',
     transmission: 'F',
   };
@@ -226,7 +222,7 @@ function immobilierCredit({ context, answers }) {
       action: aRevoir ? 'Reprenez le détail des coûts de ce crédit.' : 'Continuez à suivre ce crédit et sa cohérence avec vos autres objectifs.',
     };
   }
-  const objectifOk = hasObjectif(context, 'immobilier') || hasObjectif(context, 'residence-principale');
+  const objectifOk = hasObjectif(context, 'immobilier');
   if (!objectifOk) {
     return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de votre objectif déclaré actuellement.', action: 'À reconsidérer si votre projet évolue.' };
   }
@@ -245,7 +241,7 @@ function investissementFinancier({ context, answers }) {
   if (deja) {
     return { status: 'deja_mobilise', motif: 'Épargne et placements déjà détenus.', action: 'Vérifiez que leur rôle reste cohérent avec vos objectifs et échéances.' };
   }
-  const objectifOk = hasObjectif(context, 'placements') || hasObjectif(context, 'retraite');
+  const objectifOk = hasObjectif(context, 'placements');
   if (!objectifOk) return { status: 'non_prioritaire', motif: 'Ce sujet ne fait pas partie de votre objectif déclaré actuellement.', action: 'À reconsidérer si votre projet évolue.' };
   const echeanceProche = echeanceOf(context, 'placements') === 'moins-3';
   if (echeanceProche) {
@@ -260,7 +256,7 @@ function remunerationDirigeant({ context, answers }) {
   if (context.branch !== 'entrepreneur') return null;
   const s = scoreOf(answers, 'p1');
   if (s === null) return { status: 'informations_insuffisantes', motif: 'Comparaison de votre rémunération non précisée.', action: 'Faites le point sur votre mode de rémunération actuel.' };
-  if (s >= 3) return { status: 'deja_mobilise', motif: 'Comparaison de rémunération déjà réalisée et cohérente.', action: 'Revoyez cet arbitrage à chaque changement important.' };
+  if (s >= 2) return { status: 'deja_mobilise', motif: 'Comparaison de rémunération déjà réalisée et cohérente.', action: 'Revoyez cet arbitrage à chaque changement important.' };
   return { status: 'a_examiner', motif: 'Comparaison de rémunération jamais faite ou devenue ancienne.', action: 'Faites comparer vos options en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.' };
 }
 
@@ -274,7 +270,7 @@ function capitalisationHolding({ context, answers }) {
     return { status: 'non_prioritaire', motif: 'Excédents durables déclarés, mais aucun projet professionnel ou patrimonial explicite.', action: 'Ce sujet reste à examiner si un projet se précise — pas sur la seule base de la trésorerie disponible.' };
   }
   const s = scoreOf(answers, 'p3');
-  if (s !== null && s >= 3) {
+  if (s !== null && s >= 2) {
     return { status: 'deja_mobilise', motif: 'Arbitrage des excédents déjà comparé.', action: 'Continuez à suivre cet arbitrage lors des changements importants.' };
   }
   return { status: 'a_examiner', motif: 'Excédents durables et projet explicite, sans comparaison des coûts et contraintes.', action: 'Comparez réinvestissement, détention professionnelle et sortie personnelle — sans présumer d’un seuil, d’un taux ou d’une économie.' };
@@ -313,7 +309,7 @@ function transmission({ context, answers }) {
   if (trigger && s1 <= 1) {
     return { status: 'a_examiner', motif: 'Vos souhaits ne semblent pas encore traduits en mesures concrètes.', action: `Clarifiez qui doit recevoir quoi, et dans quelles conditions.${outilsFr}` };
   }
-  if (s1 >= 3) {
+  if (s1 >= 2) {
     return { status: 'deja_mobilise', motif: 'Organisation de la protection et de la transmission déjà avancée.', action: 'Revoyez cette organisation après chaque évolution familiale ou professionnelle importante.' };
   }
   return { status: 'non_prioritaire', motif: 'Aucune urgence identifiée à ce stade.', action: `Une cartographie de vos souhaits reste possible, sans urgence établie.${outilsFr}` };

@@ -1,7 +1,7 @@
 // Tests du moteur de calcul — exécuter avec : node site/diagnostic/tests/engine.test.mjs
 // Aucune dépendance externe (pas de framework) : petites assertions maison.
 // Référentiel réduit (un indicateur par pilier, deux pour la branche
-// dirigeant/indépendant) — voir GRILLE.md pour ce que cela change.
+// dirigeant/indépendant) et échelle à 3 niveaux (0/1/2) — voir GRILLE.md.
 'use strict';
 
 import assert from 'node:assert/strict';
@@ -35,7 +35,7 @@ function field(value) {
 function baseParticulier(overrides = {}) {
   return {
     situation: 'salarie',
-    ageBracket: '30-44',
+    ageBracket: '35-54',
     foyerSituation: 'seul',
     residenceFiscale: 'france',
     objectifs: [],
@@ -55,10 +55,10 @@ function baseParticulier(overrides = {}) {
 
 function baseEntrepreneur(overrides = {}) {
   return baseParticulier({
-    situation: 'dirigeant',
+    situation: 'entrepreneur',
     entreprise: {
       activiteStabilite: 'stable',
-      partRevenusDependante: '50-75',
+      partRevenusDependante: 'plus-50',
       projetFinancementEnvisage: 'non',
     },
     ...overrides,
@@ -75,7 +75,7 @@ console.log('Scénarios (section 14)');
 // 1. Salarié sans dette, budget suivi : aucune pénalité pour absence de crédit.
 test('1. salarié sans dette — cred1 seul peut donner un score plein sur l’axe C', () => {
   const context = baseParticulier();
-  const answers = { creditGate: { kind: 'value', value: 'non' }, cred1: scored(4) };
+  const answers = { creditGate: { kind: 'value', value: 'non' }, cred1: scored(2) };
   const axisC = computeAxisResult('C', context, answers);
   assert.equal(axisC.applicableCount, 1);
   assert.equal(axisC.score, 100);
@@ -89,10 +89,20 @@ test('2. débutant sans patrimoine — axe D non applicable, cap1 propose un pla
   assert.equal(axisD.status, 'not_applicable');
 });
 
+// 2b. Débutant sans patrimoine : cap1 même à 0 (pas de projet formalisé) ne
+// déclenche jamais le signal « argent exposé à un risque » — il n'y a rien
+// à exposer.
+test('2b. débutant sans patrimoine — cap1=0 (pas de projet) ne déclenche pas « argent exposé »', () => {
+  const context = baseParticulier();
+  const answers = { cap1: scored(0) };
+  const results = computeResults(context, answers);
+  assert.ok(!results.priorities.some((p) => p.id === 'p1-argent-expose'));
+});
+
 // 3. Retraité vivant de ses revenus patrimoniaux : pas de pénalité pour non-réinvestissement.
-test('3. retraité — cap1=4 (retrait pour vivre) n’est pas pénalisé', () => {
+test('3. retraité — cap1=2 (retrait pour vivre) n’est pas pénalisé', () => {
   const context = baseParticulier({ situation: 'retraite' });
-  const answers = { cap1: scored(4) };
+  const answers = { cap1: scored(2) };
   const axisE = computeAxisResult('E', context, answers);
   assert.equal(axisE.applicableCount, 1); // seul indicateur d'axe E pour un particulier
   assert.equal(axisE.score, 100);
@@ -101,12 +111,12 @@ test('3. retraité — cap1=4 (retrait pour vivre) n’est pas pénalisé', () =
 // 4. Dirigeant sans holding mais arbitrages examinés : aucune pénalité pour absence de holding.
 test('4. dirigeant sans excédent durable — p3 non applicable, n’abaisse pas l’axe E', () => {
   const context = baseEntrepreneur();
-  const answers = { p3Gate: { kind: 'value', value: 'non' }, cap1: scored(3) };
+  const answers = { p3Gate: { kind: 'value', value: 'non' }, cap1: scored(1) };
   const app = applicabilityMap(context, answers);
   assert.equal(app.p3.status, 'not_applicable');
   const axisE = computeAxisResult('E', context, answers);
   assert.equal(axisE.applicableCount, 1);
-  assert.equal(axisE.score, 75);
+  assert.equal(axisE.score, 50);
 });
 
 // 5. Dirigeant avec forte trésorerie nécessaire à l'activité : aucun montant traité comme excédent libre.
@@ -150,7 +160,7 @@ test('7. réponse inconnue — n’est jamais comptée comme un score de 0', () 
 // 8. Changement entrepreneur → salarié : compléments P1/P3 retirés.
 test('8. changement de branche — P1/P3 retirés par pruneAnswers', () => {
   let context = baseEntrepreneur();
-  let answers = { p1: scored(3), p3Gate: { kind: 'value', value: 'oui' }, p3: scored(2) };
+  let answers = { p1: scored(1), p3Gate: { kind: 'value', value: 'oui' }, p3: scored(2) };
   context = { ...context, situation: 'salarie' }; // retour à la branche particulier
   answers = pruneAnswers(context, answers);
   assert.equal(answers.p1, undefined);
@@ -171,7 +181,7 @@ test('10. fragilité immédiate prioritaire sur l’organisation', () => {
   const context = baseEntrepreneur();
   const answers = {
     b1: scored(0), // dépenses non couvertes (palier 1)
-    p1: scored(2), // rémunération non arbitrée (palier 4)
+    p1: scored(1), // rémunération non arbitrée (palier 4)
   };
   const results = computeResults(context, answers);
   assert.equal(results.priorities[0].id, 'p1-depenses-non-couvertes');
@@ -191,7 +201,7 @@ test('11. parts d’entreprise comptées une seule fois dans le patrimoine net',
 // 12. Couverture 50 % et 100 % : règles d'affichage respectées.
 test('12a. couverture 50% (1/2, axe B dirigeant) → non évalué', () => {
   const context = baseEntrepreneur();
-  const answers = { b1: scored(3) }; // p1 non répondu
+  const answers = { b1: scored(2) }; // p1 non répondu
   const axisB = computeAxisResult('B', context, answers);
   assert.equal(axisB.applicableCount, 2);
   assert.equal(axisB.answeredCount, 1);
@@ -199,10 +209,10 @@ test('12a. couverture 50% (1/2, axe B dirigeant) → non évalué', () => {
 });
 test('12b. couverture 100% (2/2) → affiché avec score exact', () => {
   const context = baseEntrepreneur();
-  const answers = { b1: scored(3), p1: scored(1) };
+  const answers = { b1: scored(2), p1: scored(0) };
   const axisB = computeAxisResult('B', context, answers);
   assert.equal(axisB.coverage, 1);
-  assert.equal(axisB.score, 50); // moyenne (3+1)/2=2 -> 2*25=50
+  assert.equal(axisB.score, 50); // moyenne (2+0)/2=1 -> 1*50=50
 });
 
 // 13. Toutes réponses inconnues : aucun radar trompeur.
@@ -236,7 +246,7 @@ console.log('\nInvariance');
 
 test('déterminisme — mêmes réponses ⇒ mêmes résultats', () => {
   const context = baseEntrepreneur();
-  const answers = { p1: scored(2), b1: scored(3) };
+  const answers = { p1: scored(1), b1: scored(2) };
   const r1 = computeResults(context, answers);
   const r2 = computeResults(context, answers);
   assert.deepEqual(r1.axes, r2.axes);
@@ -247,7 +257,7 @@ test('déterminisme — mêmes réponses ⇒ mêmes résultats', () => {
 test('le thème d’entrée du Reel n’influence jamais le calcul', () => {
   const context1 = baseParticulier();
   const context2 = baseParticulier({ reelTheme: 'holding' });
-  const answers = { b1: scored(3) };
+  const answers = { b1: scored(2) };
   const r1 = computeResults(context1, answers);
   const r2 = computeResults(context2, answers);
   assert.deepEqual(r1.axes, r2.axes);
@@ -255,8 +265,8 @@ test('le thème d’entrée du Reel n’influence jamais le calcul', () => {
 
 test('monotonie — augmenter une note ne peut pas faire baisser son axe', () => {
   const context = baseParticulier();
-  const before = computeAxisResult('B', context, { b1: scored(2) });
-  const after = computeAxisResult('B', context, { b1: scored(3) });
+  const before = computeAxisResult('B', context, { b1: scored(1) });
+  const after = computeAxisResult('B', context, { b1: scored(2) });
   assert.ok(after.score >= before.score);
 });
 
