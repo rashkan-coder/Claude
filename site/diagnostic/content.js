@@ -228,8 +228,8 @@ export const INDICATOR_TEXTS = {
     ],
   },
   p1: {
-    question: 'Votre mode de rémunération a-t-il été comparé en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise ?',
-    helper: null,
+    question: 'Votre rémunération de dirigeant a-t-elle déjà été optimisée ?',
+    helper: 'En tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.',
     options: [
       { value: 0, label: 'Jamais' },
       { value: 1, label: 'Une réflexion partielle' },
