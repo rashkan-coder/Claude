@@ -266,5 +266,9 @@ export const LEGAL_MENTION = 'Cet outil propose une lecture pédagogique de votr
 
 export const NON_RESIDENT_NOTICE = 'Votre résidence fiscale n’est pas la France, ou reste incertaine. Ce diagnostic reste utilisable pour une lecture générale de votre organisation patrimoniale, mais les pistes fiscales françaises ne sont pas présentées ici comme applicables à votre situation. Une analyse transfrontalière dédiée est nécessaire avant toute décision liée à la fiscalité ou à la transmission.';
 
-export const PRIVACY_NOTE = 'Vos réponses restent dans votre navigateur : aucun calcul n’est envoyé à un serveur, à un outil publicitaire ou à un service de mesure d’audience. Rien n’est enregistré automatiquement sur cet appareil — vous pouvez choisir de sauvegarder localement, et effacer cette sauvegarde à tout moment.';
+export const PRIVACY_NOTE = 'Vos réponses restent dans votre navigateur : aucun calcul n’est envoyé à un serveur, à un outil publicitaire ou à un service de mesure d’audience. Rien n’est enregistré ni conservé au-delà de votre visite.';
+
+// Disclaimer affiché une seule fois, à la toute fin du parcours (page de
+// résultats) — ne pas dupliquer sur les autres écrans.
+export const SUMMARY_ESTIMATE_NOTICE = 'Ce diagnostic constitue une estimation sommaire, établie à but pédagogique à partir des réponses que vous avez fournies. Il ne saurait remplacer une étude patrimoniale approfondie réalisée avec un professionnel.';
 

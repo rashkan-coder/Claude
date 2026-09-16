@@ -53,15 +53,7 @@ header.topbar{min-height:64px;padding:16px max(20px,calc((100vw - 1160px)/2));di
 .progress{height:4px;background:#ffffff30;margin-bottom:10px}
 .progress span{display:block;background:var(--y);height:100%;transition:width .2s}
 .rail-count{font-size:13px;color:#d7c5dc;margin:0 0 20px}
-.rail-note{font-size:12.5px;color:#d7c5dc;line-height:1.6;border-top:1px solid #ffffff30;padding-top:16px;margin:0 0 16px}
-.rail .link-button{color:#e2d3e6}
-.save-toggle{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#e2d3e6;margin:0 0 14px;cursor:pointer;line-height:1.5}
-.save-toggle input{margin-top:2px;flex-shrink:0}
-
-.resume-banner{background:#ffffff14;border:1px solid #ffffff40;border-radius:2px;padding:16px 18px;max-width:520px;margin:0 auto 24px;text-align:left}
-.resume-banner p{margin:0 0 12px;font-size:14px;color:#f1e6f4}
-.resume-actions{display:flex;gap:10px;flex-wrap:wrap}
-.resume-actions .button{padding:10px 16px;min-height:auto;font-size:13.5px}
+.rail .link-button{color:#e2d3e6;border-top:1px solid #ffffff30;padding-top:16px;display:block}
 
 .panel{padding:32px 36px;min-width:0}
 .step-top{display:flex;justify-content:space-between;gap:16px;font-size:13px;color:var(--muted);margin-bottom:8px}
@@ -173,6 +165,7 @@ p.q{font-weight:700;color:var(--p);margin:0 0 10px;font-size:14.5px}
 
 /* --- Légal / footer ---------------------------------------------------- */
 .legal{padding:18px max(20px,calc((100vw - 820px)/2));color:var(--muted);font-size:.76rem;line-height:1.6}
+.summary-notice{font-size:13px;font-weight:700;color:var(--p);border-top:1px solid var(--line);padding-top:16px;margin:16px 0 0;line-height:1.6}
 .privacy-note{font-size:.76rem;color:var(--muted);padding:0 max(20px,calc((100vw - 820px)/2)) 8px}
 .legal-mentions{padding:14px max(20px,calc((100vw - 1160px)/2));margin:0;font-size:.7rem;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
 footer{padding:26px max(20px,calc((100vw - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:24px;background:#2f0d43;color:#cbb8d0;font-size:13px}
@@ -193,7 +186,7 @@ footer span:first-child{font:700 20px Georgia,serif;color:var(--y)}
   .pillars-grid{grid-template-columns:1fr}
   .workspace{width:calc(100% - 24px);grid-template-columns:1fr;display:block;margin-top:22px}
   .rail{padding:18px 20px}
-  .rail h2,.rail-note,.rail>.eyebrow{display:none}
+  .rail h2,.rail>.eyebrow{display:none}
   .rail .progress{margin-bottom:8px}
   .rail-count{margin-bottom:8px}
   .panel{padding:22px 18px}

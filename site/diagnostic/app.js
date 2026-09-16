@@ -15,40 +15,12 @@ const state = {
   context: { objectifs: [], patrimoine: {}, entreprise: {} },
   answers: {},
   stepIndex: 0, // index dans la liste combinée contexte + indicateurs
-  saveLocally: false,
 };
-
-const STORAGE_KEY = 'diagnostic-patrimoine-v1';
-
-function persistIfEnabled() {
-  if (!state.saveLocally) return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ context: state.context, answers: state.answers, stepIndex: state.stepIndex }));
-  } catch {
-    /* stockage indisponible (navigation privée, quota) : on continue sans */
-  }
-}
 
 function clearAll() {
   state.context = { objectifs: [], patrimoine: {}, entreprise: {} };
   state.answers = {};
   state.stepIndex = 0;
-  try { localStorage.removeItem(STORAGE_KEY); } catch { /* noop */ }
-}
-
-function tryRestore() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const saved = JSON.parse(raw);
-    state.context = saved.context || state.context;
-    state.answers = saved.answers || state.answers;
-    state.stepIndex = saved.stepIndex || 0;
-    state.saveLocally = true;
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 // ---------------------------------------------------------------------
@@ -477,14 +449,12 @@ function onNext() {
     return;
   }
   state.stepIndex += 1;
-  persistIfEnabled();
   renderStep();
   document.getElementById('app').scrollIntoView({ block: 'start' });
 }
 
 function onBack() {
   state.stepIndex = Math.max(0, state.stepIndex - 1);
-  persistIfEnabled();
   renderStep();
 }
 
@@ -637,6 +607,7 @@ function renderResults() {
       </div>
 
       <section class="legal" style="padding:0">${C.LEGAL_MENTION}</section>
+      <p class="summary-notice">${C.SUMMARY_ESTIMATE_NOTICE}</p>
     </div>`;
 
   drawRadar(document.getElementById('radar'), results);
@@ -687,37 +658,10 @@ function init() {
     document.getElementById('piliers').scrollIntoView({ block: 'start' });
   });
 
-  const saveToggle = document.getElementById('save-locally-toggle');
-  saveToggle.addEventListener('change', () => {
-    state.saveLocally = saveToggle.checked;
-    if (state.saveLocally) {
-      persistIfEnabled();
-    } else {
-      try { localStorage.removeItem(STORAGE_KEY); } catch { /* noop */ }
-    }
-  });
-
   document.getElementById('btn-clear').addEventListener('click', () => {
     clearAll();
-    saveToggle.checked = false;
     backToAccueil();
   });
-
-  // Sauvegarde locale explicite : rien n'est chargé sans que la personne l'ait
-  // elle-même activé lors d'une visite précédente (voir tryRestore()).
-  const hadSavedData = tryRestore();
-  if (hadSavedData) {
-    saveToggle.checked = true;
-    const banner = document.getElementById('resume-banner');
-    banner.hidden = false;
-    document.getElementById('btn-resume').addEventListener('click', () => {
-      startFlow();
-    });
-    document.getElementById('btn-resume-clear').addEventListener('click', () => {
-      clearAll();
-      banner.hidden = true;
-    });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
