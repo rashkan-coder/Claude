@@ -1,14 +1,14 @@
 // Tests du moteur de calcul — exécuter avec : node site/diagnostic/tests/engine.test.mjs
 // Aucune dépendance externe (pas de framework) : petites assertions maison.
-// Référentiel réduit (un indicateur par pilier, deux pour la branche
-// dirigeant/indépendant) et échelle à 3 niveaux (0/1/2) — voir GRILLE.md.
+// Référentiel v2 : chaque pilier est noté à partir de faits concrets
+// (montants, tranches, choix structurels) — voir GRILLE.md pour la table
+// complète des seuils utilisée par indicators.js/facts.js.
 'use strict';
 
 import assert from 'node:assert/strict';
 import {
   computeResults,
   computeAxisResult,
-  pruneAnswers,
   applicabilityMap,
   computeGrossAllocation,
   validateAmountInput,
@@ -41,14 +41,23 @@ function baseParticulier(overrides = {}) {
     objectifs: [],
     objectifPrioritaireId: null,
     revenusNets: field(3000),
-    versementsInvestissement: field(200),
+    depensesEssentielles: field(2000),
+    epargneDisponible: field(6000),
+    epargneMensuelle: field(300),
     patrimoine: {
+      residencePrincipaleProprietaire: 'non',
       residencePrincipale: field(0),
+      residencePrincipaleCredit: null,
+      autresBiensImmobiliers: 'non',
       immobilierLocatif: field(0),
+      autresBiensCredit: null,
+      supportsDetenus: ['aucun'],
+      supportDominant: null,
       epargnePlacements: field(0),
       partsEntreprise: { mode: 'value', value: 0 },
-      dettesTotal: field(0),
+      dettesAutres: field(0),
     },
+    transmissionOrganisee: null,
     ...overrides,
   };
 }
@@ -60,195 +69,275 @@ function baseEntrepreneur(overrides = {}) {
       activiteStabilite: 'stable',
       partRevenusDependante: 'plus-50',
       projetFinancementEnvisage: 'non',
+      remunerationComparee: null,
+      excedentTresorerie: 'non',
     },
     ...overrides,
   });
 }
 
-function scored(value) {
-  return { kind: 'value', value };
+function withPatrimoine(context, patch) {
+  return { ...context, patrimoine: { ...context.patrimoine, ...patch } };
 }
 
 // ---------------------------------------------------------------------
-console.log('Scénarios (section 14)');
+console.log('Axe A — Sécurité financière (mois de couverture)');
 
-// 1. Salarié sans dette, budget suivi : aucune pénalité pour absence de crédit.
-test('1. salarié sans dette — cred1 seul peut donner un score plein sur l’axe C', () => {
-  const context = baseParticulier();
-  const answers = { creditGate: { kind: 'value', value: 'non' }, cred1: scored(2) };
-  const axisC = computeAxisResult('C', context, answers);
-  assert.equal(axisC.applicableCount, 1);
-  assert.equal(axisC.score, 100);
+test('A1. couverture < 3 mois → score 0', () => {
+  const ctx = baseParticulier({ depensesEssentielles: field(2000), epargneDisponible: field(1000) });
+  const r = computeAxisResult('A', ctx, {});
+  assert.equal(r.score, 0);
+});
+test('A2. couverture entre 3 et 12 mois → score 50', () => {
+  const ctx = baseParticulier({ depensesEssentielles: field(2000), epargneDisponible: field(6000) }); // 3 mois pile
+  const r = computeAxisResult('A', ctx, {});
+  assert.equal(r.score, 50);
+});
+test('A3. couverture > 12 mois → score 100', () => {
+  const ctx = baseParticulier({ depensesEssentielles: field(2000), epargneDisponible: field(30000) });
+  const r = computeAxisResult('A', ctx, {});
+  assert.equal(r.score, 100);
+});
+test('A4. dépenses ou épargne inconnues → non évalué, jamais 0', () => {
+  const ctx = baseParticulier({ epargneDisponible: { status: 'unknown' } });
+  const r = computeAxisResult('A', ctx, {});
+  assert.equal(r.status, 'not_evaluated');
+  assert.equal(r.score, null);
 });
 
-// 2. Débutant sans patrimoine : diversification non applicable, pas de pénalité.
-test('2. débutant sans patrimoine — axe D non applicable, cap1 propose un plan futur', () => {
-  const context = baseParticulier(); // tout à 0
-  const answers = {};
-  const axisD = computeAxisResult('D', context, answers);
-  assert.equal(axisD.status, 'not_applicable');
+// ---------------------------------------------------------------------
+console.log('\nAxe B — Capacité à investir (taux d’épargne)');
+
+test('B1. épargne mensuelle négative → score 0 (à découvert)', () => {
+  const ctx = baseParticulier({ epargneMensuelle: field(-100) });
+  const r = computeAxisResult('B', ctx, {});
+  assert.equal(r.score, 0);
+});
+test('B2. taux d’épargne ≤ 10% → score 50', () => {
+  const ctx = baseParticulier({ revenusNets: field(3000), epargneMensuelle: field(200) }); // ~6.7%
+  const r = computeAxisResult('B', ctx, {});
+  assert.equal(r.score, 50);
+});
+test('B3. taux d’épargne > 10% → score 100', () => {
+  const ctx = baseParticulier({ revenusNets: field(3000), epargneMensuelle: field(600) }); // 20%
+  const r = computeAxisResult('B', ctx, {});
+  assert.equal(r.score, 100);
 });
 
-// 2b. Débutant sans patrimoine : cap1 même à 0 (pas de projet formalisé) ne
-// déclenche jamais le signal « argent exposé à un risque » — il n'y a rien
-// à exposer.
-test('2b. débutant sans patrimoine — cap1=0 (pas de projet) ne déclenche pas « argent exposé »', () => {
-  const context = baseParticulier();
-  const answers = { cap1: scored(0) };
-  const results = computeResults(context, answers);
-  assert.ok(!results.priorities.some((p) => p.id === 'p1-argent-expose'));
+// ---------------------------------------------------------------------
+console.log('\nAxe C — Levier bancaire (loan-to-value immobilier)');
+
+test('C1. aucun bien immobilier → axe non applicable, sans pénalité', () => {
+  const ctx = baseParticulier();
+  const app = applicabilityMap(ctx, {});
+  assert.equal(app.levier1.status, 'not_applicable');
+  const r = computeAxisResult('C', ctx, {});
+  assert.equal(r.status, 'not_applicable');
+});
+test('C2. résidence principale remboursée → levier non exploité, score 0', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(300000),
+    residencePrincipaleCredit: 'aucun',
+  });
+  const r = computeAxisResult('C', ctx, {});
+  assert.equal(r.score, 0);
+});
+test('C3. crédit ≈ 20% de la valeur → levier partiellement exploité, score 50', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(300000),
+    residencePrincipaleCredit: 'leger',
+  });
+  const r = computeAxisResult('C', ctx, {});
+  assert.equal(r.score, 50);
+});
+test('C4. crédit ≥ 50% de la valeur → levier bien exploité, score 100', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(300000),
+    residencePrincipaleCredit: 'fort',
+  });
+  const r = computeAxisResult('C', ctx, {});
+  assert.equal(r.score, 100);
 });
 
-// 3. Retraité vivant de ses revenus patrimoniaux : pas de pénalité pour non-réinvestissement.
-test('3. retraité — cap1=2 (retrait pour vivre) n’est pas pénalisé', () => {
-  const context = baseParticulier({ situation: 'retraite' });
-  const answers = { cap1: scored(2) };
-  const axisE = computeAxisResult('E', context, answers);
-  assert.equal(axisE.applicableCount, 1); // seul indicateur d'axe E pour un particulier
-  assert.equal(axisE.score, 100);
+// ---------------------------------------------------------------------
+console.log('\nAxe D — Diversification');
+
+test('D1. aucun actif investi → non applicable', () => {
+  const ctx = baseParticulier();
+  const r = computeAxisResult('D', ctx, {});
+  assert.equal(r.status, 'not_applicable');
+});
+test('D2. un seul support détenu → score 0', () => {
+  const ctx = withPatrimoine(baseParticulier(), { supportsDetenus: ['assuranceVie'], supportDominant: 'assuranceVie', epargnePlacements: field(50000) });
+  const r = computeAxisResult('D', ctx, {});
+  assert.equal(r.score, 0);
+});
+test('D3. quatre supports détenus, sans concentration → score 100', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    supportsDetenus: ['livrets', 'assuranceVie', 'actions', 'scpi'],
+    supportDominant: 'assuranceVie',
+    epargnePlacements: field(50000),
+  });
+  const r = computeAxisResult('D', ctx, {});
+  assert.equal(r.score, 100);
+});
+test('D4. quatre supports mais concentration immobilière globale → plafonné à 50', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    supportsDetenus: ['livrets', 'assuranceVie', 'actions', 'scpi'],
+    supportDominant: 'assuranceVie',
+    epargnePlacements: field(50000),
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(400000),
+    residencePrincipaleCredit: 'aucun',
+  });
+  const r = computeAxisResult('D', ctx, {});
+  assert.equal(r.score, 50);
 });
 
-// 4. Dirigeant sans holding mais arbitrages examinés : aucune pénalité pour absence de holding.
-test('4. dirigeant sans excédent durable — p3 non applicable, n’abaisse pas l’axe E', () => {
-  const context = baseEntrepreneur();
-  const answers = { p3Gate: { kind: 'value', value: 'non' }, cap1: scored(1) };
-  const app = applicabilityMap(context, answers);
-  assert.equal(app.p3.status, 'not_applicable');
-  const axisE = computeAxisResult('E', context, answers);
-  assert.equal(axisE.applicableCount, 1);
-  assert.equal(axisE.score, 50);
+// ---------------------------------------------------------------------
+console.log('\nAxe E — Capitalisation et efficacité (argent qui dort)');
+
+test('E1. aucun actif investi → non pénalisé (rien à faire fructifier)', () => {
+  const ctx = baseParticulier();
+  const r = computeAxisResult('E', ctx, {});
+  assert.equal(r.score, 100);
+});
+test('E2. dominant = livrets, épargne largement excédentaire → argent qui dort, score 0', () => {
+  const ctx = withPatrimoine(baseParticulier({ depensesEssentielles: field(1500) }), {
+    supportsDetenus: ['livrets'],
+    supportDominant: 'livrets',
+    epargnePlacements: field(50000), // très supérieur à 1.5×6×1500=13500
+  });
+  const r = computeAxisResult('E', ctx, {});
+  assert.equal(r.score, 0);
+});
+test('E3. dominant = assurance-vie → capital jugé mis au travail, score 100', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    supportsDetenus: ['assuranceVie'],
+    supportDominant: 'assuranceVie',
+    epargnePlacements: field(50000),
+  });
+  const r = computeAxisResult('E', ctx, {});
+  assert.equal(r.score, 100);
 });
 
-// 5. Dirigeant avec forte trésorerie nécessaire à l'activité : aucun montant traité comme excédent libre.
-test('5. dirigeant trésorerie nécessaire à l’activité — pas d’excédent présumé', () => {
-  const context = baseEntrepreneur();
-  const answers = { p3Gate: { kind: 'value', value: 'non' } };
-  const results = computeResults(context, answers);
+// ---------------------------------------------------------------------
+console.log('\nAxe F — Protection et transmission');
+
+test('F1. transmission faite et à jour → score 100', () => {
+  const r = computeAxisResult('F', baseParticulier({ transmissionOrganisee: 'fait' }), {});
+  assert.equal(r.score, 100);
+});
+test('F2. rien n’est fait → score 0', () => {
+  const r = computeAxisResult('F', baseParticulier({ transmissionOrganisee: 'non' }), {});
+  assert.equal(r.score, 0);
+});
+test('F3. je ne sais pas → non évalué, jamais 0', () => {
+  const r = computeAxisResult('F', baseParticulier({ transmissionOrganisee: 'inconnu' }), {});
+  assert.equal(r.status, 'not_evaluated');
+  assert.equal(r.score, null);
+});
+
+// ---------------------------------------------------------------------
+console.log('\nBranche entrepreneur');
+
+test('Ent1. rémunération jamais comparée → axe B tiré vers le bas', () => {
+  const ctx = baseEntrepreneur({ epargneMensuelle: field(600) }); // capa1 = 100
+  ctx.entreprise.remunerationComparee = 'non';
+  const r = computeAxisResult('B', ctx, {});
+  assert.equal(r.coverage, 1); // 2 indicateurs, 2 répondus
+  assert.equal(r.score, 50); // (100 + 0) / 2
+});
+test('Ent2. excédent de trésorerie non déclaré → levier holding non prioritaire', () => {
+  const ctx = baseEntrepreneur();
+  ctx.entreprise.excedentTresorerie = 'non';
+  const results = computeResults(ctx, {});
   assert.equal(results.levers.capitalisationHolding.status, 'non_prioritaire');
 });
+test('Ent3. excédent durable + objectif entreprise → levier holding à examiner', () => {
+  const ctx = baseEntrepreneur({ objectifs: [{ id: 'entreprise', echeance: 'plus-8' }], objectifPrioritaireId: 'entreprise' });
+  ctx.entreprise.excedentTresorerie = 'oui';
+  const results = computeResults(ctx, {});
+  assert.equal(results.levers.capitalisationHolding.status, 'a_examiner');
+});
 
-// 6. Patrimoine immobilier concentré : signalement contextualisé, pas d'injonction de vendre.
-test('6. concentration immobilière — signalée, jamais une injonction de vendre', () => {
-  const context = baseParticulier({
-    patrimoine: {
-      ...baseParticulier().patrimoine,
-      residencePrincipale: field(400000),
-      immobilierLocatif: field(200000),
-      epargnePlacements: field(50000),
-    },
+// ---------------------------------------------------------------------
+console.log('\nPriorités et cohérence');
+
+test('P1. épargne négative → priorité fragilité budgétaire, tableau de longueur 1', () => {
+  const ctx = baseParticulier({ epargneMensuelle: field(-50) });
+  const results = computeResults(ctx, {});
+  assert.equal(results.priorities.length, 1);
+  assert.equal(results.priorities[0].id, 'p1-depenses-non-couvertes');
+});
+test('P2. concentration immobilière — signalée, jamais une injonction de vendre', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(400000),
+    residencePrincipaleCredit: 'aucun',
+    autresBiensImmobiliers: 'oui',
+    immobilierLocatif: field(200000),
+    autresBiensCredit: 'aucun',
+    epargnePlacements: field(50000),
+    supportsDetenus: ['livrets'],
+    supportDominant: 'livrets',
   });
-  const alloc = computeGrossAllocation(context);
+  const alloc = computeGrossAllocation(ctx);
   assert.ok(alloc.available);
-  const results = computeResults(context, {});
-  assert.ok(results.factuals.concentration.flags.some((f) => f.id === 'immobilier'));
+  const results = computeResults(ctx, {});
+  assert.ok(results.priorities.some((p) => p.id === 'p3-concentration'));
   const p = results.priorities.find((r) => r.id === 'p3-concentration');
-  assert.ok(p);
   assert.ok(!/vendre/i.test(p.action));
   assert.ok(!/vendre/i.test(p.text));
 });
-
-// 7. Réponses inconnues/refusées : couverture réduite, jamais transformées en zéro.
-test('7. réponse inconnue — n’est jamais comptée comme un score de 0', () => {
-  const context = baseParticulier();
-  const answers = { a1: { kind: 'unknown' } };
-  const axisA = computeAxisResult('A', context, answers);
-  assert.equal(axisA.answeredCount, 0);
-  assert.equal(axisA.status, 'not_evaluated');
-  assert.equal(axisA.score, null); // ne doit jamais afficher 0
-});
-
-// 8. Changement entrepreneur → salarié : compléments P1/P3 retirés.
-test('8. changement de branche — P1/P3 retirés par pruneAnswers', () => {
-  let context = baseEntrepreneur();
-  let answers = { p1: scored(1), p3Gate: { kind: 'value', value: 'oui' }, p3: scored(2) };
-  context = { ...context, situation: 'salarie' }; // retour à la branche particulier
-  answers = pruneAnswers(context, answers);
-  assert.equal(answers.p1, undefined);
-  assert.equal(answers.p3, undefined);
-  assert.equal(answers.p3Gate, undefined);
-});
-
-// 9. Patrimoine net nul ou négatif : pas de division par zéro ni concentration aberrante.
-test('9. patrimoine net nul — pas de division par zéro', () => {
-  const context = baseParticulier();
-  const alloc = computeGrossAllocation(context);
+test('P3. patrimoine net nul — pas de division par zéro', () => {
+  const ctx = baseParticulier();
+  const alloc = computeGrossAllocation(ctx);
   assert.equal(alloc.available, false);
-  assert.doesNotThrow(() => computeResults(context, {}));
+  assert.doesNotThrow(() => computeResults(ctx, {}));
 });
-
-// 10. Objectif proche et besoin indispensable exposé : sécurité prioritaire sur l'organisation.
-test('10. fragilité immédiate prioritaire sur l’organisation', () => {
-  const context = baseEntrepreneur();
-  const answers = {
-    b1: scored(0), // dépenses non couvertes (palier 1)
-    p1: scored(1), // rémunération non arbitrée (palier 4)
-  };
-  const results = computeResults(context, answers);
-  assert.equal(results.priorities[0].id, 'p1-depenses-non-couvertes');
-});
-
-// 11. Parts d'entreprise : pas de doubles comptes.
-test('11. parts d’entreprise comptées une seule fois dans le patrimoine net', () => {
-  const context = baseParticulier({
-    patrimoine: { ...baseParticulier().patrimoine, partsEntreprise: { mode: 'value', value: 100000 } },
-  });
-  const alloc = computeGrossAllocation(context);
+test('P4. parts d’entreprise comptées une seule fois dans le patrimoine net', () => {
+  const ctx = withPatrimoine(baseParticulier(), { partsEntreprise: { mode: 'value', value: 100000 } });
+  const alloc = computeGrossAllocation(ctx);
   assert.ok(alloc.available);
   const keys = Object.keys(alloc.pct).filter((k) => k === 'partsEntreprise');
   assert.equal(keys.length, 1);
 });
-
-// 12. Couverture 50 % et 100 % : règles d'affichage respectées.
-test('12a. couverture 50% (1/2, axe B dirigeant) → non évalué', () => {
-  const context = baseEntrepreneur();
-  const answers = { b1: scored(2) }; // p1 non répondu
-  const axisB = computeAxisResult('B', context, answers);
-  assert.equal(axisB.applicableCount, 2);
-  assert.equal(axisB.answeredCount, 1);
-  assert.equal(axisB.status, 'not_evaluated');
+test('P5. crédit immobilier déclaré sans tranche connue → patrimoine net non calculable (jamais 0 par défaut)', () => {
+  const ctx = withPatrimoine(baseParticulier(), {
+    residencePrincipaleProprietaire: 'oui',
+    residencePrincipale: field(300000),
+    residencePrincipaleCredit: null,
+  });
+  const net = computeGrossAllocation(ctx);
+  assert.equal(net.available, false);
 });
-test('12b. couverture 100% (2/2) → affiché avec score exact', () => {
-  const context = baseEntrepreneur();
-  const answers = { b1: scored(2), p1: scored(0) };
-  const axisB = computeAxisResult('B', context, answers);
-  assert.equal(axisB.coverage, 1);
-  assert.equal(axisB.score, 50); // moyenne (2+0)/2=1 -> 1*50=50
+test('P6. non-résident — fiscalité mutée vers une orientation transfrontalière', () => {
+  const ctx = baseParticulier({ residenceFiscale: 'autre' });
+  const results = computeResults(ctx, {});
+  assert.equal(results.levers.fiscaliteFrais.status, 'informations_insuffisantes');
+  assert.match(results.levers.fiscaliteFrais.action, /transfrontalière/);
+  assert.equal(results.nonResident, true);
 });
-
-// 13. Toutes réponses inconnues : aucun radar trompeur.
-test('13. tout inconnu — aucun axe n’affiche de score', () => {
-  const context = baseParticulier();
-  const results = computeResults(context, {});
+test('P7. toutes les données minimales manquantes — aucun axe n’affiche de score', () => {
+  const ctx = { situation: 'salarie', ageBracket: '35-54', foyerSituation: 'seul', residenceFiscale: 'france', objectifs: [], patrimoine: {} };
+  const results = computeResults(ctx, {});
   for (const axis of Object.values(results.axes)) {
     assert.notEqual(axis.status, 'ok');
   }
 });
 
-// 14. Une seule priorité fondée : ne pas en inventer deux autres.
-test('14. une seule priorité déclenchée → tableau de longueur 1', () => {
-  const context = baseParticulier();
-  const answers = { b1: scored(0) };
-  const results = computeResults(context, answers);
-  assert.equal(results.priorities.length, 1);
-});
-
-// 15. Non-résident : aucune piste fiscale française présentée comme applicable.
-test('15. non-résident — fiscalité mutée vers une orientation transfrontalière', () => {
-  const context = baseParticulier({ residenceFiscale: 'autre' });
-  const results = computeResults(context, {});
-  assert.equal(results.levers.fiscaliteFrais.status, 'informations_insuffisantes');
-  assert.match(results.levers.fiscaliteFrais.action, /transfrontalière/);
-  assert.equal(results.nonResident, true);
-});
-
 // ---------------------------------------------------------------------
 console.log('\nInvariance');
 
-test('déterminisme — mêmes réponses ⇒ mêmes résultats', () => {
-  const context = baseEntrepreneur();
-  const answers = { p1: scored(1), b1: scored(2) };
-  const r1 = computeResults(context, answers);
-  const r2 = computeResults(context, answers);
+test('déterminisme — même contexte ⇒ mêmes résultats', () => {
+  const ctx = baseEntrepreneur({ epargneMensuelle: field(600) });
+  ctx.entreprise.remunerationComparee = 'oui';
+  const r1 = computeResults(ctx, {});
+  const r2 = computeResults(ctx, {});
   assert.deepEqual(r1.axes, r2.axes);
   assert.deepEqual(r1.priorities, r2.priorities);
   assert.deepEqual(r1.levers, r2.levers);
@@ -257,22 +346,25 @@ test('déterminisme — mêmes réponses ⇒ mêmes résultats', () => {
 test('le thème d’entrée du Reel n’influence jamais le calcul', () => {
   const context1 = baseParticulier();
   const context2 = baseParticulier({ reelTheme: 'holding' });
-  const answers = { b1: scored(2) };
-  const r1 = computeResults(context1, answers);
-  const r2 = computeResults(context2, answers);
+  const r1 = computeResults(context1, {});
+  const r2 = computeResults(context2, {});
   assert.deepEqual(r1.axes, r2.axes);
 });
 
-test('monotonie — augmenter une note ne peut pas faire baisser son axe', () => {
-  const context = baseParticulier();
-  const before = computeAxisResult('B', context, { b1: scored(1) });
-  const after = computeAxisResult('B', context, { b1: scored(2) });
+test('monotonie — plus de couverture de sécurité ne peut jamais faire baisser le score de l’axe A', () => {
+  const before = computeAxisResult('A', baseParticulier({ depensesEssentielles: field(2000), epargneDisponible: field(1000) }), {});
+  const after = computeAxisResult('A', baseParticulier({ depensesEssentielles: field(2000), epargneDisponible: field(30000) }), {});
   assert.ok(after.score >= before.score);
 });
 
 test('validation — une chaîne vide n’est jamais silencieusement convertie en zéro', () => {
   const r = validateAmountInput('');
   assert.equal(r.valid, false);
+});
+
+test('validation — un montant négatif est rejeté par défaut, accepté si explicitement autorisé', () => {
+  assert.equal(validateAmountInput('-50').valid, false);
+  assert.equal(validateAmountInput('-50', { allowNegative: true }).valid, true);
 });
 
 console.log(`\n${passed} tests réussis, ${failed} échecs.`);

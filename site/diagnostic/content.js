@@ -2,13 +2,13 @@
 // jamais un calcul ; seuls indicators.js et rules.js portent la logique de score.
 'use strict';
 
-export const RULE_VERSION = 'diagnostic-patrimoine-v1.2.0';
-export const RULE_DATE = '2026-09-14';
+export const RULE_VERSION = 'diagnostic-patrimoine-v2.0.0';
+export const RULE_DATE = '2026-09-18';
 
 export const AXES = [
   { id: 'A', name: 'Sécurité financière', short: 'Sécurité' },
   { id: 'B', name: 'Capacité à investir', short: 'Capacité' },
-  { id: 'C', name: 'Maîtrise du crédit', short: 'Crédit' },
+  { id: 'C', name: 'Levier bancaire', short: 'Levier' },
   { id: 'D', name: 'Diversification', short: 'Diversif.' },
   { id: 'E', name: 'Capitalisation et efficacité', short: 'Capital.' },
   { id: 'F', name: 'Protection et transmission', short: 'Protect.' },
@@ -131,108 +131,95 @@ export const CONTEXT_LABELS = {
   residenceFiscale: 'Votre résidence fiscale',
   objectifs: 'Votre objectif',
   capacite: 'Votre capacité financière',
-  patrimoine: 'Votre patrimoine',
+  immobilier: 'Votre immobilier',
+  financier: 'Votre épargne financière',
+  transmission: 'Votre transmission',
   entreprise: 'Votre activité',
 };
 
-// --- Textes des indicateurs notés (voir indicators.js pour la logique) ---
-// Réduits à un indicateur par pilier (deux pour la branche dirigeant/
-// indépendant) pour raccourcir le parcours, et à une échelle à 3 niveaux
-// (0/1/2 : non / partiellement / oui) au lieu de 5, pour ne jamais proposer
-// plus de 4 choix par question (3 niveaux + « je ne sais pas / je préfère
-// ne pas répondre »).
+// --- Textes des étapes de diagnostic (voir facts.js/indicators.js pour la
+// logique de calcul) — chaque pilier est désormais noté à partir de faits
+// concrets (montants, tranches, choix structurels), jamais d'un ressenti
+// autodéclaré. Voir GRILLE.md pour la table complète des seuils.
 
-export const INDICATOR_TEXTS = {
-  a1: {
-    question: 'Si vos revenus s’arrêtaient, combien de temps votre épargne immédiatement disponible couvrirait-elle vos dépenses et vos crédits ?',
-    helper: 'Une estimation suffit — on exclut la trésorerie nécessaire à l’entreprise et l’argent déjà réservé à un projet.',
-    options: [
-      { value: 0, label: 'Moins de 3 mois' },
-      { value: 1, label: '3 à 12 mois' },
-      { value: 2, label: 'Plus de 12 mois' },
-    ],
+export const DIAGNOSTIC_QUESTIONS = {
+  depensesEssentielles: {
+    label: 'Dépenses mensuelles essentielles',
+    helper: 'Logement, charges fixes, alimentation, crédits en cours.',
   },
-  b1: {
-    question: 'Savez-vous ce que vous pouvez investir après vos dépenses, crédits, impôts et projets proches ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Non, mes dépenses dépassent mes revenus disponibles' },
-      { value: 1, label: 'J’ai une estimation approximative' },
-      { value: 2, label: 'Je la connais précisément et je la suis' },
-    ],
+  epargneDisponible: {
+    label: 'Épargne immédiatement disponible',
+    helper: 'Sans délai ni pénalité, hors argent déjà destiné à un projet précis.',
   },
-  creditGate: {
-    question: 'Avez-vous des dettes personnelles en cours, une caution, ou un projet de crédit à l’étude ?',
+  epargneMensuelle: {
+    label: 'Épargne mensuelle moyenne, tous supports confondus',
+    helper: 'Mettez un chiffre négatif si vous devez parfois puiser dans votre épargne pour boucler les fins de mois.',
   },
-  cred1WithDebt: {
-    question: 'Avez-vous une vue complète du coût et des engagements de vos crédits ?',
-    options: [
-      { value: 0, label: 'Aucune vue d’ensemble' },
-      { value: 1, label: 'Je connais les grandes lignes (mensualités, échéances)' },
-      { value: 2, label: 'Vue complète (taux, assurances, garanties)' },
-    ],
+  residencePrincipaleProprietaire: {
+    question: 'Êtes-vous propriétaire de votre résidence principale ?',
   },
-  cred1NoDebt: {
-    question: 'Disposez-vous d’une vérification de vos engagements et cautions éventuelles ?',
-    options: [
-      { value: 2, label: 'Oui, absence d’engagement confirmée' },
-      { value: null, label: 'Incertain' },
-    ],
+  residencePrincipaleCredit: {
+    question: 'Reste-t-il un crédit sur ce bien ?',
   },
-  div1: {
-    question: 'Savez-vous à quels actifs, secteurs et zones vos placements sont réellement exposés ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Aucune vue d’ensemble' },
-      { value: 1, label: 'Je connais les grandes catégories' },
-      { value: 2, label: 'Vue précise, y compris via mon entreprise ou mes structures' },
-    ],
+  autresBiensImmobiliers: {
+    question: 'Avez-vous d’autres biens immobiliers (locatif, résidence secondaire) ?',
   },
-  cap1: {
-    question: 'Vos actifs et les revenus qu’ils produisent ont-ils un rôle défini dans vos objectifs ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Non, de l’argent nécessaire à court terme est mal protégé' },
-      { value: 1, label: 'Partiellement — certains horizons sont distingués' },
-      { value: 2, label: 'Oui, chaque actif a un rôle et une règle suivie' },
-    ],
-    noInvestmentOptions: [
-      { value: 0, label: 'Pas encore de projet formalisé' },
-      { value: 1, label: 'J’ai défini des horizons et une règle' },
-      { value: 2, label: 'J’ai un plan que je suis et j’ajuste' },
-    ],
+  autresBiensCredit: {
+    question: 'Reste-t-il un crédit sur ce bien ?',
   },
-  prot1: {
-    question: 'Savez-vous qui recevrait votre patrimoine et qui pourrait agir en cas d’incapacité ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Jamais examiné' },
-      { value: 1, label: 'Partiellement (intentions ou vérifications partielles)' },
-      { value: 2, label: 'Oui, organisation vérifiée et à jour' },
-    ],
+  supportsDetenus: {
+    question: 'Parmi ces supports, lesquels détenez-vous aujourd’hui ?',
   },
-  p1: {
-    question: 'Votre rémunération de dirigeant a-t-elle déjà été optimisée ?',
-    helper: 'En tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.',
-    options: [
-      { value: 0, label: 'Jamais' },
-      { value: 1, label: 'Une réflexion partielle ou ancienne' },
-      { value: 2, label: 'Oui, une comparaison à jour' },
-    ],
+  supportDominant: {
+    question: 'Lequel représente la plus grande part de votre épargne financière ?',
   },
-  p3Gate: {
-    question: 'Votre activité dégage-t-elle des excédents de trésorerie durables, au-delà des besoins d’exploitation, des impôts et des projets déjà engagés ?',
+  dettesAutres: {
+    label: 'Autres dettes ou crédits en cours',
+    helper: 'Hors crédits immobiliers déjà indiqués (consommation, personnel...).',
   },
-  p3: {
-    question: 'L’utilisation de ces excédents professionnels est-elle organisée ?',
-    helper: null,
-    options: [
-      { value: 0, label: 'Aucune réflexion' },
-      { value: 1, label: 'Des choix ponctuels, sans comparaison' },
-      { value: 2, label: 'Oui, un arbitrage comparé et suivi' },
-    ],
+  transmissionOrganisee: {
+    question: 'Avez-vous déjà organisé votre transmission ?',
+    helper: 'Testament, donation entre époux, mandat de protection future.',
+  },
+  remunerationComparee: {
+    question: 'Avez-vous comparé votre rémunération actuelle à une autre option au cours des 2 dernières années ?',
+    helper: 'Dividendes, PER entreprise, ou toute autre alternative.',
+  },
+  excedentTresorerie: {
+    question: 'Votre activité dégage-t-elle un excédent de trésorerie durable ?',
+    helper: 'Au-delà des besoins d’exploitation, des impôts et des projets déjà engagés.',
   },
 };
+
+export const OUI_NON_OPTIONS = [
+  { value: 'oui', label: 'Oui' },
+  { value: 'non', label: 'Non' },
+];
+
+export const CREDIT_BRACKET_OPTIONS = [
+  { value: 'aucun', label: 'Non, il est remboursé' },
+  { value: 'leger', label: 'Oui, environ 20 % de la valeur du bien' },
+  { value: 'moyen', label: 'Oui, environ 50 % de la valeur du bien' },
+  { value: 'fort', label: 'Oui, plus de 50 % de la valeur du bien' },
+];
+
+export const SUPPORTS_OPTIONS = [
+  { value: 'livrets', label: 'Livrets réglementés (Livret A, LDDS, PEL...)' },
+  { value: 'assuranceVie', label: 'Assurance-vie' },
+  { value: 'per', label: 'PER ou épargne retraite' },
+  { value: 'actions', label: 'Compte-titres, PEA ou actions en direct' },
+  { value: 'scpi', label: 'SCPI' },
+  { value: 'epargneSalariale', label: 'Épargne salariale (PEE, PERCO...)' },
+  { value: 'crypto', label: 'Cryptomonnaies' },
+  { value: 'aucun', label: 'Aucun de ces supports' },
+];
+
+export const TRANSMISSION_OPTIONS = [
+  { value: 'fait', label: 'Oui, c’est fait et à jour' },
+  { value: 'reflexion', label: 'Une réflexion engagée, rien de formalisé' },
+  { value: 'non', label: 'Non, rien n’est fait' },
+  { value: 'inconnu', label: 'Je ne sais pas' },
+];
 
 export const DONT_KNOW_LABEL = 'Je ne sais pas';
 export const PREFER_NOT_TO_SAY_LABEL = 'Je préfère ne pas répondre';

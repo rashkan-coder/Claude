@@ -1,11 +1,13 @@
 // app.js — interface uniquement. Toute la logique de score, d'applicabilité
-// et de priorisation vit dans engine.js / indicators.js / rules.js ; ce
-// fichier se contente de collecter les réponses et d'afficher les résultats.
+// et de priorisation vit dans engine.js / indicators.js / rules.js / facts.js ;
+// ce fichier se contente de collecter des faits concrets (montants, tranches,
+// choix structurels) et d'afficher les résultats. Les scores ne sont jamais
+// saisis directement par la personne : ils sont dérivés de ce qu'elle déclare.
 'use strict';
 
 import * as C from './content.js';
-import { INDICATORS, getIndicator } from './indicators.js';
 import * as E from './engine.js';
+import * as F from './facts.js';
 import { drawRadar } from './radar.js';
 
 // ---------------------------------------------------------------------
@@ -13,48 +15,41 @@ import { drawRadar } from './radar.js';
 // ---------------------------------------------------------------------
 const state = {
   context: { objectifs: [], patrimoine: {}, entreprise: {} },
-  answers: {},
-  stepIndex: 0, // index dans la liste combinée contexte + indicateurs
+  stepIndex: 0,
 };
 
 function clearAll() {
   state.context = { objectifs: [], patrimoine: {}, entreprise: {} };
-  state.answers = {};
   state.stepIndex = 0;
 }
 
 // ---------------------------------------------------------------------
-// Étapes de contexte (C1 à C7 — non notées)
+// Étapes du parcours (toutes des faits déclaratifs — aucune n'est notée
+// directement : la notation est entièrement dérivée, voir indicators.js)
 // ---------------------------------------------------------------------
-const CONTEXT_STEP_IDS = ['situation', 'foyer', 'residenceFiscale', 'objectifs', 'capacite', 'patrimoine', 'entreprise'];
+const STEP_IDS = ['situation', 'foyer', 'residenceFiscale', 'objectifs', 'capacite', 'immobilier', 'financier', 'transmission', 'entreprise'];
 
-function activeContextStepIds() {
+function activeStepIds() {
   const isEntrepreneur = state.context.situation === 'entrepreneur';
-  return CONTEXT_STEP_IDS.filter((id) => id !== 'entreprise' || isEntrepreneur);
-}
-
-function activeIndicatorIds() {
-  const isEntrepreneur = E.deriveBranch(state.context) === 'entrepreneur';
-  return INDICATORS.filter((i) => isEntrepreneur || !i.entrepreneurOnly).map((i) => i.id);
-}
-
-function allStepIds() {
-  return [...activeContextStepIds(), ...activeIndicatorIds()];
+  return STEP_IDS.filter((id) => id !== 'entreprise' || isEntrepreneur);
 }
 
 // ---------------------------------------------------------------------
 // Utilitaires de rendu
 // ---------------------------------------------------------------------
-function el(html) {
-  const t = document.createElement('template');
-  t.innerHTML = html.trim();
-  return t.content.firstElementChild;
-}
-
 function radioGroup(name, options, selected) {
   return `<div class="choices">${options
     .map(
       (o) => `<label class="choice"><input type="radio" name="${name}" value="${o.value}" ${selected === o.value ? 'checked' : ''}><span>${o.label}</span></label>`
+    )
+    .join('')}</div>`;
+}
+
+function checkboxGroup(name, options, selected) {
+  const sel = selected || [];
+  return `<div class="choices">${options
+    .map(
+      (o) => `<label class="choice"><input type="checkbox" name="${name}" value="${o.value}" ${sel.includes(o.value) ? 'checked' : ''}><span>${o.label}</span></label>`
     )
     .join('')}</div>`;
 }
@@ -73,7 +68,7 @@ function amountFieldHTML(fieldId, label, field, opts = {}) {
   return `
   <div class="field-group" data-field="${fieldId}" data-meta="${meta}">
     <label style="display:block;font-weight:700;color:var(--p);font-size:14px;margin-bottom:6px">${label}${opts.helper ? `<br><span style="font-weight:400;color:var(--muted);font-size:12.5px">${opts.helper}</span>` : ''}</label>
-    <div class="field"><input type="number" min="0" inputmode="decimal" id="${fieldId}" placeholder="${opts.placeholder || 'Ex. 1000'}" value="${value}" ${meta ? 'disabled' : ''}><span>€</span></div>
+    <div class="field"><input type="number" ${opts.allowNegative ? '' : 'min="0"'} inputmode="decimal" id="${fieldId}" placeholder="${opts.placeholder || 'Ex. 1000'}" value="${value}" ${meta ? 'disabled' : ''}><span>€</span></div>
     <div class="meta-row">
       <button type="button" class="meta-btn ${meta === 'unknown' ? 'active' : ''}" data-role="unknown" data-target="${fieldId}">${C.DONT_KNOW_LABEL}</button>
       <button type="button" class="meta-btn ${meta === 'refuse' ? 'active' : ''}" data-role="refuse" data-target="${fieldId}">${C.PREFER_NOT_TO_SAY_LABEL}</button>
@@ -97,13 +92,13 @@ function wireMetaButtons(container) {
   });
 }
 
-function readAmountField(fieldId, { allowZero = true } = {}) {
+function readAmountField(fieldId, { allowZero = true, allowNegative = false } = {}) {
   const group = document.querySelector(`[data-field="${fieldId}"]`);
   const meta = group ? group.dataset.meta : '';
   if (meta === 'unknown') return { field: { status: 'unknown' }, error: null };
   if (meta === 'refuse') return { field: { status: 'refuse' }, error: null };
   const raw = document.getElementById(fieldId).value;
-  const v = E.validateAmountInput(raw, { allowZero });
+  const v = E.validateAmountInput(raw, { allowZero, allowNegative });
   if (!v.valid) return { field: null, error: v.error };
   return { field: { status: 'value', value: v.value }, error: null };
 }
@@ -113,11 +108,20 @@ function radioValue(name) {
   return checked ? checked.value : null;
 }
 
+function checkboxValues(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value);
+}
+
+function navHTML(showBack) {
+  return `<div class="nav"><button class="button secondary" type="button" id="btn-back" ${showBack ? '' : 'disabled'} style="${showBack ? '' : 'visibility:hidden'}">Retour</button><button class="button" type="button" id="btn-next">Continuer →</button></div>`;
+}
+
 // ---------------------------------------------------------------------
-// Rendu des écrans de contexte
+// Rendu des écrans
 // ---------------------------------------------------------------------
-function renderContextStep(id, container) {
+function renderStepBody(id, container) {
   const ctx = state.context;
+
   if (id === 'situation') {
     container.innerHTML = `
       <div class="step-top"><span>VOTRE SITUATION</span><span>Un questionnaire adapté à votre situation</span></div>
@@ -129,11 +133,7 @@ function renderContextStep(id, container) {
     return () => {
       const v = radioValue('situation');
       if (!v) return { error: 'Choisissez une réponse.' };
-      const oldSituation = ctx.situation;
       ctx.situation = v;
-      if (oldSituation !== v) {
-        state.answers = E.pruneAnswers(ctx, state.answers);
-      }
       return { error: null };
     };
   }
@@ -207,50 +207,158 @@ function renderContextStep(id, container) {
       <h2 tabindex="-1">Votre capacité financière</h2>
       <p class="helper">Montants approximatifs acceptés, y compris zéro.</p>
       ${amountFieldHTML('revenusNets', 'Revenus nets mensuels du foyer, après impôt', ctx.revenusNets, { placeholder: 'Ex. 3500' })}
-      ${amountFieldHTML('versementsInvestissement', 'Versements d’investissement habituels par mois', ctx.versementsInvestissement, { placeholder: 'Ex. 300' })}
+      ${amountFieldHTML('depensesEssentielles', C.DIAGNOSTIC_QUESTIONS.depensesEssentielles.label, ctx.depensesEssentielles, { placeholder: 'Ex. 2200', helper: C.DIAGNOSTIC_QUESTIONS.depensesEssentielles.helper })}
+      ${amountFieldHTML('epargneDisponible', C.DIAGNOSTIC_QUESTIONS.epargneDisponible.label, ctx.epargneDisponible, { placeholder: 'Ex. 8000', helper: C.DIAGNOSTIC_QUESTIONS.epargneDisponible.helper })}
+      ${amountFieldHTML('epargneMensuelle', C.DIAGNOSTIC_QUESTIONS.epargneMensuelle.label, ctx.epargneMensuelle, { placeholder: 'Ex. 300', helper: C.DIAGNOSTIC_QUESTIONS.epargneMensuelle.helper, allowNegative: true })}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
     return () => {
-      const fields = ['revenusNets', 'versementsInvestissement'];
-      const results = {};
-      for (const f of fields) {
-        const r = readAmountField(f);
-        if (r.error) return { error: r.error };
-        results[f] = r.field;
-      }
-      Object.assign(ctx, results);
+      const revenus = readAmountField('revenusNets');
+      if (revenus.error) return { error: revenus.error };
+      const depenses = readAmountField('depensesEssentielles');
+      if (depenses.error) return { error: depenses.error };
+      const dispo = readAmountField('epargneDisponible');
+      if (dispo.error) return { error: dispo.error };
+      const mensuelle = readAmountField('epargneMensuelle', { allowNegative: true });
+      if (mensuelle.error) return { error: mensuelle.error };
+      ctx.revenusNets = revenus.field;
+      ctx.depensesEssentielles = depenses.field;
+      ctx.epargneDisponible = dispo.field;
+      ctx.epargneMensuelle = mensuelle.field;
       return { error: null };
     };
   }
 
-  if (id === 'patrimoine') {
+  if (id === 'immobilier') {
+    const p = ctx.patrimoine || {};
+    container.innerHTML = `
+      <div class="step-top"><span>VOTRE IMMOBILIER</span><span></span></div>
+      <h2 tabindex="-1">Votre immobilier</h2>
+      <div class="linked-field">
+        <p class="q">${C.DIAGNOSTIC_QUESTIONS.residencePrincipaleProprietaire.question}</p>
+        ${radioGroup('rpProprietaire', C.OUI_NON_OPTIONS, p.residencePrincipaleProprietaire || null)}
+        <div id="rp-body"></div>
+      </div>
+      <div class="linked-field">
+        <p class="q">${C.DIAGNOSTIC_QUESTIONS.autresBiensImmobiliers.question}</p>
+        ${radioGroup('autresBiens', C.OUI_NON_OPTIONS, p.autresBiensImmobiliers || null)}
+        <div id="autres-body"></div>
+      </div>
+      <p class="error" id="error" role="alert"></p>
+      ${navHTML(true)}`;
+
+    function renderRP() {
+      const v = radioValue('rpProprietaire');
+      const wrap = container.querySelector('#rp-body');
+      if (v !== 'oui') { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = `
+        ${amountFieldHTML('residencePrincipale', 'Valeur estimée du bien', p.residencePrincipale, { placeholder: 'Ex. 300000' })}
+        <p class="q">${C.DIAGNOSTIC_QUESTIONS.residencePrincipaleCredit.question}</p>
+        ${radioGroup('rpCredit', C.CREDIT_BRACKET_OPTIONS, p.residencePrincipaleCredit || null)}`;
+      wireMetaButtons(wrap);
+    }
+    function renderAutres() {
+      const v = radioValue('autresBiens');
+      const wrap = container.querySelector('#autres-body');
+      if (v !== 'oui') { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = `
+        ${amountFieldHTML('immobilierLocatif', 'Valeur estimée du ou des biens', p.immobilierLocatif, { placeholder: 'Ex. 150000' })}
+        <p class="q">${C.DIAGNOSTIC_QUESTIONS.autresBiensCredit.question}</p>
+        ${radioGroup('autresCredit', C.CREDIT_BRACKET_OPTIONS, p.autresBiensCredit || null)}`;
+      wireMetaButtons(wrap);
+    }
+    renderRP();
+    renderAutres();
+    container.querySelectorAll('input[name="rpProprietaire"]').forEach((r) => r.addEventListener('change', renderRP));
+    container.querySelectorAll('input[name="autresBiens"]').forEach((r) => r.addEventListener('change', renderAutres));
+
+    return () => {
+      const rpOwned = radioValue('rpProprietaire');
+      const autresOwned = radioValue('autresBiens');
+      if (!rpOwned || !autresOwned) return { error: 'Merci de répondre à chaque question.' };
+
+      let residencePrincipale = { status: 'value', value: 0 };
+      let residencePrincipaleCredit = null;
+      if (rpOwned === 'oui') {
+        const r = readAmountField('residencePrincipale');
+        if (r.error) return { error: r.error };
+        residencePrincipale = r.field;
+        residencePrincipaleCredit = radioValue('rpCredit');
+        if (!residencePrincipaleCredit) return { error: 'Merci d’indiquer si un crédit reste en cours sur ce bien.' };
+      }
+
+      let immobilierLocatif = { status: 'value', value: 0 };
+      let autresBiensCredit = null;
+      if (autresOwned === 'oui') {
+        const r = readAmountField('immobilierLocatif');
+        if (r.error) return { error: r.error };
+        immobilierLocatif = r.field;
+        autresBiensCredit = radioValue('autresCredit');
+        if (!autresBiensCredit) return { error: 'Merci d’indiquer si un crédit reste en cours sur ce bien.' };
+      }
+
+      ctx.patrimoine = {
+        ...ctx.patrimoine,
+        residencePrincipaleProprietaire: rpOwned,
+        residencePrincipale,
+        residencePrincipaleCredit,
+        autresBiensImmobiliers: autresOwned,
+        immobilierLocatif,
+        autresBiensCredit,
+      };
+      return { error: null };
+    };
+  }
+
+  if (id === 'financier') {
     const p = ctx.patrimoine || {};
     const parts = p.partsEntreprise || { mode: 'value', value: '' };
+    const supports = p.supportsDetenus || [];
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE PATRIMOINE</span><span></span></div>
-      <h2 tabindex="-1">Votre patrimoine</h2>
-      <p class="helper">Valeurs brutes approximatives. Un patrimoine nul est accepté.</p>
-      ${amountFieldHTML('residencePrincipale', 'Résidence principale', ctx.patrimoine && ctx.patrimoine.residencePrincipale, { placeholder: 'Ex. 300000' })}
-      ${amountFieldHTML('immobilierLocatif', 'Immobilier locatif', ctx.patrimoine && ctx.patrimoine.immobilierLocatif, { placeholder: 'Ex. 150000' })}
-      ${amountFieldHTML('epargnePlacements', 'Épargne et placements financiers (comptes, livrets, assurance-vie, bourse, crypto…)', ctx.patrimoine && ctx.patrimoine.epargnePlacements, { placeholder: 'Ex. 50000' })}
+      <div class="step-top"><span>VOTRE ÉPARGNE FINANCIÈRE</span><span></span></div>
+      <h2 tabindex="-1">Votre épargne financière</h2>
+      <div class="linked-field">
+        <p class="q">${C.DIAGNOSTIC_QUESTIONS.supportsDetenus.question}</p>
+        ${checkboxGroup('supports', C.SUPPORTS_OPTIONS, supports)}
+      </div>
+      <div id="dominant-field"></div>
+      <p class="helper">Valeurs brutes approximatives. Un montant nul est accepté.</p>
+      ${amountFieldHTML('epargnePlacements', 'Montant total de votre épargne et placements financiers', p.epargnePlacements, { placeholder: 'Ex. 50000' })}
       <div class="field-group" data-field="partsEntreprise" data-meta="${parts.mode === 'unknown' ? 'unknown' : ''}">
         <label style="display:block;font-weight:700;color:var(--p);font-size:14px;margin-bottom:6px">Parts d’entreprise (valeur estimée des titres)</label>
         <div class="field"><input type="number" min="0" id="partsEntreprise" placeholder="Ex. 150000" value="${parts.mode === 'value' ? parts.value : ''}" ${parts.mode === 'unknown' ? 'disabled' : ''}><span>€</span></div>
         <div class="meta-row"><button type="button" class="meta-btn ${parts.mode === 'unknown' ? 'active' : ''}" data-role="unknown" data-target="partsEntreprise">Valeur inconnue</button></div>
       </div>
-      ${amountFieldHTML('dettesTotal', 'Dettes personnelles (total)', ctx.patrimoine && ctx.patrimoine.dettesTotal, { placeholder: 'Ex. 20000' })}
+      ${amountFieldHTML('dettesAutres', C.DIAGNOSTIC_QUESTIONS.dettesAutres.label, p.dettesAutres, { placeholder: 'Ex. 5000', helper: C.DIAGNOSTIC_QUESTIONS.dettesAutres.helper })}
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     wireMetaButtons(container);
+
+    function renderDominant() {
+      const checked = checkboxValues('supports').filter((s) => s !== 'aucun');
+      const wrap = container.querySelector('#dominant-field');
+      if (checked.length < 2) { wrap.innerHTML = ''; return; }
+      const opts = C.SUPPORTS_OPTIONS.filter((o) => checked.includes(o.value));
+      wrap.innerHTML = `<div class="linked-field"><p class="q">${C.DIAGNOSTIC_QUESTIONS.supportDominant.question}</p>${radioGroup('supportDominant', opts, p.supportDominant || null)}</div>`;
+    }
+    renderDominant();
+    container.querySelectorAll('input[name="supports"]').forEach((c) => c.addEventListener('change', renderDominant));
+
     return () => {
-      const fields = ['residencePrincipale', 'immobilierLocatif', 'epargnePlacements', 'dettesTotal'];
-      const results = {};
-      for (const f of fields) {
-        const r = readAmountField(f);
-        if (r.error) return { error: r.error };
-        results[f] = r.field;
+      const selectedSupports = checkboxValues('supports');
+      if (selectedSupports.length === 0) return { error: 'Choisissez au moins une réponse (ou « Aucun de ces supports »).' };
+      const nonAucun = selectedSupports.filter((s) => s !== 'aucun');
+      let supportDominant = null;
+      if (nonAucun.length === 1) supportDominant = nonAucun[0];
+      else if (nonAucun.length >= 2) {
+        supportDominant = radioValue('supportDominant');
+        if (!supportDominant) return { error: 'Choisissez le support qui représente la plus grande part.' };
       }
+
+      const epargne = readAmountField('epargnePlacements');
+      if (epargne.error) return { error: epargne.error };
+
       const partsGroup = document.querySelector('[data-field="partsEntreprise"]');
       let partsResult;
       if (partsGroup.dataset.meta === 'unknown') {
@@ -261,8 +369,34 @@ function renderContextStep(id, container) {
         if (!v.valid) return { error: v.error };
         partsResult = { mode: 'value', value: v.value };
       }
-      ctx.patrimoine = { ...results, partsEntreprise: partsResult };
-      state.answers = E.pruneAnswers(ctx, state.answers);
+
+      const dettes = readAmountField('dettesAutres');
+      if (dettes.error) return { error: dettes.error };
+
+      ctx.patrimoine = {
+        ...ctx.patrimoine,
+        supportsDetenus: selectedSupports,
+        supportDominant,
+        epargnePlacements: epargne.field,
+        partsEntreprise: partsResult,
+        dettesAutres: dettes.field,
+      };
+      return { error: null };
+    };
+  }
+
+  if (id === 'transmission') {
+    container.innerHTML = `
+      <div class="step-top"><span>VOTRE TRANSMISSION</span><span></span></div>
+      <h2 tabindex="-1">${C.DIAGNOSTIC_QUESTIONS.transmissionOrganisee.question}</h2>
+      <p class="helper">${C.DIAGNOSTIC_QUESTIONS.transmissionOrganisee.helper}</p>
+      ${radioGroup('transmissionOrganisee', C.TRANSMISSION_OPTIONS, ctx.transmissionOrganisee || null)}
+      <p class="error" id="error" role="alert"></p>
+      ${navHTML(true)}`;
+    return () => {
+      const v = radioValue('transmissionOrganisee');
+      if (!v) return { error: 'Choisissez une réponse.' };
+      ctx.transmissionOrganisee = v;
       return { error: null };
     };
   }
@@ -275,140 +409,25 @@ function renderContextStep(id, container) {
       <div class="linked-field"><p class="q">L’activité est…</p>${radioGroup('activiteStabilite', C.ACTIVITE_STABILITE_OPTIONS, ent.activiteStabilite)}</div>
       <div class="linked-field"><p class="q">Part des revenus du foyer dépendant de cette activité</p>${radioGroup('partRevenusDependante', C.PART_REVENUS_OPTIONS, ent.partRevenusDependante)}</div>
       <div class="linked-field"><p class="q">Avez-vous un projet professionnel avec financement envisagé&nbsp;?</p>${radioGroup('projetFinancementEnvisage', C.OUI_NON_INCONNU, ent.projetFinancementEnvisage)}</div>
+      <div class="linked-field"><p class="q">${C.DIAGNOSTIC_QUESTIONS.remunerationComparee.question}</p><p class="helper">${C.DIAGNOSTIC_QUESTIONS.remunerationComparee.helper}</p>${radioGroup('remunerationComparee', C.OUI_NON_INCONNU, ent.remunerationComparee)}</div>
+      <div class="linked-field"><p class="q">${C.DIAGNOSTIC_QUESTIONS.excedentTresorerie.question}</p><p class="helper">${C.DIAGNOSTIC_QUESTIONS.excedentTresorerie.helper}</p>${radioGroup('excedentTresorerie', C.OUI_NON_INCONNU, ent.excedentTresorerie)}</div>
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     return () => {
       const activiteStabilite = radioValue('activiteStabilite');
       const partRevenusDependante = radioValue('partRevenusDependante');
       const projetFinancementEnvisage = radioValue('projetFinancementEnvisage');
-      if (!activiteStabilite || !partRevenusDependante || !projetFinancementEnvisage) {
+      const remunerationComparee = radioValue('remunerationComparee');
+      const excedentTresorerie = radioValue('excedentTresorerie');
+      if (!activiteStabilite || !partRevenusDependante || !projetFinancementEnvisage || !remunerationComparee || !excedentTresorerie) {
         return { error: 'Merci de répondre à chaque question.' };
       }
-      ctx.entreprise = { activiteStabilite, partRevenusDependante, projetFinancementEnvisage };
+      ctx.entreprise = { activiteStabilite, partRevenusDependante, projetFinancementEnvisage, remunerationComparee, excedentTresorerie };
       return { error: null };
     };
   }
+
   return () => ({ error: null });
-}
-
-function navHTML(showBack) {
-  return `<div class="nav"><button class="button secondary" type="button" id="btn-back" ${showBack ? '' : 'disabled'} style="${showBack ? '' : 'visibility:hidden'}">Retour</button><button class="button" type="button" id="btn-next">Continuer →</button></div>`;
-}
-
-// ---------------------------------------------------------------------
-// Rendu des cartes d'indicateurs notés
-// ---------------------------------------------------------------------
-function renderIndicatorStep(id, container) {
-  const ctx = state.context;
-  const answers = state.answers;
-  const ind = getIndicator(id);
-
-  // Indicateurs avec une "porte" liée (creditGate, p3Gate)
-  if (ind.gate) return renderGatedIndicator(ind, container);
-
-  const app = ind.getApplicability(ctx, answers);
-  if (app.status === 'not_applicable') {
-    container.innerHTML = `
-      <div class="step-top"><span>${axisLabel(ind.axis)}</span><span></span></div>
-      <h2 tabindex="-1">${ind.getQuestion(ctx, answers)}</h2>
-      <div class="info-note">${app.note || 'Cette question ne s’applique pas à votre situation déclarée.'}</div>
-      ${navHTML(true)}`;
-    return () => ({ error: null });
-  }
-
-  const question = ind.getQuestion(ctx, answers);
-  const options = ind.getOptions(ctx, answers);
-  const helper = INDICATOR_HELPER(id);
-  const current = answers[id];
-  const selectedValue = current && current.kind === 'value' ? String(current.value) : current && (current.kind === 'unknown' || current.kind === 'refuse') ? '__unknown__' : null;
-
-  container.innerHTML = `
-    <div class="step-top"><span>${axisLabel(ind.axis)}</span><span></span></div>
-    <h2 tabindex="-1">${question}</h2>
-    ${helper ? `<p class="helper">${helper}</p>` : ''}
-    ${app.status === 'unknown' ? `<div class="info-note unknown">${app.note}</div>` : ''}
-    ${radioGroup('indicator', [...options.map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: C.UNKNOWN_OR_PREFER_LABEL }], selectedValue)}
-    <p class="error" id="error" role="alert"></p>
-    ${navHTML(true)}`;
-
-  return () => {
-    const v = radioValue('indicator');
-    if (!v) return { error: 'Choisissez une réponse.' };
-    if (v === '__unknown__') answers[id] = { kind: 'unknown' };
-    else answers[id] = { kind: 'value', value: Number(v) };
-    return { error: null };
-  };
-}
-
-function axisLabel(axisId) {
-  const a = C.AXES.find((x) => x.id === axisId);
-  return a ? a.name.toUpperCase() : '';
-}
-
-function INDICATOR_HELPER(id) {
-  const t = C.INDICATOR_TEXTS[id];
-  return t && t.helper ? t.helper : null;
-}
-
-function renderGatedIndicator(ind, container) {
-  const ctx = state.context;
-  const answers = state.answers;
-  const gateId = ind.gate;
-  const gateQuestion = C.INDICATOR_TEXTS[gateId].question;
-  const currentGate = answers[gateId] && answers[gateId].kind === 'value' ? answers[gateId].value : null;
-
-  function renderBody() {
-    const gateVal = radioValue('gate');
-    const draftAnswers = { ...answers, [gateId]: gateVal ? { kind: 'value', value: gateVal } : undefined };
-    const app = ind.getApplicability(ctx, draftAnswers);
-    const bodyWrap = container.querySelector('#gated-body');
-    if (!gateVal) {
-      bodyWrap.innerHTML = '';
-      return;
-    }
-    if (app.status === 'not_applicable') {
-      bodyWrap.innerHTML = `<div class="info-note">${app.note || 'Cette question ne s’applique pas à votre situation déclarée.'}</div>`;
-      return;
-    }
-    const question = ind.getQuestion(ctx, draftAnswers);
-    const options = ind.getOptions(ctx, draftAnswers);
-    const current = answers[ind.id];
-    const selectedValue = current && current.kind === 'value' ? String(current.value) : current && (current.kind === 'unknown' || current.kind === 'refuse') ? '__unknown__' : null;
-    bodyWrap.innerHTML = `
-      <p class="q" style="margin-top:18px">${question}</p>
-      ${app.status === 'unknown' ? `<div class="info-note unknown">${app.note}</div>` : ''}
-      ${radioGroup('scored', [...options.filter((o) => o.value !== null).map((o) => ({ value: String(o.value), label: o.label })), { value: '__unknown__', label: C.UNKNOWN_OR_PREFER_LABEL }], selectedValue)}`;
-  }
-
-  container.innerHTML = `
-    <div class="step-top"><span>${axisLabel(ind.axis)}</span><span></span></div>
-    <h2 tabindex="-1">${gateQuestion}</h2>
-    ${radioGroup('gate', C.OUI_NON_INCONNU, currentGate)}
-    <div id="gated-body"></div>
-    <p class="error" id="error" role="alert"></p>
-    ${navHTML(true)}`;
-  container.querySelectorAll('input[name="gate"]').forEach((r) => r.addEventListener('change', renderBody));
-  renderBody();
-
-  return () => {
-    const gateVal = radioValue('gate');
-    if (!gateVal) return { error: 'Choisissez une réponse.' };
-    answers[gateId] = { kind: 'value', value: gateVal };
-    if (gateVal === 'inconnu') {
-      answers[ind.id] = { kind: 'unknown' };
-      return { error: null };
-    }
-    const app = ind.getApplicability(ctx, answers);
-    if (app.status === 'not_applicable') {
-      delete answers[ind.id];
-      return { error: null };
-    }
-    const v = radioValue('scored');
-    if (!v) return { error: 'Choisissez une réponse.' };
-    if (v === '__unknown__') answers[ind.id] = { kind: 'unknown' };
-    else answers[ind.id] = { kind: 'value', value: Number(v) };
-    return { error: null };
-  };
 }
 
 // ---------------------------------------------------------------------
@@ -417,23 +436,20 @@ function renderGatedIndicator(ind, container) {
 let currentCommit = null;
 
 function renderStep() {
-  const steps = allStepIds();
+  const steps = activeStepIds();
   if (state.stepIndex >= steps.length) {
     showResults();
     return;
   }
   const id = steps[state.stepIndex];
-  const isContext = CONTEXT_STEP_IDS.includes(id);
   const container = document.getElementById('step-container');
-  currentCommit = isContext ? renderContextStep(id, container) : renderIndicatorStep(id, container);
+  currentCommit = renderStepBody(id, container);
 
   const total = steps.length;
   document.getElementById('progress-bar').style.width = `${Math.round((state.stepIndex / total) * 100)}%`;
-  document.getElementById('rail-count').textContent = isContext ? `Étape ${state.stepIndex + 1} sur ${activeContextStepIds().length} (contexte)` : `Question ${state.stepIndex - activeContextStepIds().length + 1} sur ${activeIndicatorIds().length}`;
-  document.getElementById('rail-phase').textContent = isContext ? 'CONTEXTE' : 'DIAGNOSTIC';
-  // Le titre de la barre latérale suit l'étape réellement affichée, plutôt
-  // que de rester figé sur le libellé de la toute première étape de la phase.
-  document.getElementById('rail-title').textContent = isContext ? C.CONTEXT_LABELS[id] : C.AXES.find((a) => a.id === getIndicator(id).axis).name;
+  document.getElementById('rail-count').textContent = `Étape ${state.stepIndex + 1} sur ${total}`;
+  document.getElementById('rail-phase').textContent = 'DIAGNOSTIC';
+  document.getElementById('rail-title').textContent = C.CONTEXT_LABELS[id];
 
   const h2 = container.querySelector('h2');
   if (h2) h2.focus({ preventScroll: true });
@@ -478,18 +494,39 @@ function levelClass(levelId) {
   return levelId || 'a-structurer';
 }
 
-function axisExplain(axisId, axisResult, context, answers) {
-  // Réponses qui expliquent le résultat + limite + action suivante, en
-  // s'appuyant sur les indicateurs de l'axe réellement répondus.
-  const inds = INDICATORS.filter((i) => i.axis === axisId && (E.deriveBranch(context) === 'entrepreneur' || !i.entrepreneurOnly));
+// Explique un score d'axe à partir des faits objectifs qui l'ont produit
+// (voir facts.js) — jamais à partir d'un libellé d'option choisie, puisqu'il
+// n'y a plus de question notée directement.
+function axisExplain(axisId, context) {
   const lines = [];
-  for (const ind of inds) {
-    const ans = E.resolvedAnswer(ind.id, context, answers);
-    if (ans && ans.kind === 'value') {
-      const opts = ind.getOptions ? ind.getOptions(context, answers) : null;
-      const label = opts ? (opts.find((o) => o.value === ans.value) || {}).label : null;
-      if (label) lines.push(label);
+  if (axisId === 'A') {
+    const months = F.computeRunwayMonths(context);
+    if (months !== null) {
+      lines.push(months === Infinity ? 'Dépenses essentielles déclarées nulles : couverture jugée large.' : `Votre épargne disponible couvre environ ${Math.round(months * 10) / 10} mois de dépenses essentielles.`);
     }
+  } else if (axisId === 'B') {
+    const r = F.computeSavingsRate(context);
+    if (r !== null) {
+      lines.push(r.negative ? 'Votre épargne mensuelle déclarée est négative.' : `Vous épargnez environ ${Math.round(r.rate * 100)}% de vos revenus nets chaque mois.`);
+    }
+  } else if (axisId === 'C') {
+    const l = F.computeRealEstateLeverage(context);
+    if (l.available) lines.push(`Environ ${Math.round(l.ltv * 100)}% de la valeur de votre immobilier reste financée à crédit.`);
+  } else if (axisId === 'D') {
+    const d = F.computeDiversification(context);
+    if (d.available) {
+      lines.push(`${d.nbSupports} support${d.nbSupports > 1 ? 's' : ''} d’épargne différent${d.nbSupports > 1 ? 's' : ''} détenu${d.nbSupports > 1 ? 's' : ''}.`);
+      if (d.concentrated) lines.push('Une concentration importante a par ailleurs été repérée sur votre patrimoine global.');
+    }
+  } else if (axisId === 'E') {
+    const d = F.computeDormantMoney(context);
+    if (d.available) {
+      const label = (C.SUPPORTS_OPTIONS.find((o) => o.value === d.dominant) || {}).label;
+      lines.push(d.dominant === 'livrets' ? 'Votre épargne financière reste majoritairement sur des livrets ou comptes non investis.' : `Votre épargne financière est majoritairement investie (${label || 'support déclaré'}).`);
+    }
+  } else if (axisId === 'F') {
+    const label = (C.TRANSMISSION_OPTIONS.find((o) => o.value === context.transmissionOrganisee) || {}).label;
+    if (label) lines.push(label);
   }
   return lines;
 }
@@ -503,13 +540,13 @@ function synthesisText(results) {
   const weakest = [...okAxes].sort((a, b) => a.score - b.score)[0];
   const weakestName = C.AXES.find((x) => x.id === weakest.axis).name;
   if (strong.length && weakest.score < 75) {
-    return `${strong[0]} est suivi. Votre priorité maintenant : ${weakestName.toLowerCase()}.`;
+    return `${strong[0]} est suivi. Votre priorité maintenant : ${weakestName.toLowerCase()}.`;
   }
-  return `Voici où en est votre organisation patrimoniale déclarée, pilier par pilier. Votre priorité actuelle porte sur : ${weakestName.toLowerCase()}.`;
+  return `Voici où en est votre organisation patrimoniale déclarée, pilier par pilier. Votre priorité actuelle porte sur : ${weakestName.toLowerCase()}.`;
 }
 
 function renderResults() {
-  const results = E.computeResults(state.context, state.answers);
+  const results = E.computeResults(state.context, {});
   const root = document.getElementById('results');
   document.getElementById('app').hidden = true;
   root.hidden = false;
@@ -534,7 +571,7 @@ function renderResults() {
     if (r.status === 'not_evaluated') {
       return `<div class="axis-card"><div class="head"><h3>${axis.name}</h3></div><p class="not-evaluated">Non évalué — complétude des réponses insuffisante sur ce pilier (${Math.round((r.coverage || 0) * 100)}%).</p></div>`;
     }
-    const explainLines = axisExplain(axis.id, r, state.context, state.answers);
+    const explainLines = axisExplain(axis.id, state.context);
     return `<div class="axis-card">
       <div class="head"><h3>${axis.name}</h3><span class="axis-score">${r.score}</span></div>
       <span class="axis-level ${levelClass(r.level.id)}">${r.level.label}</span>
