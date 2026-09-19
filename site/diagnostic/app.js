@@ -124,7 +124,6 @@ function renderStepBody(id, container) {
 
   if (id === 'situation') {
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE SITUATION</span><span>Un questionnaire adapté à votre situation</span></div>
       <h2 tabindex="-1">Quelle est votre situation aujourd'hui&nbsp;?</h2>
       <p class="helper">Cela adapte les questions suivantes à votre cas.</p>
       ${radioGroup('situation', C.SITUATION_OPTIONS, ctx.situation)}
@@ -140,7 +139,6 @@ function renderStepBody(id, container) {
 
   if (id === 'foyer') {
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE FOYER</span><span></span></div>
       <h2 tabindex="-1">Votre foyer</h2>
       <div class="linked-field"><p class="q">Votre tranche d'âge</p>${radioGroup('ageBracket', C.AGE_BRACKETS, ctx.ageBracket)}</div>
       <div class="linked-field"><p class="q">Votre situation familiale</p>${radioGroup('foyerSituation', C.FOYER_OPTIONS, ctx.foyerSituation)}</div>
@@ -158,7 +156,6 @@ function renderStepBody(id, container) {
 
   if (id === 'residenceFiscale') {
     container.innerHTML = `
-      <div class="step-top"><span>RÉSIDENCE FISCALE</span><span></span></div>
       <h2 tabindex="-1">Où êtes-vous résident fiscal&nbsp;?</h2>
       <p class="helper">Si vous résidez hors de France, ou si vous n'êtes pas sûr, les pistes fiscales françaises ne vous seront pas présentées comme applicables.</p>
       ${radioGroup('residenceFiscale', C.RESIDENCE_FISCALE_OPTIONS, ctx.residenceFiscale)}
@@ -175,7 +172,6 @@ function renderStepBody(id, container) {
   if (id === 'objectifs') {
     const selected = (ctx.objectifs || []).map((o) => o.id)[0] || null;
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE OBJECTIF</span><span></span></div>
       <h2 tabindex="-1">Quel est votre objectif principal en ce moment&nbsp;?</h2>
       ${radioGroup('objectif', C.OBJECTIF_OPTIONS, selected)}
       <div id="echeance-field"></div>
@@ -203,7 +199,6 @@ function renderStepBody(id, container) {
 
   if (id === 'capacite') {
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE CAPACITÉ FINANCIÈRE</span><span></span></div>
       <h2 tabindex="-1">Votre capacité financière</h2>
       <p class="helper">Montants approximatifs acceptés, y compris zéro.</p>
       ${amountFieldHTML('revenusNets', 'Revenus nets mensuels du foyer, après impôt', ctx.revenusNets, { placeholder: 'Ex. 3500' })}
@@ -233,7 +228,6 @@ function renderStepBody(id, container) {
   if (id === 'immobilier') {
     const p = ctx.patrimoine || {};
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE IMMOBILIER</span><span></span></div>
       <h2 tabindex="-1">Votre immobilier</h2>
       <div class="linked-field">
         <p class="q">${C.DIAGNOSTIC_QUESTIONS.residencePrincipaleProprietaire.question}</p>
@@ -316,7 +310,6 @@ function renderStepBody(id, container) {
     const parts = p.partsEntreprise || { mode: 'value', value: '' };
     const supports = p.supportsDetenus || [];
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE ÉPARGNE FINANCIÈRE</span><span></span></div>
       <h2 tabindex="-1">Votre épargne financière</h2>
       <div class="linked-field">
         <p class="q">${C.DIAGNOSTIC_QUESTIONS.supportsDetenus.question}</p>
@@ -387,7 +380,6 @@ function renderStepBody(id, container) {
 
   if (id === 'transmission') {
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE TRANSMISSION</span><span></span></div>
       <h2 tabindex="-1">${C.DIAGNOSTIC_QUESTIONS.transmissionOrganisee.question}</h2>
       <p class="helper">${C.DIAGNOSTIC_QUESTIONS.transmissionOrganisee.helper}</p>
       ${radioGroup('transmissionOrganisee', C.TRANSMISSION_OPTIONS, ctx.transmissionOrganisee || null)}
@@ -404,7 +396,6 @@ function renderStepBody(id, container) {
   if (id === 'entreprise') {
     const ent = ctx.entreprise || {};
     container.innerHTML = `
-      <div class="step-top"><span>VOTRE ACTIVITÉ</span><span></span></div>
       <h2 tabindex="-1">Votre activité professionnelle</h2>
       <div class="linked-field"><p class="q">L’activité est…</p>${radioGroup('activiteStabilite', C.ACTIVITE_STABILITE_OPTIONS, ent.activiteStabilite)}</div>
       <div class="linked-field"><p class="q">Part des revenus du foyer dépendant de cette activité</p>${radioGroup('partRevenusDependante', C.PART_REVENUS_OPTIONS, ent.partRevenusDependante)}</div>
@@ -575,6 +566,7 @@ function renderResults() {
     return `<div class="axis-card">
       <div class="head"><h3>${axis.name}</h3><span class="axis-score">${r.score}%</span></div>
       <span class="axis-level ${levelClass(r.level.id)}">${r.level.label}</span>
+      <div class="axis-meter ${levelClass(r.level.id)}" role="img" aria-label="Score : ${r.score} sur 100"><span style="width:${r.score}%"></span></div>
       ${explainLines.length ? `<ul>${explainLines.map((l) => `<li>${l}</li>`).join('')}</ul>` : ''}
       <p class="limite">Organisation déclarée, complétude des réponses&nbsp;: ${Math.round(r.coverage * 100)}%. Une bonne note ne certifie ni la conformité juridique, ni l’adéquation d’un produit.</p>
     </div>`;
@@ -619,7 +611,7 @@ function renderResults() {
         </table>
       </div>
 
-      <h3 style="margin-top:6px">Le détail de vos six piliers</h3>
+      <h3>Le détail de vos six piliers</h3>
       ${axesHTML}
 
       ${actionsHTML}

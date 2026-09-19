@@ -56,7 +56,7 @@ export const PILLARS_INTRO = {
 export const PILLARS = [
   { axis: 'A', title: 'Sécurité financière', text: 'Une réserve disponible en cas de coup dur.' },
   { axis: 'B', title: 'Capacité à investir', text: 'Savoir ce que vous pouvez réellement investir.' },
-  { axis: 'C', title: 'Maîtrise du crédit', text: 'Une vue claire du coût de vos engagements.' },
+  { axis: 'C', title: 'Levier bancaire', text: 'Utiliser le crédit comme un outil, pas seulement le subir.' },
   { axis: 'D', title: 'Diversification', text: 'Savoir à quoi vous êtes réellement exposé.' },
   { axis: 'E', title: 'Capitalisation et efficacité', text: 'Donner un rôle à chaque actif.' },
   { axis: 'F', title: 'Protection et transmission', text: 'Savoir qui recevrait quoi, et qui pourrait agir pour vous.' },
