@@ -170,9 +170,8 @@ export function computeSavingsRate(context) {
   const revenus = fieldValue(context.revenusNets);
   const epargne = fieldValue(context.epargneMensuelle);
   if (revenus === null || epargne === null) return null;
-  if (epargne < 0) return { negative: true, rate: null };
   if (revenus <= 0) return null; // taux non calculable sans revenu de référence
-  return { negative: false, rate: epargne / revenus };
+  return { rate: epargne / revenus };
 }
 
 // Effet de levier bancaire immobilier : part de la valeur totale de

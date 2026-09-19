@@ -42,7 +42,7 @@ export const PRIORITY_RULES = [
     topic: 'depenses-non-couvertes',
     axis: 'B',
     test: ({ answers }) => scoreOf(answers, 'capa1') === 0,
-    text: 'Votre épargne mensuelle déclarée est négative : vos dépenses semblent dépasser vos revenus disponibles.',
+    text: 'Votre épargne mensuelle déclarée est nulle ou négative : vous ne parvenez pas encore à dégager de capacité d’épargne.',
     action: 'Réexaminez votre budget avant d’engager tout nouveau crédit ou investissement.',
   },
 

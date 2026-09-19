@@ -113,6 +113,11 @@ test('B1. épargne mensuelle négative → score 0 (à découvert)', () => {
   const r = computeAxisResult('B', ctx, {});
   assert.equal(r.score, 0);
 });
+test('B1b. épargne mensuelle nulle → score 0, jamais logée avec un taux positif', () => {
+  const ctx = baseParticulier({ revenusNets: field(3000), epargneMensuelle: field(0) });
+  const r = computeAxisResult('B', ctx, {});
+  assert.equal(r.score, 0);
+});
 test('B2. taux d’épargne ≤ 10% → score 50', () => {
   const ctx = baseParticulier({ revenusNets: field(3000), epargneMensuelle: field(200) }); // ~6.7%
   const r = computeAxisResult('B', ctx, {});

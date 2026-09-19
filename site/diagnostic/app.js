@@ -507,7 +507,7 @@ function axisExplain(axisId, context) {
   } else if (axisId === 'B') {
     const r = F.computeSavingsRate(context);
     if (r !== null) {
-      lines.push(r.negative ? 'Votre épargne mensuelle déclarée est négative.' : `Vous épargnez environ ${Math.round(r.rate * 100)}% de vos revenus nets chaque mois.`);
+      lines.push(r.rate <= 0 ? 'Votre épargne mensuelle déclarée est nulle ou négative.' : `Vous épargnez environ ${Math.round(r.rate * 100)}% de vos revenus nets chaque mois.`);
     }
   } else if (axisId === 'C') {
     const l = F.computeRealEstateLeverage(context);
@@ -573,7 +573,7 @@ function renderResults() {
     }
     const explainLines = axisExplain(axis.id, state.context);
     return `<div class="axis-card">
-      <div class="head"><h3>${axis.name}</h3><span class="axis-score">${r.score}</span></div>
+      <div class="head"><h3>${axis.name}</h3><span class="axis-score">${r.score}%</span></div>
       <span class="axis-level ${levelClass(r.level.id)}">${r.level.label}</span>
       ${explainLines.length ? `<ul>${explainLines.map((l) => `<li>${l}</li>`).join('')}</ul>` : ''}
       <p class="limite">Organisation déclarée, complétude des réponses&nbsp;: ${Math.round(r.coverage * 100)}%. Une bonne note ne certifie ni la conformité juridique, ni l’adéquation d’un produit.</p>
@@ -610,12 +610,11 @@ function renderResults() {
         <canvas id="radar" width="320" height="320" role="img" aria-label="Radar de votre organisation patrimoniale déclarée sur six piliers"></canvas>
         <table class="radar-table">
           <caption>Lecture accessible du radar (les piliers non évalués ne sont pas représentés par un zéro)</caption>
-          <thead><tr><th>Pilier</th><th>Niveau</th><th>Complétude</th></tr></thead>
+          <thead><tr><th>Pilier</th><th>Niveau</th></tr></thead>
           <tbody>${C.AXES.map((axis) => {
             const r = results.axes[axis.id];
-            const level = r.status === 'ok' ? `${r.score} — ${r.level.label}` : r.status === 'not_applicable' ? 'Non applicable' : 'Non évalué';
-            const cov = r.coverage !== null && r.coverage !== undefined ? `${Math.round(r.coverage * 100)}%` : '—';
-            return `<tr><td>${axis.name}</td><td>${level}</td><td>${cov}</td></tr>`;
+            const level = r.status === 'ok' ? `${r.score}% — ${r.level.label}` : r.status === 'not_applicable' ? 'Non applicable' : 'Non évalué';
+            return `<tr><td>${axis.name}</td><td>${level}</td></tr>`;
           }).join('')}</tbody>
         </table>
       </div>

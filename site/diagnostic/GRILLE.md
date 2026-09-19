@@ -43,7 +43,7 @@ réglementaires, ni le résultat d'une méthode validée scientifiquement.
 | Axe | Indicateur | Fait mesuré | Seuils (0 / 1 / 2) |
 |---|---|---|---|
 | A — Sécurité financière | `secu1` | Mois de couverture = épargne immédiatement disponible ÷ dépenses mensuelles essentielles | < 3 mois / 3 à 12 mois / > 12 mois |
-| B — Capacité à investir | `capa1` | Taux d'épargne = épargne mensuelle moyenne ÷ revenus nets | épargne négative / 0 à 10 % / > 10 % |
+| B — Capacité à investir | `capa1` | Taux d'épargne = épargne mensuelle moyenne ÷ revenus nets | ≤ 0 % (épargne nulle ou négative) / 0 à 10 % / > 10 % |
 | B (dirigeant) | `remuneration1` | Rémunération comparée à une autre option dans les 2 dernières années | non / — / oui (binaire, pas de palier intermédiaire) |
 | C — Levier bancaire | `levier1` | Loan-to-value agrégé de l'immobilier détenu (crédit restant ÷ valeur du bien, par tranche déclarée) | 0 % / 0 à 50 % / ≥ 50 % |
 | D — Diversification | `diversif1` | Nombre de supports d'épargne distincts détenus, plafonné si concentration globale identifiée | ≤ 1 support / 2 à 3 / ≥ 4 (plafonné à 1 si concentration) |

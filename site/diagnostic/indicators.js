@@ -48,7 +48,10 @@ export const INDICATORS = [
     computeScore: (context) => {
       const r = computeSavingsRate(context);
       if (r === null) return UNKNOWN;
-      if (r.negative) return scoreValue(0);
+      // Une épargne nulle ou négative reste une situation à corriger, quelle
+      // que soit la raison (revenus tendus ou dépenses trop hautes) — jamais
+      // logée dans la même tranche qu'une épargne positive, même faible.
+      if (r.rate <= 0) return scoreValue(0);
       if (r.rate <= 0.1) return scoreValue(1);
       return scoreValue(2);
     },
