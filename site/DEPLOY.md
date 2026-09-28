@@ -26,10 +26,19 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 - `site/credit-immobilier/index.html` — landing page « Crédit immobilier » (opt-in — même
   gabarit que ci-dessus)
 - `site/credit-immobilier/fiche/index.html` — page affichée après inscription : fiche
-  pédagogique statique, 6 points à négocier sur un crédit immobilier (durée, apport,
-  assurance emprunteur, frais de dossier, différé de remboursement, indemnités de
-  remboursement anticipé) et section « Pour aller plus loin ». Pas de quiz ni de
-  diagnostic : simple lecture, aucun endpoint `/api/*` dédié.
+  pédagogique statique, 9 points à négocier sur un crédit immobilier (durée, apport,
+  assurance emprunteur, frais de dossier, garantie, modularité, différé de remboursement,
+  report d'échéances, indemnités de remboursement anticipé) et section « Pour aller plus
+  loin ». Pas de quiz ni de diagnostic : simple lecture, aucun endpoint `/api/*` dédié.
+- `site/sci-familiale/index.html` — landing page « SCI familiale » (opt-in — même gabarit
+  que ci-dessus). Distincte de `site/sci/index.html` (guide « SCI ou nom propre, IR ou
+  IS, holding », non gaté), qui n'est pas concernée par cet opt-in.
+- `site/sci-familiale/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique, 6 protections à prévoir dans les statuts d'une SCI familiale
+  (gérance, pouvoirs entre usufruitiers et nus-propriétaires, entrées contrôlées,
+  majorités pour les décisions importantes, clause d'exclusion, capital variable) et
+  section « Pour aller plus loin ». Pas de quiz ni de diagnostic : simple lecture, aucun
+  endpoint `/api/*` dédié.
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
 - `site/diagnostic/index.html` — application « Votre patrimoine : les leviers que
   vous n'utilisez pas encore » : diagnostic interactif en six piliers (radar +
@@ -42,7 +51,7 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
   (`node site/diagnostic/tests/engine.test.mjs`).
 - `site/favicon.svg`
 
-Les cinq landing pages (`/`, `/obo/`, `/transmission/`, `/fiscalite-immobiliere/` et `/credit-immobilier/`) partagent le même Worker, la même KV
+Les six landing pages (`/`, `/obo/`, `/transmission/`, `/fiscalite-immobiliere/`, `/credit-immobilier/` et `/sci-familiale/`) partagent le même Worker, la même KV
 de leads et le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV
 supplémentaire à créer pour chaque nouveau site. Si un sous-domaine dédié est préféré à terme
 (ex. `obo.captain-invest.com`), suivre la même méthode manuelle DNS + Route décrite à l'étape 3
@@ -83,6 +92,8 @@ ci-dessous.
      vers `/fiscalite-immobiliere/fiche/`.
    - Ouvrir `https://guide.captain-invest.com/credit-immobilier/` : idem, avec redirection vers
      `/credit-immobilier/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/sci-familiale/` : idem, avec redirection vers
+     `/sci-familiale/fiche/`.
    - Ouvrir `https://guide.captain-invest.com/diagnostic/` : le diagnostic patrimonial
      doit s'afficher directement (pas d'opt-in), le questionnaire et la page de résultats
      doivent fonctionner sans erreur réseau (aucun téléchargement à tester : retiré).
@@ -102,7 +113,7 @@ Trois endpoints (`GET /api/leads-export`, `GET /api/obo-diagnostic-export`,
 
 Usage ensuite :
 - Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don`,
-  `obo`, `transmission`, `fiscalite-immobiliere` ou `credit-immobilier`) :
+  `obo`, `transmission`, `fiscalite-immobiliere`, `credit-immobilier` ou `sci-familiale`) :
   - JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
   - CSV : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
 - Réponses au diagnostic d'éligibilité OBO (`site/obo/decouvrir/`) — éligible ou non, et pourquoi :
@@ -129,6 +140,8 @@ Usage ensuite :
   `site/fiscalite-immobiliere/fiche/index.html` (section « Pour aller plus loin »).
 - **Lien Calendly Crédit immobilier** : même lien que ci-dessus, câblé en dur dans
   `site/credit-immobilier/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly SCI familiale** : même lien que ci-dessus, câblé en dur dans
+  `site/sci-familiale/fiche/index.html` (section « Pour aller plus loin »).
 - **Lien Calendly Diagnostic patrimonial** : même lien que ci-dessus
   (`https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`), câblé en dur dans
   `site/diagnostic/app.js` (bloc de contact en fin de résultats) — à mettre à jour au même
