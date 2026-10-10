@@ -634,7 +634,6 @@ function showResults() {
 // Amorçage
 // ---------------------------------------------------------------------
 function fillStaticText() {
-  document.getElementById('short-disclaimer').textContent = C.SHORT_DISCLAIMER;
   document.getElementById('promise-text').textContent = C.HERO.promise;
   document.getElementById('reel-intro').textContent = C.REEL_INTROS[new URLSearchParams(location.search).get('theme')] || '';
   document.getElementById('pillars-eyebrow').textContent = C.PILLARS_INTRO.eyebrow;

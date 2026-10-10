@@ -44,7 +44,6 @@ export const HERO = {
 // Disclaimer court, affiché bien en évidence (accueil + questionnaire), en
 // plus de la mention légale complète (LEGAL_MENTION) affichée sous les
 // résultats.
-export const SHORT_DISCLAIMER = 'Ce diagnostic est une estimation pédagogique à partir de vos réponses — quelques minutes suffisent. Aucun engagement de votre part, aucun résultat garanti.';
 
 export const PILLARS_INTRO = {
   eyebrow: 'LES 6 PILIERS DE VOTRE ORGANISATION PATRIMONIALE',
