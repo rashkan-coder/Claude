@@ -38,7 +38,6 @@ export const HERO = {
   title: 'Votre stratégie patrimoniale à 360°',
   subtitle: 'Immobilier, placements, fiscalité, entreprise, transmission : découvrez les leviers qui feront passer votre patrimoine au niveau supérieur.',
   ctaPrimary: 'Faire mon diagnostic',
-  ctaSecondary: 'Découvrir les 6 piliers',
   promise: 'Cet outil vous aide à repérer les sujets à étudier et leur ordre de priorité. Il ne promet ni enrichissement, ni rendement, ni économie d’impôt chiffrée, ni validation d’un montage.',
 };
 

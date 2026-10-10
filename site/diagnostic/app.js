@@ -658,9 +658,6 @@ function init() {
   fillStaticText();
   document.getElementById('cta-start').addEventListener('click', startFlow);
   document.getElementById('cta-start-2').addEventListener('click', startFlow);
-  document.getElementById('cta-pillars').addEventListener('click', () => {
-    document.getElementById('piliers').scrollIntoView({ block: 'start' });
-  });
 
   document.getElementById('btn-clear').addEventListener('click', () => {
     clearAll();
