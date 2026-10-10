@@ -44,7 +44,7 @@ réglementaires, ni le résultat d'une méthode validée scientifiquement.
 |---|---|---|---|
 | A — Sécurité financière | `secu1` | Mois de couverture = épargne immédiatement disponible ÷ dépenses mensuelles essentielles | < 3 mois / 3 à 12 mois / > 12 mois |
 | B — Capacité à investir | `capa1` | Taux d'épargne = épargne mensuelle moyenne ÷ revenus nets | ≤ 0 % (épargne nulle ou négative) / 0 à 10 % / > 10 % |
-| B (dirigeant) | `remuneration1` | Rémunération comparée à une autre option dans les 2 dernières années | non / — / oui (binaire, pas de palier intermédiaire) |
+| B (dirigeant) | `remuneration1` | Rémunération d'entrepreneur déjà optimisée (« Avez-vous déjà optimisé votre rémunération d'entrepreneur ? ») | non / — / oui (binaire, pas de palier intermédiaire) |
 | C — Levier bancaire | `levier1` | Loan-to-value agrégé de l'immobilier détenu (crédit restant ÷ valeur du bien, par tranche déclarée) | 0 % / 0 à 50 % / ≥ 50 % |
 | D — Diversification | `diversif1` | Nombre de supports d'épargne distincts détenus, plafonné si concentration globale identifiée | ≤ 1 support / 2 à 3 / ≥ 4 (plafonné à 1 si concentration) |
 | E — Capitalisation et efficacité | `capital1` | Support dominant de l'épargne financière face au besoin de sécurité (matelas × 1,5) | dominant = livrets et épargne très excédentaire / dominant = livrets mais épargne modeste / dominant = tout support investi |
@@ -108,8 +108,9 @@ Niveaux affichés : 0–24 *À structurer* · 25–49 *Premiers repères* ·
 ## 4. Cohérence
 
 `engine.js#detectContradictions` détecte : patrimoine déclaré nul mais
-épargne/placements positifs (suspend `diversif1`) ; activité stable mais
-parts d'entreprise valorisées à zéro (suspend `capital1`). Une incohérence
+épargne/placements positifs (suspend `diversif1`). (Le contrôle « activité
+stable mais parts valorisées à zéro » a été retiré avec la question sur la
+stabilité de l'activité.) Une incohérence
 non résolue neutralise uniquement les indicateurs concernés (traités comme
 non répondus dans le calcul), jamais tout le diagnostic.
 
@@ -132,15 +133,22 @@ est affichée — jamais complétée artificiellement.
 
 ## 6. Carte des leviers
 
-Sept leviers (`rules.js#computeLevers`) : immobilier à crédit, investissement
+> **Affichage** : la page de résultats n'affiche plus ni la liste « Vos prochaines
+> actions » ni « La carte de vos leviers » (seule la priorité principale reste
+> affichée en bandeau). Le moteur continue de calculer priorités et leviers
+> (testés), ce qui permet de les réafficher plus tard sans toucher aux règles.
+
+Six leviers (`rules.js#computeLevers`) : immobilier à crédit, investissement
 financier, rémunération du dirigeant, capitalisation en société/holding,
-levier bancaire professionnel, fiscalité et frais, transmission. Chacun
-renvoie `{status, motif, action}` à partir de faits déclarés. Le levier
-« capitalisation en société/holding » se fonde désormais sur une seule
-question (`excedentTresorerie`, oui/non/je ne sais pas) au lieu de deux
-(l'ancienne question de comparaison d'arbitrage a été retirée — voir section
-8) : il ne distingue plus « excédent existant mais mal arbitré » de « déjà
-bien arbitré », seulement « excédent à examiner » ou « non prioritaire ».
+fiscalité et frais, transmission. Chacun renvoie `{status, motif, action}` à
+partir de faits déclarés. Le levier « capitalisation en société/holding » se
+fonde uniquement sur les objectifs déclarés (entreprise, transmission ou
+placements) : « à examiner » si l'un d'eux est déclaré, sinon « non
+prioritaire ». La question sur l'excédent de trésorerie durable a été retirée
+pour raccourcir le parcours ; l'action affichée rappelle que le sujet ne se
+pose que si l'activité dégage des excédents durables. Le levier « levier
+bancaire professionnel » a été retiré avec la question sur le projet de
+financement professionnel, qui était sa seule source.
 
 ## 7. Non-résidents fiscaux
 
@@ -201,12 +209,11 @@ v2.0.0 remplace : voir l'en-tête de ce document.
   d'avancement réel de la transmission (fait / réflexion / rien / je ne sais
   pas), qui remplace une auto-évaluation par un fait vérifiable.
 - **p1** (rémunération optimisée, autodéclaré) → **`remuneration1`** : même
-  principe, mais la question porte directement sur le fait (« avez-vous
-  comparé... ») plutôt que sur une auto-évaluation de qualité de l'arbitrage.
+  principe, avec une question directe (« Avez-vous déjà optimisé votre
+  rémunération d'entrepreneur ? »).
 - **p3 + p3Gate** (excédents pro : existence puis qualité de l'arbitrage) →
-  une seule question (`excedentTresorerie`) qui alimente uniquement le
-  levier « capitalisation en société/holding » ; il n'y a plus de deuxième
-  question sur la qualité de l'arbitrage. L'axe E des dirigeants est
+  supprimées ; le levier « capitalisation en société/holding » repose sur
+  les objectifs déclarés (voir section 6). L'axe E des dirigeants est
   désormais noté par le même `capital1` universel que pour un particulier.
 - **Nouveaux champs de contexte** : `depensesEssentielles`,
   `epargneDisponible`, `epargneMensuelle` (remplace

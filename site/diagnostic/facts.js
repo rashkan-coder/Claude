@@ -51,16 +51,6 @@ export function hasInvestments(context) {
   return false;
 }
 
-// --- Excédent professionnel durable (branche entrepreneur) -----------------
-// Remplace l'ancienne question p3Gate : lu directement depuis context.entreprise,
-// renseigné en une seule question (voir content.js / GRILLE.md).
-export function hasDurableSurplus(context) {
-  const v = context.entreprise && context.entreprise.excedentTresorerie;
-  if (v === 'oui') return true;
-  if (v === 'non') return false;
-  return 'unknown';
-}
-
 // --- Patrimoine net et allocation (inchangé) --------------------------------
 
 export function grossAssetFields(context) {

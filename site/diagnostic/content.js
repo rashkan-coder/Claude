@@ -105,13 +105,6 @@ export const ECHEANCE_OPTIONS = [
   { value: 'inconnue', label: 'Échéance inconnue' },
 ];
 
-export const ACTIVITE_STABILITE_OPTIONS = [
-  { value: 'stable', label: 'Stable' },
-  { value: 'variable', label: 'Variable' },
-  { value: 'lancement', label: 'En phase de lancement' },
-  { value: 'difficultes', label: 'En difficulté' },
-];
-
 export const PART_REVENUS_OPTIONS = [
   { value: 'moins-25', label: 'Moins de 25 %' },
   { value: '25-50', label: '25 à 50 %' },
@@ -182,12 +175,8 @@ export const DIAGNOSTIC_QUESTIONS = {
     helper: 'Testament, donation entre époux, mandat de protection future.',
   },
   remunerationComparee: {
-    question: 'Avez-vous comparé votre rémunération actuelle à une autre option au cours des 2 dernières années ?',
-    helper: 'Dividendes, PER entreprise, ou toute autre alternative.',
-  },
-  excedentTresorerie: {
-    question: 'Votre activité dégage-t-elle un excédent de trésorerie durable ?',
-    helper: 'Au-delà des besoins d’exploitation, des impôts et des projets déjà engagés.',
+    question: 'Avez-vous déjà optimisé votre rémunération d’entrepreneur ?',
+    helper: 'Arbitrage salaire / dividendes, PER entreprise, ou toute autre option.',
   },
 };
 
@@ -234,7 +223,6 @@ export const LEVER_LABELS = {
   investissementFinancier: 'Investissement financier',
   remunerationDirigeant: 'Rémunération du dirigeant',
   capitalisationHolding: 'Capitalisation en société / holding',
-  levierBancairePro: 'Levier bancaire professionnel',
   fiscaliteFrais: 'Fiscalité et frais',
   transmission: 'Transmission',
 };

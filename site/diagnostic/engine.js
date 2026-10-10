@@ -152,11 +152,6 @@ export function detectContradictions(context, answers) {
   if (epargnePositive && anyAssetPositive === false) {
     issues.push({ id: 'patrimoine-nul-mais-placements', message: 'Un patrimoine nul est déclaré, alors qu’une épargne ou des placements positifs sont renseignés.', affects: ['diversif1'] });
   }
-  const parts = context.patrimoine && context.patrimoine.partsEntreprise;
-  const entreprise = context.entreprise || {};
-  if (deriveBranch(context) === 'entrepreneur' && parts && parts.mode === 'value' && parts.value === 0 && entreprise.activiteStabilite === 'stable') {
-    issues.push({ id: 'entreprise-sans-valeur-mais-active', message: 'Votre activité est déclarée stable, mais la valeur de vos parts d’entreprise est renseignée à zéro.', affects: ['capital1'] });
-  }
   return issues;
 }
 

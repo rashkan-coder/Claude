@@ -397,23 +397,17 @@ function renderStepBody(id, container) {
     const ent = ctx.entreprise || {};
     container.innerHTML = `
       <h2 tabindex="-1">Votre activité professionnelle</h2>
-      <div class="linked-field"><p class="q">L’activité est…</p>${radioGroup('activiteStabilite', C.ACTIVITE_STABILITE_OPTIONS, ent.activiteStabilite)}</div>
       <div class="linked-field"><p class="q">Part des revenus du foyer dépendant de cette activité</p>${radioGroup('partRevenusDependante', C.PART_REVENUS_OPTIONS, ent.partRevenusDependante)}</div>
-      <div class="linked-field"><p class="q">Avez-vous un projet professionnel avec financement envisagé&nbsp;?</p>${radioGroup('projetFinancementEnvisage', C.OUI_NON_INCONNU, ent.projetFinancementEnvisage)}</div>
       <div class="linked-field"><p class="q">${C.DIAGNOSTIC_QUESTIONS.remunerationComparee.question}</p><p class="helper">${C.DIAGNOSTIC_QUESTIONS.remunerationComparee.helper}</p>${radioGroup('remunerationComparee', C.OUI_NON_INCONNU, ent.remunerationComparee)}</div>
-      <div class="linked-field"><p class="q">${C.DIAGNOSTIC_QUESTIONS.excedentTresorerie.question}</p><p class="helper">${C.DIAGNOSTIC_QUESTIONS.excedentTresorerie.helper}</p>${radioGroup('excedentTresorerie', C.OUI_NON_INCONNU, ent.excedentTresorerie)}</div>
       <p class="error" id="error" role="alert"></p>
       ${navHTML(true)}`;
     return () => {
-      const activiteStabilite = radioValue('activiteStabilite');
       const partRevenusDependante = radioValue('partRevenusDependante');
-      const projetFinancementEnvisage = radioValue('projetFinancementEnvisage');
       const remunerationComparee = radioValue('remunerationComparee');
-      const excedentTresorerie = radioValue('excedentTresorerie');
-      if (!activiteStabilite || !partRevenusDependante || !projetFinancementEnvisage || !remunerationComparee || !excedentTresorerie) {
+      if (!partRevenusDependante || !remunerationComparee) {
         return { error: 'Merci de répondre à chaque question.' };
       }
-      ctx.entreprise = { activiteStabilite, partRevenusDependante, projetFinancementEnvisage, remunerationComparee, excedentTresorerie };
+      ctx.entreprise = { partRevenusDependante, remunerationComparee };
       return { error: null };
     };
   }
@@ -572,22 +566,6 @@ function renderResults() {
     </div>`;
   }).join('');
 
-  const actionsHTML = results.priorities.length
-    ? `<div class="actions-block"><h3>Vos prochaines actions</h3>${results.priorities
-        .map((p) => `<div class="action-item"><p class="text">${p.text}</p><p class="what">${p.action}</p></div>`)
-        .join('')}</div>`
-    : `<div class="actions-block"><h3>Vos prochaines actions</h3><p class="what">Aucune fragilité ni priorité claire ne ressort de vos réponses actuelles. Complétez les piliers « non évalués » ci-dessus pour affiner ce repérage.</p></div>`;
-
-  const leverEntries = Object.entries(results.levers);
-  const leversHTML = leverEntries
-    .map(([key, lv]) => `<div class="lever-card">
-      <span class="lever-status ${lv.status}">${C.LEVER_STATUS_LABELS[lv.status]}</span>
-      <h4>${C.LEVER_LABELS[key]}</h4>
-      <p>${lv.motif}</p>
-      <p class="action-line">${lv.action}</p>
-    </div>`)
-    .join('');
-
   root.innerHTML = `
     <div class="results-inner">
       <span class="pill">VOTRE REPÉRAGE PERSONNALISÉ</span>
@@ -614,24 +592,22 @@ function renderResults() {
       <h3>Le détail de vos six piliers</h3>
       ${axesHTML}
 
-      ${actionsHTML}
-
-      <h3>La carte de vos leviers</h3>
-      <p class="helper">Des conditions de découverte à partir de vos réponses — jamais une conclusion d’éligibilité ni une recommandation de souscription.</p>
-      <div class="levers-grid">${leversHTML}</div>
-
       <div class="quiet-actions">
         <button class="button secondary" id="btn-edit" type="button" style="color:var(--p);border-color:#d9cedc">Modifier mes réponses</button>
       </div>
 
-      <div class="contact-block">
-        <h3>Envie d’aller plus loin&nbsp;?</h3>
-        <p>Un simulateur donne des pistes&nbsp;; une étude patrimoniale les transforme en plan d’action, adapté à votre famille et à vos objectifs.</p>
-        <div class="cta-row">
-          <a class="button" href="https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1" target="_blank" rel="noopener noreferrer">Demander une étude personnalisée</a>
-          <a class="mail" href="mailto:rashan@captain-invest.com">Ou écrivez-moi directement</a>
+      <div class="accompagnement">
+        <img src="/images/rashan-kadioglu-transmission.jpg" alt="">
+        <div>
+          <p class="eyebrow">Envie d’aller plus loin&nbsp;?</p>
+          <h2>Pour construire votre stratégie d’enrichissement</h2>
+          <p>Vous avez déjà construit un beau patrimoine. Mais si vous sentez que vous stagnez et voulez passer à l’étape suivante, un patrimoine puissant se construit en actionnant tous les leviers à la fois&nbsp;: investissement financier, immobilier, effet de levier bancaire, optimisation fiscale globale, structuration professionnelle ou holding. Un diagnostic offert pour savoir où vous en êtes, et identifier les prochains leviers à actionner.</p>
+          <div class="cta-row">
+            <a class="button" href="https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1" target="_blank" rel="noopener noreferrer">Prendre RDV pour un diagnostic offert</a>
+            <a class="mail" href="mailto:rashan@captain-invest.com">Ou écrivez-moi directement</a>
+          </div>
+          <p class="disclosure">Vos réponses à ce diagnostic ne sont transmises automatiquement à personne&nbsp;; vous choisissez ce que vous partagez lors de l’échange.</p>
         </div>
-        <p class="disclosure">Ce bouton ouvre Calendly (planification de rendez-vous) dans un nouvel onglet. Vos réponses à ce diagnostic ne sont transmises automatiquement à personne&nbsp;; vous seul(e) choisissez ce que vous partagez lors de l’échange.</p>
       </div>
 
       <section class="legal" style="padding:0">${C.LEGAL_MENTION}</section>

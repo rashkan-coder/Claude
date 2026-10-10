@@ -66,11 +66,8 @@ function baseEntrepreneur(overrides = {}) {
   return baseParticulier({
     situation: 'entrepreneur',
     entreprise: {
-      activiteStabilite: 'stable',
       partRevenusDependante: 'plus-50',
-      projetFinancementEnvisage: 'non',
       remunerationComparee: null,
-      excedentTresorerie: 'non',
     },
     ...overrides,
   });
@@ -256,15 +253,13 @@ test('Ent1. rémunération jamais comparée → axe B tiré vers le bas', () => 
   assert.equal(r.coverage, 1); // 2 indicateurs, 2 répondus
   assert.equal(r.score, 50); // (100 + 0) / 2
 });
-test('Ent2. excédent de trésorerie non déclaré → levier holding non prioritaire', () => {
+test('Ent2. aucun projet explicite → levier holding non prioritaire', () => {
   const ctx = baseEntrepreneur();
-  ctx.entreprise.excedentTresorerie = 'non';
   const results = computeResults(ctx, {});
   assert.equal(results.levers.capitalisationHolding.status, 'non_prioritaire');
 });
-test('Ent3. excédent durable + objectif entreprise → levier holding à examiner', () => {
+test('Ent3. objectif entreprise → levier holding à examiner', () => {
   const ctx = baseEntrepreneur({ objectifs: [{ id: 'entreprise', echeance: 'plus-8' }], objectifPrioritaireId: 'entreprise' });
-  ctx.entreprise.excedentTresorerie = 'oui';
   const results = computeResults(ctx, {});
   assert.equal(results.levers.capitalisationHolding.status, 'a_examiner');
 });

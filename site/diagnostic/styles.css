@@ -219,3 +219,16 @@ footer span:first-child{font:700 20px Georgia,serif;color:var(--y)}
   footer span{display:block;margin:6px 0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Bloc « Envie d'aller plus loin ? » — même format que les fiches guides (photo) */
+.accompagnement{padding:44px;margin:36px 0 30px;background:var(--p);color:#fff;display:grid;grid-template-columns:220px minmax(0,1fr);gap:36px;align-items:center;box-shadow:0 20px 50px #00000030;border-bottom:4px solid var(--y);border-radius:var(--radius)}
+.accompagnement img{width:220px;height:220px;border-radius:999px;object-fit:cover;object-position:center;border:4px solid #ffffff40}
+.accompagnement .eyebrow{color:var(--y);text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:800;margin:0}
+.accompagnement h2{color:#fff;font-size:30px;margin:10px 0 0;font-family:Georgia,serif;line-height:1.2}
+.accompagnement p{color:#eee0f0;max-width:640px;line-height:1.65;margin:14px 0 0}
+.accompagnement .cta-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:22px}
+.accompagnement .button{text-decoration:none}
+.accompagnement .mail{color:#f1e0f5;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.accompagnement .disclosure{font-size:12.5px;color:#d8c7e2}
+@media(max-width:850px){.accompagnement{grid-template-columns:1fr;padding:32px}.accompagnement img{width:180px;height:180px}}
+@media(max-width:600px){.accompagnement{padding:24px 19px}.accompagnement img{width:150px;height:150px}.accompagnement h2{font-size:24px}}

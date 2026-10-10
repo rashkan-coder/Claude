@@ -8,7 +8,6 @@
 
 import {
   hasInvestments,
-  hasDurableSurplus,
   residenceNonFrancaise,
   computeConcentrationFlags,
   computeRealEstateLeverage,
@@ -220,29 +219,18 @@ function investissementFinancier({ context, answers }) {
 function remunerationDirigeant({ context, answers }) {
   if (context.branch !== 'entrepreneur') return null;
   const s = scoreOf(answers, 'remuneration1');
-  if (s === null) return { status: 'informations_insuffisantes', motif: 'Comparaison de votre rémunération non précisée.', action: 'Faites le point sur votre mode de rémunération actuel.' };
-  if (s >= 2) return { status: 'deja_mobilise', motif: 'Comparaison de rémunération déjà réalisée.', action: 'Revoyez cet arbitrage à chaque changement important.' };
-  return { status: 'a_examiner', motif: 'Comparaison de rémunération jamais faite ou devenue ancienne.', action: 'Faites comparer vos options en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.' };
+  if (s === null) return { status: 'informations_insuffisantes', motif: 'Optimisation de votre rémunération non précisée.', action: 'Faites le point sur votre mode de rémunération actuel.' };
+  if (s >= 2) return { status: 'deja_mobilise', motif: 'Rémunération déjà optimisée.', action: 'Revoyez cet arbitrage à chaque changement important.' };
+  return { status: 'a_examiner', motif: 'Rémunération pas encore optimisée.', action: 'Faites comparer vos options en tenant compte de votre revenu disponible, de votre protection sociale et des besoins de l’entreprise.' };
 }
 
 function capitalisationHolding({ context }) {
   if (context.branch !== 'entrepreneur') return null;
-  const surplus = hasDurableSurplus(context);
-  if (surplus === 'unknown') return { status: 'informations_insuffisantes', motif: 'Existence d’excédents professionnels durables non précisée.', action: 'Précisez si votre activité dégage des excédents durables.' };
-  if (surplus === false) return { status: 'non_prioritaire', motif: 'Aucun excédent professionnel durable déclaré actuellement.', action: 'À reconsidérer si votre trésorerie professionnelle évolue.' };
   const projetExplicite = hasObjectif(context, 'entreprise') || hasObjectif(context, 'transmission') || hasObjectif(context, 'placements');
   if (!projetExplicite) {
-    return { status: 'non_prioritaire', motif: 'Excédents durables déclarés, mais aucun projet professionnel ou patrimonial explicite.', action: 'Ce sujet reste à examiner si un projet se précise — pas sur la seule base de la trésorerie disponible.' };
+    return { status: 'non_prioritaire', motif: 'Aucun projet professionnel ou patrimonial explicite déclaré.', action: 'Ce sujet reste à examiner si un projet se précise — pas sur la seule base de la trésorerie disponible.' };
   }
-  return { status: 'a_examiner', motif: 'Excédents durables et projet explicite, sans comparaison des coûts et contraintes encore réalisée.', action: 'Comparez réinvestissement, détention professionnelle et sortie personnelle — sans présumer d’un seuil, d’un taux ou d’une économie.' };
-}
-
-function levierBancairePro({ context }) {
-  if (context.branch !== 'entrepreneur') return null;
-  const projet = context.entreprise && context.entreprise.projetFinancementEnvisage;
-  if (!projet || projet === 'inconnu') return { status: 'informations_insuffisantes', motif: 'Projet de financement professionnel non précisé.', action: 'Précisez si un financement professionnel est envisagé.' };
-  if (projet === 'non') return { status: 'non_prioritaire', motif: 'Aucun projet de financement professionnel déclaré.', action: 'À reconsidérer si un projet de financement se présente.' };
-  return { status: 'a_examiner', motif: 'Projet de financement professionnel envisagé.', action: 'Évaluez les flux prévisionnels, les garanties et l’effet sur vos engagements personnels — ceci n’est pas un accord bancaire.' };
+  return { status: 'a_examiner', motif: 'Projet professionnel ou patrimonial explicite déclaré.', action: 'Si votre activité dégage des excédents durables, comparez réinvestissement, détention professionnelle et sortie personnelle — sans présumer d’un seuil, d’un taux ou d’une économie.' };
 }
 
 function fiscaliteFrais({ context }) {
@@ -283,7 +271,6 @@ export function computeLevers({ context, answers, applicability }) {
     investissementFinancier,
     remunerationDirigeant,
     capitalisationHolding,
-    levierBancairePro,
     fiscaliteFrais,
     transmission: transmission,
   };
