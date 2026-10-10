@@ -33,7 +33,7 @@ header.topbar{min-height:64px;padding:16px max(20px,calc((100vw - 1160px)/2));di
 .hero .lead{max-width:620px;margin:20px auto 0;font-size:17px;color:#f1e6f4;line-height:1.6}
 .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px}
 
-.promise{max-width:620px;margin:14px auto 0;font-size:13px;color:#d7c5dc;line-height:1.6}
+.promise{max-width:620px;margin:24px auto 0;font-size:13px;color:#d7c5dc;line-height:1.6}
 
 .button{border:1px solid var(--y);background:var(--y);color:var(--p);padding:14px 24px;font:800 16px Arial,Helvetica,sans-serif;cursor:pointer;min-height:50px;border-radius:var(--radius-sm);transition:transform .15s ease,box-shadow .15s ease,background-color .15s ease}
 .button:hover{background:#f1c500;border-color:#f1c500;transform:translateY(-1px);box-shadow:0 6px 16px #fbf21140}
@@ -232,3 +232,11 @@ footer span:first-child{font:700 20px Georgia,serif;color:var(--y)}
 .accompagnement .disclosure{font-size:12.5px;color:#d8c7e2}
 @media(max-width:850px){.accompagnement{grid-template-columns:1fr;padding:32px}.accompagnement img{width:180px;height:180px}}
 @media(max-width:600px){.accompagnement{padding:24px 19px}.accompagnement img{width:150px;height:150px}.accompagnement h2{font-size:24px}}
+
+/* Bouton « Faire mon diagnostic » : contour lumineux qui pulse doucement */
+.button.cta-glow{position:relative;padding:17px 34px;font-size:17px;border-radius:999px;border:2px solid #fff6a8;box-shadow:0 0 0 0 #fbf21199,0 0 18px #fbf21180,0 0 42px #fbf21140;animation:cta-pulse 2.4s ease-in-out infinite}
+.button.cta-glow span{display:inline-block;margin-left:6px;transition:transform .15s ease}
+.button.cta-glow:hover{background:var(--y);border-color:#fff;transform:translateY(-2px);box-shadow:0 0 0 4px #fbf21140,0 0 26px #fbf211b3,0 0 60px #fbf21166}
+.button.cta-glow:hover span{transform:translateX(4px)}
+@keyframes cta-pulse{0%,100%{box-shadow:0 0 0 0 #fbf21180,0 0 18px #fbf21173,0 0 42px #fbf21133}50%{box-shadow:0 0 0 7px #fbf21100,0 0 26px #fbf211b3,0 0 56px #fbf21159}}
+@media(prefers-reduced-motion:reduce){.button.cta-glow{animation:none}}
