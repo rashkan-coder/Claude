@@ -6,11 +6,75 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 ## Structure du dépôt
 - `wrangler.toml` — config du Worker (nom, assets, binding KV) — **à la racine**
 - `worker/index.js` — le Worker : sert `site/` tel quel, et gère lui-même
-  `POST /api/leads`
-- `site/index.html` — landing page (opt-in du guide)
-- `site/guide/index.html` — page affichée après inscription
+  `POST /api/leads` et `POST /api/obo-diagnostic`
+- `site/index.html` — landing page « Clauses Don » (opt-in du guide transmission)
+- `site/guide/index.html` — page affichée après inscription (guide clauses de donation)
+- `site/obo/index.html` — landing page « OBO » (opt-in du guide OBO — même gabarit que ci-dessus)
+- `site/obo/decouvrir/index.html` — page affichée après inscription : mécanisme de l'OBO,
+  schémas (liquidités / immobilier) et diagnostic d'éligibilité interactif
+- `site/transmission/index.html` — landing page « Simulateur de transmission » (opt-in — même
+  gabarit que ci-dessus)
+- `site/transmission/simulateur/index.html` — page affichée après inscription : simulateur en
+  6 questions, leviers de transmission, section « Pour aller plus loin » (profil de Rashan) et
+  diagnostic enregistré en fin de parcours
+- `site/fiscalite-immobiliere/index.html` — landing page « Fiscalité immobilière » (opt-in — même
+  gabarit que ci-dessus)
+- `site/fiscalite-immobiliere/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique (3 leviers pour baisser la taxe foncière, tableau des régimes de
+  fiscalité des revenus locatifs — micro-foncier, réel, LMNP, LMP) et section « Pour aller
+  plus loin ». Pas de quiz ni de diagnostic : simple lecture, aucun endpoint `/api/*` dédié.
+- `site/credit-immobilier/index.html` — landing page « Crédit immobilier » (opt-in — même
+  gabarit que ci-dessus)
+- `site/credit-immobilier/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique, 9 points à négocier sur un crédit immobilier (durée, apport,
+  assurance emprunteur, frais de dossier, garantie, modularité, différé de remboursement,
+  report d'échéances, indemnités de remboursement anticipé) et section « Pour aller plus
+  loin ». Pas de quiz ni de diagnostic : simple lecture, aucun endpoint `/api/*` dédié.
+- `site/sci-familiale/index.html` — landing page « SCI familiale » (opt-in — même gabarit
+  que ci-dessus). Distincte de `site/sci/index.html` (guide « SCI ou nom propre, IR ou
+  IS, holding », non gaté), qui n'est pas concernée par cet opt-in.
+- `site/sci-familiale/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique, 6 protections à prévoir dans les statuts d'une SCI familiale
+  (gérance, pouvoirs entre usufruitiers et nus-propriétaires, entrées contrôlées,
+  majorités pour les décisions importantes, clause d'exclusion, capital variable) et
+  section « Pour aller plus loin ». Pas de quiz ni de diagnostic : simple lecture, aucun
+  endpoint `/api/*` dédié.
+- `site/clauses-beneficiaires/index.html` — landing page « Clauses bénéficiaires » (opt-in — même
+  gabarit que ci-dessus)
+- `site/clauses-beneficiaires/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique, 9 clauses/points pour protéger conjoint et enfants sur assurance-vie,
+  PER et prévoyance (démembrement, clause à options, désignation nominative, acceptation du
+  bénéficiaire, enfant mineur ou vulnérable, famille recomposée, PER assurantiel vs bancaire,
+  prévoyance décès, relecture de la clause type) et section « Pour aller plus loin ». Pas de
+  quiz ni de diagnostic : simple lecture, aucun endpoint `/api/*` dédié.
+- `site/indicateurs-dirigeant/index.html` — landing page « Les indicateurs clés des dirigeants qui
+  ont 3 coups d'avance » (opt-in — même gabarit que ci-dessus)
+- `site/indicateurs-dirigeant/fiche/index.html` — page affichée après inscription : fiche
+  pédagogique statique, 6 indicateurs de pilotage (chiffre d'affaires, EBE et marge, seuil de
+  rentabilité, trésorerie/runway, poids des salaires, taux de conversion) + 4 indicateurs bonus
+  (croissance des nouveaux clients, CAC, panier moyen, cycle de vente), résumé en 4 familles et
+  section « Pour aller plus loin » (diagnostic gratuit avec Rashan). Aucun endpoint `/api/*` dédié.
+- `site/ifi/index.html` — landing page « Checklist IFI » (opt-in — même gabarit que ci-dessus)
+- `site/ifi/fiche/index.html` — page affichée après inscription : checklist IFI 2026 (6 erreurs
+  fréquentes, 4 points avancés, 6 repères chiffrés) et section « Allez plus loin » (diagnostic
+  stratégique offert de 45 minutes). Aucun endpoint `/api/*` dédié.
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
+- `site/diagnostic/index.html` — application « Votre patrimoine : les leviers que
+  vous n'utilisez pas encore » : diagnostic interactif en six piliers (radar +
+  carte des leviers), affiché à l'écran uniquement (pas de téléchargement),
+  sans email ni compte obligatoire. Calculs 100&nbsp;% côté navigateur —
+  **aucune réponse n'est envoyée au Worker ni à la KV** (pas d'endpoint
+  `/api/*` pour cet outil). Voir `site/diagnostic/GRILLE.md` pour la
+  documentation complète de la grille de score et ses limites, et
+  `site/diagnostic/tests/engine.test.mjs` pour les tests du moteur
+  (`node site/diagnostic/tests/engine.test.mjs`).
 - `site/favicon.svg`
+
+Les neuf landing pages (`/`, `/obo/`, `/transmission/`, `/fiscalite-immobiliere/`, `/credit-immobilier/`, `/sci-familiale/`, `/clauses-beneficiaires/`, `/indicateurs-dirigeant/` et `/ifi/`) partagent le même Worker, la même KV
+de leads et le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV
+supplémentaire à créer pour chaque nouveau site. Si un sous-domaine dédié est préféré à terme
+(ex. `obo.captain-invest.com`), suivre la même méthode manuelle DNS + Route décrite à l'étape 3
+ci-dessous.
 
 ## KV déjà créée
 - Nom : `captain-invest-guide-leads`
@@ -39,11 +103,31 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 4. **Vérifier** :
    - Ouvrir `https://guide.captain-invest.com/` : la landing page doit s'afficher.
    - Remplir le formulaire : succès → redirection vers `/guide/`.
+   - Ouvrir `https://guide.captain-invest.com/obo/` : idem, avec redirection vers `/obo/decouvrir/`
+     et son diagnostic d'éligibilité.
+   - Ouvrir `https://guide.captain-invest.com/transmission/` : idem, avec redirection vers
+     `/transmission/simulateur/`.
+   - Ouvrir `https://guide.captain-invest.com/fiscalite-immobiliere/` : idem, avec redirection
+     vers `/fiscalite-immobiliere/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/credit-immobilier/` : idem, avec redirection vers
+     `/credit-immobilier/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/sci-familiale/` : idem, avec redirection vers
+     `/sci-familiale/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/clauses-beneficiaires/` : idem, avec redirection
+     vers `/clauses-beneficiaires/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/indicateurs-dirigeant/` : idem, avec redirection
+     vers `/indicateurs-dirigeant/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/ifi/` : idem, avec redirection vers `/ifi/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/diagnostic/` : le diagnostic patrimonial
+     doit s'afficher directement (pas d'opt-in), le questionnaire et la page de résultats
+     doivent fonctionner sans erreur réseau (aucun téléchargement à tester : retiré).
    - Dashboard Cloudflare → *Storage & Databases* → *KV* → `captain-invest-guide-leads` → une entrée doit apparaître.
 
-## Export des leads (`GET /api/leads-export`)
+## Export des leads et des réponses aux diagnostics
 
-Endpoint protégé par un secret partagé (`EXPORT_TOKEN`), à configurer une fois :
+Trois endpoints (`GET /api/leads-export`, `GET /api/obo-diagnostic-export`,
+`GET /api/transmission-diagnostic-export`), tous protégés par le même secret partagé
+(`EXPORT_TOKEN`), à configurer une fois :
 
 1. Dashboard Cloudflare → Worker `captain-invest-guide` → *Settings* → *Variables and Secrets* → *Add*.
    - Type : **Secret** (pas "Text" — pour qu'il ne soit jamais affiché en clair après coup).
@@ -52,8 +136,17 @@ Endpoint protégé par un secret partagé (`EXPORT_TOKEN`), à configurer une fo
 2. Save + redeploy si demandé.
 
 Usage ensuite :
-- JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
-- CSV (téléchargeable, ouvrable dans Excel/Sheets) : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
+- Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don`,
+  `obo`, `transmission`, `fiscalite-immobiliere`, `credit-immobilier`, `sci-familiale`,
+  `clauses-beneficiaires`, `indicateurs-dirigeant` ou `ifi`) :
+  - JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
+- Réponses au diagnostic d'éligibilité OBO (`site/obo/decouvrir/`) — éligible ou non, et pourquoi :
+  - JSON : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/obo-diagnostic-export?token=VOTRE_TOKEN&format=csv`
+- Réponses au simulateur de transmission (`site/transmission/simulateur/`) :
+  - JSON : `https://guide.captain-invest.com/api/transmission-diagnostic-export?token=VOTRE_TOKEN`
+  - CSV : `https://guide.captain-invest.com/api/transmission-diagnostic-export?token=VOTRE_TOKEN&format=csv`
 - Ou via header (plus propre, évite le token dans l'URL/historique du navigateur) :
   `curl -H "Authorization: Bearer VOTRE_TOKEN" https://guide.captain-invest.com/api/leads-export`
 
@@ -62,3 +155,25 @@ Usage ensuite :
 ## À finaliser ensuite
 - **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
 - **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
+- **Lien Calendly OBO** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique-clone?back=1`,
+  câblé en dur à 3 endroits dans `site/obo/decouvrir/index.html` (lien de secours `<noscript>`, bouton du
+  profil de Rashan, et `link.href` dans la fonction `showResult()` du script) — à mettre à jour aux trois
+  endroits si l'événement change (rechercher « calendly.com » dans le fichier).
+- **Lien Calendly Transmission** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`,
+  câblé en dur dans `site/transmission/simulateur/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly Fiscalité immobilière** : même lien que ci-dessus, câblé en dur dans
+  `site/fiscalite-immobiliere/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly Crédit immobilier** : même lien que ci-dessus, câblé en dur dans
+  `site/credit-immobilier/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly SCI familiale** : même lien que ci-dessus, câblé en dur dans
+  `site/sci-familiale/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly Clauses bénéficiaires** : même lien que ci-dessus, câblé en dur dans
+  `site/clauses-beneficiaires/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly Indicateurs dirigeant** : même lien que ci-dessus, câblé en dur dans
+  `site/indicateurs-dirigeant/fiche/index.html` (section « Pour aller plus loin »).
+- **Lien Calendly IFI** : même lien que ci-dessus, câblé en dur dans `site/ifi/fiche/index.html`
+  (section « Allez plus loin »).
+- **Lien Calendly Diagnostic patrimonial** : même lien que ci-dessus
+  (`https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`), câblé en dur dans
+  `site/diagnostic/app.js` (bloc de contact en fin de résultats) — à mettre à jour au même
+  endroit si l'événement change.
