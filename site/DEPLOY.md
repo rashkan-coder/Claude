@@ -58,6 +58,13 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 - `site/ifi/fiche/index.html` — page affichée après inscription : checklist IFI 2026 (6 erreurs
   fréquentes, 4 points avancés, 6 repères chiffrés) et section « Allez plus loin » (diagnostic
   stratégique offert de 45 minutes). Aucun endpoint `/api/*` dédié.
+- `site/sortir-argent-societe/index.html` — landing page « 4 leviers pour sortir l'argent de votre
+  société » (guide « PLAN » — opt-in, même gabarit que ci-dessus)
+- `site/sortir-argent-societe/fiche/index.html` — page affichée après inscription : coût d'un
+  dividende en 2026, 4 leviers (frais professionnels, épargne salariale, CESU préfinancé,
+  holding), schéma de la stratégie holding (version ordinateur + version mobile), 3 décisions,
+  3 poches d'investissement, plan d'action et section « Pour aller plus loin ». Aucun endpoint
+  `/api/*` dédié.
 - `site/confidentialite/index.html` — page provisoire, **à remplacer**
 - `site/diagnostic/index.html` — application « Votre patrimoine : les leviers que
   vous n'utilisez pas encore » : diagnostic interactif en six piliers (radar +
@@ -70,7 +77,7 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
   (`node site/diagnostic/tests/engine.test.mjs`).
 - `site/favicon.svg`
 
-Les neuf landing pages (`/`, `/obo/`, `/transmission/`, `/fiscalite-immobiliere/`, `/credit-immobilier/`, `/sci-familiale/`, `/clauses-beneficiaires/`, `/indicateurs-dirigeant/` et `/ifi/`) partagent le même Worker, la même KV
+Les dix landing pages (`/`, `/obo/`, `/transmission/`, `/fiscalite-immobiliere/`, `/credit-immobilier/`, `/sci-familiale/`, `/clauses-beneficiaires/`, `/indicateurs-dirigeant/`, `/ifi/` et `/sortir-argent-societe/`) partagent le même Worker, la même KV
 de leads et le même sous-domaine `guide.captain-invest.com` — pas de route ni de KV
 supplémentaire à créer pour chaque nouveau site. Si un sous-domaine dédié est préféré à terme
 (ex. `obo.captain-invest.com`), suivre la même méthode manuelle DNS + Route décrite à l'étape 3
@@ -118,6 +125,8 @@ ci-dessous.
    - Ouvrir `https://guide.captain-invest.com/indicateurs-dirigeant/` : idem, avec redirection
      vers `/indicateurs-dirigeant/fiche/`.
    - Ouvrir `https://guide.captain-invest.com/ifi/` : idem, avec redirection vers `/ifi/fiche/`.
+   - Ouvrir `https://guide.captain-invest.com/sortir-argent-societe/` : idem, avec redirection
+     vers `/sortir-argent-societe/fiche/`.
    - Ouvrir `https://guide.captain-invest.com/diagnostic/` : le diagnostic patrimonial
      doit s'afficher directement (pas d'opt-in), le questionnaire et la page de résultats
      doivent fonctionner sans erreur réseau (aucun téléchargement à tester : retiré).
@@ -138,7 +147,7 @@ Trois endpoints (`GET /api/leads-export`, `GET /api/obo-diagnostic-export`,
 Usage ensuite :
 - Leads (formulaires d'opt-in, tous sites confondus — voir le champ `source` : `clauses-don`,
   `obo`, `transmission`, `fiscalite-immobiliere`, `credit-immobilier`, `sci-familiale`,
-  `clauses-beneficiaires`, `indicateurs-dirigeant` ou `ifi`) :
+  `clauses-beneficiaires`, `indicateurs-dirigeant`, `ifi` ou `sortir-argent-societe`) :
   - JSON : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN`
   - CSV : `https://guide.captain-invest.com/api/leads-export?token=VOTRE_TOKEN&format=csv`
 - Réponses au diagnostic d'éligibilité OBO (`site/obo/decouvrir/`) — éligible ou non, et pourquoi :
@@ -173,6 +182,8 @@ Usage ensuite :
   `site/indicateurs-dirigeant/fiche/index.html` (section « Pour aller plus loin »).
 - **Lien Calendly IFI** : même lien que ci-dessus, câblé en dur dans `site/ifi/fiche/index.html`
   (section « Allez plus loin »).
+- **Lien Calendly Sortir l'argent de sa société** : même lien que ci-dessus, câblé en dur dans
+  `site/sortir-argent-societe/fiche/index.html` (section « Pour aller plus loin »).
 - **Lien Calendly Diagnostic patrimonial** : même lien que ci-dessus
   (`https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`), câblé en dur dans
   `site/diagnostic/app.js` (bloc de contact en fin de résultats) — à mettre à jour au même
