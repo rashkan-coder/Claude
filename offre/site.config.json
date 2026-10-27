@@ -1,0 +1,42 @@
+{
+  "_comment": "Seule source des données variables de l'offre dirigeant. Une valeur vide s'affiche « [à compléter : CLÉ] » sur le site et est listée par `node offre/build.mjs`. Après modification : relancer le build et committer site/.",
+
+  "SITE_URL": "https://guide.captain-invest.com",
+  "EMAIL": "rashan@captain-invest.com",
+  "ORIAS": "25007826",
+  "CNCEF": "25/861973",
+  "CARTE_T": "75012025000000315",
+
+  "CAPITAL": "",
+  "ADRESSE_SIEGE": "",
+  "RCS": "",
+  "SIREN": "",
+  "TVA": "",
+  "CATEGORIES_ORIAS": "",
+  "CCI": "",
+  "GARANTIE_OU_NON_DETENTION": "",
+  "POLICE_RCP": "",
+  "MEDIATEUR_CONSO": "",
+  "BAREME_TRANSACTION": "",
+  "AUDIT_DELAY": "",
+
+  "BOOKING_URL": "https://calendly.com/rashan-kadioglu/diagnostic-strategique",
+  "OUTIL_RDV": "Calendly",
+  "MESSAGERIE": "",
+  "TRANSFERTS": "",
+
+  "HEBERGEUR_NOM": "Cloudflare, Inc.",
+  "HEBERGEUR_ADRESSE": "",
+  "HEBERGEUR_TEL": "",
+
+  "PHOTOGRAPHE": "",
+  "HERO_IMAGE": "/images/rashan-kadioglu.jpg",
+  "ABOUT_IMAGE": "/images/rashan-kadioglu.jpg",
+  "VIDEO_URL": "",
+  "DER_URL": "/docs/DER-Captain-Invest.pdf",
+  "SIMULATEUR_URL": "",
+  "GUIDE_LEVIERS_URL": "",
+  "DIAGNOSTIC_URL": "/diagnostic/",
+
+  "_optional": ["PHOTOGRAPHE", "VIDEO_URL", "SIMULATEUR_URL", "GUIDE_LEVIERS_URL"]
+}

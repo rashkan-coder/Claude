@@ -1,0 +1,100 @@
+<!--meta {"path": "/rendez-vous/", "title": "Réserver mon Diagnostic Stratégique — Captain Invest", "description": "Réservez votre Diagnostic Stratégique de 45 minutes, offert, en visio. 7 questions, puis l'agenda.", "noindex": true} -->
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Diagnostic Stratégique · 45 min · offert</p>
+    <h1 class="h2">Réserver mon diagnostic</h1>
+    <p class="lead">7 questions, puis l'agenda. Elles me permettent de préparer notre échange et de vérifier qu'il vous sera utile.</p>
+
+    <form class="booking-form" id="qualif" novalidate data-booking-url="{{BOOKING_URL}}">
+      <fieldset>
+        <legend>1. Vos coordonnées</legend>
+        <div class="grid-2">
+          <label>Prénom<input name="prenom" autocomplete="given-name" required></label>
+          <label>Nom<input name="nom" autocomplete="family-name" required></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Téléphone <span class="opt">(facultatif)</span><input name="telephone" type="tel" autocomplete="tel"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. Forme de votre société</legend>
+        <div class="choices">
+          <label><input type="radio" name="forme" value="SAS / SASU" required> SAS / SASU</label>
+          <label><input type="radio" name="forme" value="SARL / EURL"> SARL / EURL</label>
+          <label><input type="radio" name="forme" value="SEL"> SEL</label>
+          <label><input type="radio" name="forme" value="Autre société à l'IS"> Autre société à l'IS</label>
+          <label><input type="radio" name="forme" value="Entreprise individuelle ou micro" data-exclude> Entreprise individuelle ou micro</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3. Votre société est-elle bénéficiaire ?</legend>
+        <div class="choices">
+          <label><input type="radio" name="beneficiaire" value="Oui, depuis 2 exercices ou plus" required> Oui, depuis 2 exercices ou plus</label>
+          <label><input type="radio" name="beneficiaire" value="Oui, depuis moins de 2 exercices"> Oui, depuis moins de 2 exercices</label>
+          <label><input type="radio" name="beneficiaire" value="Non" data-exclude> Non</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>4. Trésorerie disponible dans la société</legend>
+        <div class="choices">
+          <label><input type="radio" name="tresorerie" value="Moins de 50 k€" required> Moins de 50 k€</label>
+          <label><input type="radio" name="tresorerie" value="50–150 k€"> 50–150 k€</label>
+          <label><input type="radio" name="tresorerie" value="150–500 k€"> 150–500 k€</label>
+          <label><input type="radio" name="tresorerie" value="Plus de 500 k€"> Plus de 500 k€</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>5. Votre sujet prioritaire</legend>
+        <div class="choices">
+          <label><input type="radio" name="sujet" value="Ma rémunération" required> Ma rémunération</label>
+          <label><input type="radio" name="sujet" value="Ma trésorerie"> Ma trésorerie</label>
+          <label><input type="radio" name="sujet" value="Ma holding"> Ma holding</label>
+          <label><input type="radio" name="sujet" value="Un financement"> Un financement</label>
+          <label><input type="radio" name="sujet" value="Mon patrimoine personnel"> Mon patrimoine personnel</label>
+          <label><input type="radio" name="sujet" value="La transmission"> La transmission</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><label for="attente">6. Qu'attendez-vous de ce rendez-vous ?</label></legend>
+        <textarea id="attente" name="attente" maxlength="300" rows="4" required></textarea>
+        <p class="hint"><span data-count>0</span> / 300 caractères</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>7. Comment m'avez-vous connue ?</legend>
+        <div class="choices">
+          <label><input type="radio" name="origine" value="Instagram" required> Instagram</label>
+          <label><input type="radio" name="origine" value="LinkedIn"> LinkedIn</label>
+          <label><input type="radio" name="origine" value="Recommandation d'un client"> Recommandation d'un client</label>
+          <label><input type="radio" name="origine" value="Mon expert-comptable"> Mon expert-comptable</label>
+          <label><input type="radio" name="origine" value="Autre"> Autre</label>
+        </div>
+      </fieldset>
+
+      <label class="consent"><input type="checkbox" name="consentement" required> J'accepte que mes données soient utilisées pour organiser ce rendez-vous, conformément à la <a href="/confidentialite/">politique de confidentialité</a>.</label>
+
+      <p class="form-error" role="alert" aria-live="polite"></p>
+      <button class="btn" type="submit">Voir les créneaux disponibles</button>
+      <p class="hint">Vos réponses ne sont pas enregistrées par ce site. Elles sont transmises à l'agenda ({{OUTIL_RDV}}) au moment de la réservation.</p>
+    </form>
+
+    <div class="agenda" id="agenda" hidden>
+      <h2 class="h3">Choisissez votre créneau</h2>
+      <div class="agenda-consent" data-agenda-consent>
+        <p>L'agenda ({{OUTIL_RDV}}) dépose des cookies tiers. Il ne s'affiche ici qu'avec votre accord.</p>
+        <div class="agenda-actions">
+          <button type="button" class="btn" data-agenda-accept>Afficher l'agenda ici</button>
+          <a class="btn btn-ghost" href="{{BOOKING_URL}}" target="_blank" rel="noopener" data-agenda-tab>Ouvrir l'agenda dans un nouvel onglet</a>
+        </div>
+      </div>
+      <div class="agenda-frame" data-agenda-frame></div>
+      <p class="hint"><button type="button" class="linklike" data-agenda-back>Modifier mes réponses</button></p>
+    </div>
+
+    <noscript><p class="lead">Le formulaire nécessite JavaScript. Vous pouvez aussi <a href="{{BOOKING_URL}}">ouvrir l'agenda directement</a>.</p></noscript>
+  </div>
+</section>

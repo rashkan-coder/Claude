@@ -58,7 +58,8 @@ Cloudflare a fusionné Pages dans Workers : ce dépôt se déploie comme un
 - `site/ifi/fiche/index.html` — page affichée après inscription : checklist IFI 2026 (6 erreurs
   fréquentes, 4 points avancés, 6 repères chiffrés) et section « Allez plus loin » (diagnostic
   stratégique offert de 45 minutes). Aucun endpoint `/api/*` dédié.
-- `site/confidentialite/index.html` — page provisoire, **à remplacer**
+- `site/confidentialite/index.html` — politique de confidentialité complète, **générée** par
+  `offre/build.mjs` (voir « Offre dirigeant » ci-dessous) — ne pas l'éditer à la main
 - `site/diagnostic/index.html` — application « Votre patrimoine : les leviers que
   vous n'utilisez pas encore » : diagnostic interactif en six piliers (radar +
   carte des leviers), affiché à l'écran uniquement (pas de téléchargement),
@@ -153,7 +154,6 @@ Usage ensuite :
 ⚠️ Ce token donne accès à toutes les coordonnées collectées (email, prénom, nom) — à traiter comme un mot de passe, ne jamais le committer dans le repo ni le partager publiquement.
 
 ## À finaliser ensuite
-- **`/confidentialite`** : remplacer le contenu provisoire par le texte réel (donne l'URL du site principal ou le texte, et il sera mis à jour).
 - **Envoi automatique du guide par email** : `/api/leads` enregistre le contact dans la KV mais n'envoie aucun email pour l'instant — à brancher plus tard (Resend, Brevo, Mailjet…) si besoin.
 - **Lien Calendly OBO** : `https://calendly.com/rashan-kadioglu/diagnostic-strategique-clone?back=1`,
   câblé en dur à 3 endroits dans `site/obo/decouvrir/index.html` (lien de secours `<noscript>`, bouton du
@@ -177,3 +177,39 @@ Usage ensuite :
   (`https://calendly.com/rashan-kadioglu/diagnostic-strategique?back=1`), câblé en dur dans
   `site/diagnostic/app.js` (bloc de contact en fin de résultats) — à mettre à jour au même
   endroit si l'événement change.
+
+## Offre dirigeant (`/dirigeants/`, `/rendez-vous/`, pages légales)
+
+Pages **générées** — ne pas éditer directement les `index.html` correspondants dans `site/` :
+`/dirigeants/`, `/rendez-vous/` (+ `confirmation/`, `pas-encore/`), `/informations-reglementaires/`,
+`/mentions-legales/`, `/confidentialite/`, `/cookies/`, `/reclamations/`, `/tarifs/`.
+
+- Sources : `offre/pages/*.html` (contenu), `offre/layout.html` (en-tête, pied de page avec le bloc
+  réglementaire, bandeau cookies), styles et script partagés `site/assets/offre.css` et `site/assets/offre.js`.
+- **Toutes les données variables** (numéros réglementaires, adresse, lien de réservation, délai de l'audit…)
+  sont dans `offre/site.config.json`. Une valeur vide s'affiche « [à compléter : CLÉ] » sur le site.
+- Après toute modification : `node offre/build.mjs`, puis committer `offre/` **et** `site/`.
+  Le script liste les valeurs à compléter et **échoue** si un mot interdit apparaît
+  (« indépendant » hors « non indépendant », « agréé AMF », « garanti » hors tournures prévues,
+  « sans risque », « rendement assuré », « 100 % honoraires », « sans commission »)
+  ou si le bloc réglementaire manque sur une page.
+- Pas d'étape de build côté Cloudflare : les pages générées sont committées.
+
+### Prise de rendez-vous
+- Le formulaire de qualification (7 questions) est sur `/rendez-vous/` et **n'envoie rien à ce site**.
+  Entreprise individuelle / micro ou société non bénéficiaire → `/rendez-vous/pas-encore/`.
+  Sinon → agenda `BOOKING_URL` pré-rempli : `name`, `email`, puis `a1`…`a7` = téléphone, forme,
+  bénéficiaire, trésorerie, sujet, attente, origine, et les paramètres `utm_*` d'arrivée.
+- **À configurer dans Calendly** (non faisable depuis le dépôt) : 7 questions personnalisées dans
+  cet ordre pour recevoir les réponses `a1`…`a7` ; durée 45 min, délai de prévenance 24 h,
+  5 créneaux/jour max ; redirection après réservation vers `/rendez-vous/confirmation/` ;
+  DER en pièce jointe de l'email de confirmation ; rappels J-1 et H-1.
+- L'agenda intégré (iframe) ne se charge qu'après consentement cookies ; sinon bouton
+  « Ouvrir l'agenda dans un nouvel onglet ». Choix conservé 6 mois (`localStorage`).
+- Lien de la bio Instagram : `/dirigeants/?utm_source=instagram&utm_medium=bio`.
+
+### Fichiers à déposer
+- `site/docs/DER-Captain-Invest.pdf` (lié depuis `/rendez-vous/confirmation/`, `/tarifs/`,
+  `/informations-reglementaires/` — lien cassé tant qu'il n'est pas déposé).
+- Photos : remplacer `HERO_IMAGE` / `ABOUT_IMAGE` dans la config quand la séance photo est faite
+  (l'avatar actuel 480×480 sert en attendant).
